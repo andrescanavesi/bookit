@@ -57,8 +57,9 @@ export default class AAPublicAgenda extends LightningElement {
     get primerNombreMisTurnos() { return this.misTurnosLogin.nombre ? this.misTurnosLogin.nombre.split(' ')[0] : ''; }
 
     get preciosAgrupados() {
-       return this.categoriasBD.map(cat => {
-            const serviciosDelGrupo = this.serviciosBD
+        console.info('preciosAgrupados');
+       return this.categories.map(cat => {
+            const serviciosDelGrupo = this.services
                 .filter(s => s.Grupo_Servicio__c === cat.id)
                 .map(s => {
                     return {
@@ -71,16 +72,18 @@ export default class AAPublicAgenda extends LightningElement {
             return { titulo: cat.label.toUpperCase(), servicios: serviciosDelGrupo };
         }).filter(g => g.servicios.length > 0);
     }
-    
+
     // Reemplazamos el getter anterior por uno que use la variable del estado
     get categorias() {
         return this.categories;
     }
     
     get serviciosFiltrados() {
+        console.info('serviciosFiltrados, grupo seleccionado '+this.reserva.grupoSel);
+        //console.info(JSON.stringify( this.services, null, 2));
       if (!this.reserva.grupoSel) return [];
         
-        return this.serviciosBD
+        const filteredServices = this.services
             .filter(s => s.Grupo_Servicio__c === this.reserva.grupoSel)
             .map(s => {
                 let durText = s.Duracion_Base_Min__c >= 60 
@@ -94,9 +97,13 @@ export default class AAPublicAgenda extends LightningElement {
                     tieneDescripcion: s.Descripcion_Extendida__c && s.Descripcion_Extendida__c.trim() !== '' 
                 };
             });
+
+            //console.info(JSON.stringify( filteredServices, null, 2));
+            return filteredServices;
     }
 
     get servicioSeleccionadoInfo() {
+        console.info('servicioSeleccionadoInfo: '+this.reserva.servicioSel);
         if (!this.reserva.servicioSel) return null;
         return this.serviciosFiltrados.find(s => s.Id === this.reserva.servicioSel);
     }
@@ -187,10 +194,10 @@ export default class AAPublicAgenda extends LightningElement {
                 getServices()
             ]);
 
-            console.info('categories: ');
-            console.info(JSON.stringify(categoriesDB));
-            console.info('services: ');
-            console.info(JSON.stringify(servicesDB));
+            console.info('categoriesDB: ');
+            console.info(JSON.stringify(categoriesDB, null, 2));
+            console.info('servicesDB: ');
+            console.info(JSON.stringify(servicesDB, null, 2));
 
             // Mapeamos las categorías para mantener las clases CSS y la estructura
             this.categories = categoriesDB.map(cat => {
@@ -212,7 +219,7 @@ export default class AAPublicAgenda extends LightningElement {
                 Duracion_Base_Min__c: s.Duration_Minutes__c,
                 Precio__c: s.Price__c,
                 Grupo_Servicio__c: s.AA_Service_Category__c, // Ahora es el ID de la categoría
-                // ... resto de campos
+                Descripcion_Extendida__c: 'descripcion extendida test'
             }));
 
         } catch (error) {
@@ -225,18 +232,26 @@ export default class AAPublicAgenda extends LightningElement {
     
     // avanzar paso 4 (service category selected, now the user has to select the service)
     handleSelectCategoria(event) { 
+        console.info('handleSelectCategoria, avanzar paso 4: '+event.currentTarget.dataset.id);
+        console.info(JSON.stringify(event.currentTarget.dataset, null, 2));
         this.reserva.grupoSel = event.currentTarget.dataset.id; 
+        //this.serviciosFiltrados();
         this.reservaStep = 4; 
         }
 
     // Al seleccionar un servicio (Paso 4), guardamos su ID y decidimos a dónde ir (Retiro o Fecha)
     handleSelectServicio(event) { 
+        console.info('handleSelectServicio: '+event.currentTarget.dataset.id);
+        //console.info(JSON.stringify(event.currentTarget.dataset, null, 2));
         const srvId = event.currentTarget.dataset.id; 
         this.reserva.servicioSel = srvId;
-        const srv = this.serviciosBD.find(s => s.Id === srvId);
+        const srv = this.services.find(s => s.Id === srvId);
+        console.info('handleSelectServicio, srv: '+JSON.stringify(srv, null, 2));
         if (srv && srv.Requiere_Pregunta_Retiro__c) { 
+            console.info('handleSelectServicio, to step 5');
             this.reservaStep = 5; 
         } else { 
+            console.info('handleSelectServicio, to step 6');
             this.reservaStep = 6; 
         }
     }
