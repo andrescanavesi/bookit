@@ -1,0 +1,88 @@
+<template>
+    <div class="slds-box slds-theme_default slds-m-around_medium">
+        
+        <template if:true={isFinished}>
+            <div class="slds-text-align_center slds-p-around_large">
+                <lightning-icon 
+                    icon-name="action:approval" 
+                    size="large" 
+                    class="slds-m-bottom_medium">
+                </lightning-icon>
+                <h1 class="slds-text-heading_large">¡Reserva Confirmada!</h1>
+                <p class="slds-text-heading_small slds-m-top_medium">
+                    Ya podés cerrar esta ventana y volver a WhatsApp. 
+                    Te enviamos los detalles por el chat.
+                </p>
+            </div>
+        </template>
+
+        <template if:false={isFinished}>
+            
+            <template if:true={sessionData}>
+                <div class="slds-text-align_center slds-m-bottom_large">
+                    <h1 class="slds-text-heading_medium">¡Hola, {sessionData.customerName}!</h1>
+                    <p>Reservando: <strong>{sessionData.serviceName}</strong></p>
+                </div>
+            </template>
+
+            <div class="slds-form-element slds-m-bottom_large">
+                <lightning-input 
+                    type="date" 
+                    label="Seleccioná una fecha de inicio" 
+                    onchange={handleDateChange}
+                    min={minDate}
+                    value={selectedDate}>
+                </lightning-input>
+            </div>
+
+            <template if:true={loadingSlots}>
+                <div class="slds-p-around_large slds-text-align_center">
+                    <lightning-spinner alternative-text="Buscando turnos..." size="small"></lightning-spinner>
+                    <p class="slds-m-top_medium">Buscando turnos disponibles...</p>
+                </div>
+            </template>
+
+            <template if:false={loadingSlots}>
+                <template if:true={hasSlots}>
+                    <template for:each={daysWithSlots} for:item="day">
+                        <div key={day.dateLabel} class="slds-m-bottom_medium">
+                            <h2 class="slds-text-title_caps slds-m-bottom_small">{day.dateLabel}</h2>
+                            <div class="slds-grid slds-wrap">
+                                <template for:each={day.slots} for:item="slot">
+                                    <div key={slot.id} class="slds-col slds-size_1-of-2 slds-p-around_xx-small">
+                                        <button 
+                                            class={slot.className}
+                                            onclick={handleSlotSelection}
+                                            data-id={slot.id}>
+                                            {slot.time}
+                                        </button>
+                                    </div>
+                                </template>
+                            </div>
+                        </div>
+                    </template>
+                </template>
+
+                <template if:false={hasSlots}>
+                    <template if:true={selectedDate}>
+                        <div class="slds-notify slds-notify_alert slds-theme_alert-texture slds-theme_warning" role="alert">
+                            <span class="slds-assistive-text">warning</span>
+                            <h2>No hay turnos disponibles para esta fecha. Por favor, seleccioná otro día.</h2>
+                        </div>
+                    </template>
+                </template>
+            </template>
+
+            <div class="slds-m-top_xlarge">
+                <lightning-button 
+                    variant="brand" 
+                    label="Confirmar Reserva" 
+                    onclick={handleSubmit}
+                    disabled={isSubmitDisabled}
+                    class="slds-size_full">
+                </lightning-button>
+            </div>
+
+        </template>
+    </div>
+</template>

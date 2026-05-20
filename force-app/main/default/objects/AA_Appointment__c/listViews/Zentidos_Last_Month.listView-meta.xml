@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ListView xmlns="http://soap.sforce.com/2006/04/metadata">
+    <fullName>Zentidos_Last_Month</fullName>
+    <columns>NAME</columns>
+    <columns>Amount__c</columns>
+    <columns>Branch_Name__c</columns>
+    <columns>Service__c</columns>
+    <filterScope>Everything</filterScope>
+    <filters>
+        <field>Branch_Name__c</field>
+        <operation>equals</operation>
+        <value>Zentidos</value>
+    </filters>
+    <label>Zentidos Last Month</label>
+</ListView>

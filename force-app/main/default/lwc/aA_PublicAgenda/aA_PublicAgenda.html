@@ -1,0 +1,612 @@
+<template>
+    <div class="app-frame">
+        
+        <!-- PANTALLA 0: MENÚ PRINCIPAL --> 
+        <template if:true={isWelcome}>
+            <div class="screen welcome">
+                <h2>Silvina Uñas</h2>
+                <p class="subtitle">Selecciona una opción:</p>
+
+                <button class="card" onclick={navToReserva}>
+                    <div class="card__title">Quiero un turno</div>
+                </button>
+
+                <button class="card" onclick={navToMisTurnos}>
+                    <div class="card__title">Mis turnos</div>
+                </button>
+
+                <button class="card" onclick={navToPrecios}>
+                    <div class="card__title">Precios y Servicios</div>
+                </button>
+
+                <button class="card" onclick={navToConsulta}>
+                    <div class="card__title">Otra consulta</div>
+                </button>
+
+                <div class="staff-link-container">
+                    <div style="font-size: 13px; color: #8A7B6E; margin-bottom: 24px;">Av. Brasil 2377 — Apto 1803 · Pocitos, Montevideo</div>
+                    <button class="staff-link" onclick={navToEquipoLogin}>🔒 ACCESO DEL EQUIPO</button>
+                </div>
+            </div>
+        </template>
+
+        <!-- PANTALLA 1: QUIERO UN TURNO -->
+        <template if:true={isReserva}>
+           <div class="screen">
+                
+                <!-- PASO 1: Identificación -->
+                <template if:true={isReservaPaso1}>
+                    <div class="logo">
+                        <span class="logo__script">Silvina</span>
+                        <span class="logo__caps">- UÑAS -</span>
+                    </div>
+
+                    <div class="step-head">
+                        <div class="step-head__top">
+                            <button class="step-back" onclick={navToWelcome}>&larr; Volver</button>
+                            <span class="step-counter">PASO 1 DE 5</span>
+                        </div>
+                        <h2 class="h2">¿Cuál es tu celular?</h2>
+                        <p class="subtitle">Ingresá tu número para comenzar o continuar con tu reserva.</p>
+                    </div>
+
+                    <div class="field">
+                        <label class="field__label">CELULAR</label>
+                        <input class="field__input" type="tel" data-id="celular" placeholder="099 123 456" value={persona.celular} onchange={handleInputChange}>
+                        <span class="field__hint">Para enviar la confirmación y recordatorios de tu turno.</span>
+                    </div>
+
+                    <div class="spacer-md"></div>
+                    <button class="btn" onclick={avanzarPaso2}>Continuar</button>
+                </template>
+
+               <!-- PASO 2: Bienvenida -->
+               <template if:true={isReservaPaso2}>
+                    <div class="step-head">
+                        <div class="step-head__top">
+                            <button class="step-back" onclick={volverPaso1}>&larr; Volver</button>
+                        </div>
+                        <h2 class="h2">Bienvenida 👋</h2>
+                        <p class="subtitle">Es tu primera vez con nosotros. Contanos un poco para acompañarte mejor.</p>
+                    </div>
+
+                    <div class="field">
+                        <label class="field__label">NOMBRE Y APELLIDO</label>
+                        <input class="field__input" type="text" data-id="nombre" placeholder="Silvina Schnyder" value={persona.nombre} onchange={handleInputChange}>
+                    </div>
+
+                    <div class="field">
+                        <label class="field__label">EMAIL</label>
+                        <input class="field__input" type="email" data-id="email" placeholder="vos@email.com" value={persona.email} onchange={handleInputChange}>
+                        <span class="field__hint">Recibís invitación al calendario.</span>
+                    </div>
+
+                    <div class="field">
+                        <label class="field__label">¿DÍAS U HORARIOS QUE PREFERÍS?</label>
+                        <textarea class="field__textarea" data-id="preferencias" rows="3" placeholder="Ej: viernes tarde o sábados por la mañana." value={persona.preferencias} onchange={handleInputChange}></textarea>
+                    </div>
+
+                    <div class="field">
+                        <label class="field__label">¿HAY ALGO IMPORTANTE QUE TENGAMOS QUE SABER?</label>
+                        <div class="pill-row">
+                            <button class={pillClaseNo} data-valor="no" onclick={handleIndicacionesToggle}>No, todo bien</button>
+                            <button class={pillClaseSi} data-valor="si" onclick={handleIndicacionesToggle}>Sí, contar algo</button>
+                        </div>
+                    </div>
+
+                    <template if:true={tieneIndicaciones}>
+                        <div class="field">
+                            <textarea class="field__textarea" data-id="indicaciones" rows="3" placeholder="Diabetes, alergias, embarazo, lactancia, condiciones de piel..." value={persona.indicaciones} onchange={handleInputChange}></textarea>
+                            <span class="field__hint">Esta información sólo la ve el equipo.</span>
+                        </div>
+                    </template>
+
+                    <div class="spacer-md"></div>
+                    <button class="btn" onclick={avanzarPaso3}>Continuar</button>
+                </template>
+
+               <!-- PASO 3: Selección de Categoría (Visualmente Paso 2) -->
+                <template if:true={isReservaPaso3}>
+                    <div class="step-head">
+                        <div class="step-head__top">
+                            <button class="step-back" onclick={volverPaso2}>&larr; Volver</button>
+                            <span class="step-counter">PASO 2 DE 5</span>
+                        </div>
+                        <h2 class="h2">Hola {primerNombre}</h2>
+                        <p class="subtitle">¿Qué servicio querés reservar?</p>
+                    </div>
+
+                    <!-- Iterador de Tarjetas -->
+                    <div>
+                        <template for:each={categorias} for:item="cat">
+                            <button key={cat.id} class={cat.cssClass} data-id={cat.id} onclick={handleSelectCategoria}>
+                                <div class="card__content">
+                                    <div class="card__title">{cat.label}</div>
+                                    <div class="card__eyebrow">{cat.sub}</div>
+                                </div>
+                                <span class="chevron">&rsaquo;</span>
+                            </button>
+                        </template>
+                    </div>
+                </template>
+
+               <!-- PASO 4: Selección de Servicio Específico -->
+                <template if:true={isReservaPaso4}>
+                    <div class="step-head" style="margin-bottom: 24px;">
+                        <h2 class="h2">Hola {primerNombre}</h2>
+                        <p class="subtitle">¿Qué servicio querés reservar?</p>
+                    </div>
+
+                    <button class="change-link" onclick={volverPaso3}>&larr; Cambiar categoría</button>
+
+                    <!-- Iterador de Servicios -->
+                    <div>
+                        <template for:each={serviciosFiltrados} for:item="srv">
+                            <button key={srv.Id} class="card card--service" data-id={srv.Id} onclick={handleSelectServicio}>
+                                <div class="card__content">
+                                    <div class="card__title card__title--sm">{srv.Nombre_Visible__c}</div>
+                                    
+                                    <template if:true={srv.tieneDescripcion}>
+                                        <div class="card__desc">{srv.Descripcion_Extendida__c}</div>
+                                    </template>
+                                    
+                                    <div class="card__duration">{srv.duracionFormateada}</div>
+                                </div>
+                            </button>
+                        </template>
+                    </div>
+                </template>
+
+              <!-- PASO 5: Retiro de Material (Condicional) -->
+                <template if:true={isReservaPaso5}>
+                    <div class="step-head" style="margin-bottom: 24px;">
+                        <div class="step-head__top">
+                            <button class="step-back" onclick={volverPaso4}>&larr; Volver</button>
+                        </div>
+                        <h2 class="h2">¿Necesitás retiro de material?</h2>
+                        <p class="subtitle">Tenelo en cuenta para que reservemos el tiempo necesario.</p>
+                    </div>
+
+                    <!-- Tarjetas de Retiro -->
+                    <button class="card card--service" data-tipo="no" onclick={handleSelectRetiro}>
+                        <div class="card__content">
+                            <div class="card__title card__title--sm">No, vengo limpia</div>
+                            <div class="card__desc">Sin material previo</div>
+                        </div>
+                    </button>
+
+                    <button class="card card--service" data-tipo="nuestro" onclick={handleSelectRetiro}>
+                        <div class="card__content">
+                            <div class="card__title card__title--sm">Retiro de material nuestro</div>
+                            <div class="card__desc">Se hizo acá la última vez · sin costo extra</div>
+                        </div>
+                    </button>
+
+                    <button class="card card--service" data-tipo="externo" onclick={handleSelectRetiro}>
+                        <div class="card__content">
+                            <div class="card__title card__title--sm">Retiro de material externo</div>
+                            <div class="card__desc">Hecho en otro lugar</div>
+                        </div>
+                    </button>
+
+                    <!-- Sub-opciones condicionales para Retiro Externo -->
+                    <template if:true={mostrarSubOpcionesRetiro}>
+                        <div class="notice-block">
+                            <h3 class="notice-block__title">¿Qué tipo de material es?</h3>
+                            <div class="pill-row">
+                                <button class="pill" data-material="blando" onclick={handleSelectRetiroMaterial}>Blando · +$200</button>
+                                <button class="pill" data-material="duro" onclick={handleSelectRetiroMaterial}>Duro · +$300</button>
+                            </div>
+                        </div>
+                    </template>
+                </template>
+
+              <!-- PASO 6: Selección de Día y Hora -->
+                <template if:true={isReservaPaso6}>
+                    <div class="step-head">
+                        <div class="step-head__top">
+                            <button class="step-back" onclick={volverPasoDesde6}>&larr; Volver</button>
+                            <span class="step-counter">PASO 3 DE 5</span>
+                        </div>
+                        <h2 class="h2" style="margin-bottom: 12px;">Elegí día y hora</h2>
+                        <template if:true={servicioSeleccionadoInfo}>
+                            <p class="subtitle" style="font-size: 16px;">
+                                {servicioSeleccionadoInfo.Nombre_Visible__c} · {servicioSeleccionadoInfo.duracionFormateada}
+                            </p>
+                        </template>
+                    </div>
+
+                    <!-- Selector de Días (Horizontal Scroll) -->
+                    <div class="day-picker">
+                        <template for:each={diasDisponibles} for:item="dia">
+                            <button key={dia.iso} class={dia.cssClass} data-fecha={dia.iso} onclick={handleSelectFecha}>
+                                <div class="day-pill__dow">{dia.dow}</div>
+                                <div class="day-pill__num">{dia.num}</div>
+                                <div class="day-pill__mon">{dia.mon}</div>
+                            </button>
+                        </template>
+                    </div>
+
+                    <!-- Grilla de Horas -->
+                    <div class="slot-grid">
+                        <template for:each={horasDisponibles} for:item="hora">
+                            <button key={hora.val} class={hora.cssClass} data-hora={hora.val} onclick={handleSelectHora}>
+                                {hora.val}
+                            </button>
+                        </template>
+                    </div>
+
+                    <div class="spacer-md"></div>
+                    <button class="btn" onclick={avanzarPaso7} disabled={isBotonFechaContinuarDeshabilitado}>Continuar</button>
+                </template>
+
+              <!-- PASO 7: Confirmación -->
+                <template if:true={isReservaPaso7}>
+                    <div class="step-head">
+                        <div class="step-head__top">
+                            <button class="step-back" onclick={volverPaso6}>&larr; Volver</button>
+                            <span class="step-counter">PASO 4 DE 5</span>
+                        </div>
+                        <h2 class="h2">Confirmá tu reserva</h2>
+                        <p class="subtitle">Revisá los datos antes de confirmar.</p>
+                    </div>
+
+                    <!-- Cuadro de Resumen -->
+                    <div class="resumen">
+                        <div class="resumen__row">
+                            <span class="label-caps">CLIENTE</span>
+                            <span class="body-text text-right">{resumenDatos.cliente}</span>
+                        </div>
+                        <div class="resumen__row">
+                            <span class="label-caps">SERVICIO</span>
+                            <span class="body-text text-right">{resumenDatos.servicio}</span>
+                        </div>
+                        <div class="resumen__row">
+                            <span class="label-caps">PROFESIONAL</span>
+                            <span class="body-text text-right">{resumenDatos.profesional}</span>
+                        </div>
+                        <div class="resumen__row">
+                            <span class="label-caps">FECHA</span>
+                            <span class="body-text text-right">{resumenDatos.fecha}</span>
+                        </div>
+                        <div class="resumen__row">
+                            <span class="label-caps">HORA</span>
+                            <span class="body-text text-right">{resumenDatos.hora}</span>
+                        </div>
+                        <div class="resumen__row">
+                            <span class="label-caps">DURACIÓN</span>
+                            <span class="body-text text-right">{resumenDatos.duracion}</span>
+                        </div>
+                        
+                        <div class="resumen__spacer"></div>
+                        
+                        <div class="resumen__total">
+                            <span class="label-caps">TOTAL</span>
+                            <span class="price-text">${resumenDatos.total}</span>
+                        </div>
+                    </div>
+
+                    <!-- Selección de Pago -->
+                    <div class="field" style="margin-top:32px">
+                        <label class="field__label">¿CÓMO VAS A ABONAR?</label>
+                        <div class="pill-row" style="flex-wrap: wrap;">
+                            <template for:each={opcionesPago} for:item="pago">
+                                <button key={pago.label} class={pago.cssClass} data-pago={pago.label} onclick={handleSelectPago}>{pago.label}</button>
+                            </template>
+                        </div>
+                    </div>
+
+                    <!-- Notificación de Política -->
+                    <div class="notice--red">
+                        <strong>Política de cancelación:</strong> con menos de 12 horas de aviso, se cobra el costo mínimo del servicio. Te enviamos un recordatorio el día anterior.
+                    </div>
+
+                    <button class="btn" disabled={isBotonConfirmarDeshabilitado} onclick={handleConfirmarReserva}>Confirmar reserva</button>
+                    
+                    <div style="text-align: center; margin-top: 24px;">
+                        <button class="btn-ghost" onclick={volverPaso6}>Cambiar día u hora</button>
+                    </div>
+                </template>
+
+              <!-- PASO 8: Éxito -->
+                <template if:true={isReservaPaso8}>
+                    <div class="screen success-screen">
+                        
+                        <!-- Contenedor Superior (Centrado) -->
+                        <div class="success-screen__top">
+                            <div class="success-circle">&#10003;</div>
+                            <div class="label-caps label-caps--accent" style="margin-top: 24px; margin-bottom: 12px;">
+                                RESERVA CONFIRMADA
+                            </div>
+                            
+                            <h2 class="h2" style="font-size: 36px; margin-bottom: 16px;">¡Te esperamos!</h2>
+                            
+                            <div class="h-display" style="font-size: 20px; color: var(--black); margin-bottom: 24px;">
+                                {resumenDatos.fecha} &middot; {resumenDatos.hora}
+                            </div>
+                            
+                            <p class="subtitle" style="font-size: 16px; margin-bottom: 4px;">
+                                {resumenDatos.servicio}
+                            </p>
+                            <p class="subtitle" style="font-size: 16px;">
+                                con {resumenDatos.profesional}
+                            </p>
+                        </div>
+
+                        <!-- Contenedor Inferior (Dirección y Botón) -->
+                        <div class="success-screen__bottom">
+                            <div class="notice-block notice-block--final">
+                                <p style="font-weight: 600; margin-bottom: 8px; color: var(--black);">Te esperamos en</p>
+                                <p style="margin-bottom: 24px; color: var(--black); line-height: 1.5;">
+                                    Av. Brasil 2377, apto 1803 &middot; Pocitos<br>
+                                    Edificio entre Araucho y Ponce
+                                </p>
+                                <p style="color: var(--black); line-height: 1.5; opacity: 0.8;">
+                                    Recibís recordatorio 24h antes. Si necesitás cancelar, hacelo con 12h de anticipación.
+                                </p>
+                            </div>
+                            
+                            <button class="btn" onclick={navToWelcome}>Volver al inicio</button>
+                        </div>
+
+                    </div>
+                </template>
+            </div>
+        </template>
+
+      <!-- PANTALLA 2: MIS TURNOS -->
+        <template if:true={isMisTurnos}>
+            <div class="screen">
+                
+                <!-- PASO 1: Identificación -->
+                <template if:true={isMisTurnosPaso1}>
+                    <div class="step-head">
+                        <div class="step-head__top">
+                            <button class="step-back" onclick={navToWelcome}>&larr; Volver</button>
+                        </div>
+                        <h2 class="h2">Mis turnos</h2>
+                        <p class="subtitle">Identificate para ver tus reservas.</p>
+                    </div>
+
+                    <div class="field">
+                        <label class="field__label">NOMBRE Y APELLIDO</label>
+                        <input class="field__input" type="text" data-id="nombre" placeholder="Silvina Schnyder" value={misTurnosLogin.nombre} onchange={handleMisTurnosInput}>
+                    </div>
+
+                    <div class="field">
+                        <label class="field__label">CELULAR</label>
+                        <input class="field__input" type="tel" data-id="celular" placeholder="099 123 456" value={misTurnosLogin.celular} onchange={handleMisTurnosInput}>
+                    </div>
+
+                    <div class="spacer-md"></div>
+                    <button class="btn" onclick={handleBuscarTurnos}>Ver mis turnos</button>
+                </template>
+
+              <!-- PASO 2: Lista de turnos -->
+                <template if:true={isMisTurnosPaso2}>
+                    <div class="step-head">
+                        <div class="step-head__top">
+                            <button class="step-back" onclick={volverMisTurnosPaso1}>&larr; Volver</button>
+                        </div>
+                        <h2 class="h2">Hola {primerNombreMisTurnos}</h2>
+                        <p class="subtitle">Tus próximos turnos.</p>
+                    </div>
+
+                    <!-- Lista Dinámica de Turnos -->
+                    <div class="turnos-list">
+                        <template for:each={turnosEncontrados} for:item="turno">
+                            <div key={turno.Id} class="turno-card">
+                                
+                                <div class="turno-card__header">
+                                    <div class="turno-card__date">{turno.fechaStr}</div>
+                                    <div class="turno-card__time">{turno.horaStr}</div>
+                                </div>
+                                
+                                <div class="turno-card__service">{turno.servicio}</div>
+                                <div class="turno-card__meta">con {turno.profesional}</div>
+                                
+                                <div class="turno-card__actions">
+                                    <div class="turno-card__actions-row">
+                                        <button class="btn-outline btn-outline--success" data-id={turno.Id} onclick={handleConfirmarAsistencia}>Confirmar asistencia</button>
+                                        <button class="btn-outline btn-outline--dark" data-id={turno.Id} onclick={handleRecoordinar}>Recoordinar</button>
+                                    </div>
+                                    <button class="btn-outline btn-outline--danger" data-id={turno.Id} onclick={handleCancelarTurno}>Cancelar</button>
+                                </div>
+                                
+                            </div>
+                        </template>
+                    </div>
+                </template>
+
+            </div>
+        </template>
+
+      <!-- PANTALLA 3: PRECIOS Y SERVICIOS -->
+        <template if:true={isPrecios}>
+            <div class="screen">
+                <div class="step-head__top">
+                    <button class="step-back" onclick={navToWelcome}>&larr; Volver</button>
+                </div>
+                
+                <h2 class="h2" style="font-size: 36px; margin-bottom: 40px; margin-top: 16px;">Precios y servicios</h2>
+
+                <!-- Iteración por Categorías (MANICURÍA, CEJAS, etc.) -->
+                <template for:each={preciosAgrupados} for:item="grupo">
+                    <div key={grupo.titulo} class="precios-group">
+                        
+                        <!-- Título y línea de acento -->
+                        <h3 class="precios-group__title">{grupo.titulo}</h3>
+                        <div class="precios-group__rule"></div>
+
+                        <!-- Iteración de Servicios dentro de la Categoría -->
+                        <div class="precios-list">
+                            <template for:each={grupo.servicios} for:item="srv">
+                                <div key={srv.Id} class="precio-row">
+                                    <div class="precio-row__info">
+                                        <div class="precio-row__name">{srv.Nombre_Visible__c}</div>
+                                        <template if:true={srv.tieneDescripcion}>
+                                            <div class="precio-row__desc">{srv.Descripcion_Extendida__c}</div>
+                                        </template>
+                                    </div>
+                                    <div class="precio-row__price">${srv.precioFormateado}</div>
+                                </div>
+                            </template>
+                        </div>
+
+                    </div>
+                </template>
+
+                <div class="spacer-md"></div>
+                <!-- Al clickear redirige al flujo principal de reservas (paso 1) -->
+                <button class="btn" onclick={navToReserva}>Reservar un turno</button>
+            </div>
+        </template>
+
+      <!-- PANTALLA 4: OTRA CONSULTA -->
+        <template if:true={isConsulta}>
+            <div class="screen">
+                
+                <!-- Cabecera con logo y botón volver alineados -->
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 32px;">
+                    <div class="logo logo--sm">
+                        <span class="logo__script">Silvina</span>
+                        <span class="logo__caps">- UÑAS -</span>
+                    </div>
+                    <button class="step-back" onclick={navToWelcome} style="margin-bottom: 0;">&larr; Volver</button>
+                </div>
+
+                <!-- Bloque Rojo de Redirección a WhatsApp -->
+                <div class="wa-redirect">
+                    <div class="wa-redirect__eyebrow">IMPORTANTE</div>
+                    <h2 class="wa-redirect__title">¿Querés que te escribamos?</h2>
+                    <p class="wa-redirect__body">
+                        Para servicios combinados, consultas especiales, o cualquier otra cosa fuera de lo agendable acá, escribinos directamente y te respondemos lo antes posible.
+                    </p>
+                    
+                    <!-- Reemplaza el href con el link real de WhatsApp de la peluquería -->
+                    <a class="wa-redirect__cta" href="https://wa.me/message/PUX7XCBYPK4MN1" target="_blank" rel="noopener">
+                        &rarr; Coordiná por WhatsApp
+                    </a>
+                </div>
+
+                <!-- Footer / Dirección -->
+                <p style="margin-top: 32px; color: #8A7B6E; font-size: 15px; line-height: 1.5;">
+                    Estamos en Av. Brasil 2377, apto 1803 &middot; Pocitos, Montevideo. Lunes a viernes 9-19h, sábados 9-15h.
+                </p>
+
+            </div>
+        </template>
+
+ <!-- PANTALLA: LOGIN EQUIPO -->
+        <template if:true={isEquipoLogin}>
+            <div class="screen" style="text-align: center; padding-top: 10vh;">
+                <div class="logo logo--lg" style="margin: 0 auto 32px;">
+                    <span class="logo__script">Silvina</span>
+                    <span class="logo__caps">- UÑAS -</span>
+                </div>
+                
+                <div class="label-caps" style="color: #8B1A1A; margin-bottom: 12px;">ACCESO DEL EQUIPO</div>
+                <h2 class="h2" style="margin-bottom: 40px; font-size: 36px;">Ingresá la contraseña</h2>
+
+                <div class="field" style="text-align: left;">
+                    <label class="field__label">CONTRASEÑA</label>
+                    <input class="field__input" type="password" placeholder="••••••••" onchange={handleLoginInput}>
+                    <template if:true={errorLogin}>
+                        <span class="field__hint" style="color: #8B1A1A;">{errorLogin}</span>
+                    </template>
+                </div>
+
+                <button class="btn btn--bordo" onclick={intentarLogin}>Continuar</button>
+                
+                <div style="margin-top: 24px;">
+                    <button class="btn-ghost" onclick={navToWelcome}>Volver al inicio</button>
+                </div>
+            </div>
+        </template>
+
+        <!-- PANTALLA: PANEL DE ADMINISTRACIÓN (DARK THEME) -->
+        <template if:true={isAdmin}>
+            <div class="admin-wrapper">
+                <!-- Header -->
+                <div class="admin-header">
+                    <div style="display: flex; flex-direction: column;">
+                        <span style="font-family: 'Allura', cursive; font-size: 24px; color: #fff; line-height: 1;">Silvina</span>
+                        <span style="font-size: 7px; letter-spacing: 0.3em; color: #fff;">- UÑAS -</span>
+                    </div>
+                    <button class="btn-outline-light" onclick={handleAdminLogout}>Salir</button>
+                </div>
+
+                <div class="label-caps" style="color: #C9A582; margin-bottom: 8px;">PANEL DEL EQUIPO</div>
+                <h2 class="h2" style="color: #fff; margin-bottom: 32px;">Agenda</h2>
+
+                <!-- Filtro Profesional -->
+                <div style="margin-bottom: 24px;">
+                    <div class="label-caps" style="color: #8A7B6E; margin-bottom: 12px;">VER AGENDA DE</div>
+                    <div class="prof-pill-container">
+                        <template for:each={adminPillsProfesionales} for:item="prof">
+                            <button key={prof.id} class={prof.cssClass} data-id={prof.id} onclick={handleAdminProfFilter}>
+                                <template if:true={prof.color}>
+                                    <span class="prof-dot" style={prof.colorStyle}></span>
+                                </template>
+                                {prof.label}
+                            </button>
+                        </template>
+                    </div>
+                </div>
+
+                <!-- Tabs -->
+                <div class="admin-tabs-container">
+                    <div style="display: flex;">
+                        <template for:each={adminTabs} for:item="tab">
+                            <button key={tab.id} class={tab.cssClass} data-id={tab.id} onclick={handleAdminTab}>{tab.label}</button>
+                        </template>
+                    </div>
+                    <button style="background: transparent; border: none; color: #8A7B6E; cursor: pointer;">&#x21bb;</button>
+                </div>
+
+                <!-- Lista de Agenda -->
+                <div class="admin-agenda-list">
+                    <template for:each={adminAgendaData} for:item="item">
+                        
+                        <template if:true={item.isHeader}>
+                            <h3 key={item.key} class="admin-date-header">{item.label}</h3>
+                        </template>
+
+                        <template if:true={item.isBooking}>
+                            <div key={item.id} class="admin-card" style={item.borderStyle}>
+                                <div class="admin-card__top">
+                                    <span class="admin-card__time">{item.time}</span>
+                                    <span class="admin-card__status">
+                                        <template if:true={item.isConfirmado}>&#10003; </template>{item.status}
+                                    </span>
+                                </div>
+                                <div class="admin-card__client">{item.client}</div>
+                                <div class="admin-card__service">{item.service}</div>
+                                
+                                <div class="admin-card__footer">
+                                    <span class="admin-card__meta">&#128222; {item.phone}</span>
+                                    <span class="admin-card__meta">
+                                        <span class="prof-dot" style={item.profColorStyle}></span> {item.prof}
+                                    </span>
+                                </div>
+                                <div class="admin-card__payment">Forma de pago: {item.payment}</div>
+                            </div>
+                        </template>
+
+                        <template if:true={item.isGap}>
+                            <div key={item.key} class="admin-gap">
+                                <span>&#9201; {item.timeRange}</span>
+                                <span class="label-caps" style="color: #C9A582;">{item.label}</span>
+                            </div>
+                        </template>
+
+                    </template>
+                </div>
+            </div>
+        </template>
+        
+    </div>
+
+   
+
+</template>

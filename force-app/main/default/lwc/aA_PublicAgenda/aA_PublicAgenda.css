@@ -1,0 +1,1008 @@
+:host {
+    /* Paleta base de tu diseño */
+    --black: #0F0E0D;
+    --cream: #FAF6F0;
+    --line: #E5DCCE;
+    --warm: #E8DDD0;
+    
+    font-family: 'DM Sans', sans-serif;
+    display: block;
+    min-height: 100vh;
+    background-color: #F4EEE4; /* Fondo exterior */
+}
+
+/* Contenedor principal estilo móvil */
+.app-frame {
+    max-width: 480px;
+    margin: 0 auto;
+    min-height: 100vh;
+    background: var(--cream);
+    box-shadow: 0 0 60px rgba(0,0,0,0.15);
+}
+
+.screen {
+    padding: 32px 24px;
+}
+
+h2 {
+    font-family: 'Playfair Display', serif;
+    font-size: 32px;
+    margin-bottom: 8px;
+    color: var(--black);
+}
+
+.subtitle {
+    margin-bottom: 24px;
+    color: #8A7B6E;
+}
+
+/* Tarjetas del menú */
+.card {
+    display: block; 
+    width: 100%; 
+    text-align: left;
+    padding: 20px 22px;
+    background: var(--cream);
+    color: var(--black);
+    border: 1px solid var(--line);
+    cursor: pointer;
+    margin-bottom: 12px;
+    transition: background 0.18s ease;
+    font-family: inherit;
+}
+
+.card:hover { 
+    background: var(--warm); 
+}
+
+.card__title { 
+    font-size: 18px; 
+}
+
+/* Botón simple de volver */
+.btn-back {
+    background: transparent;
+    border: none;
+    color: #8A7B6E;
+    font-size: 14px;
+    cursor: pointer;
+    margin-bottom: 24px;
+    padding: 0;
+}
+
+.content {
+    padding: 20px;
+    border: 1px dashed var(--line);
+    text-align: center;
+    color: var(--black);
+}
+
+
+/* Elementos de la cabecera del paso */
+.step-head {
+    margin-top: 32px;
+    margin-bottom: 32px;
+}
+
+.step-head__top {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 24px;
+}
+
+.step-back {
+    background: none;
+    border: none;
+    padding: 0;
+    font-family: inherit;
+    font-size: 15px;
+    color: #8A7B6E;
+    cursor: pointer;
+}
+
+.step-counter {
+    font-size: 12px;
+    letter-spacing: 0.15em;
+    color: #8A7B6E;
+}
+
+/* Campos de Formulario (Inputs) */
+.field {
+    margin-bottom: 28px;
+    display: block;
+}
+
+.field__label {
+    display: block;
+    font-size: 11px;
+    letter-spacing: 0.15em;
+    color: #8A7B6E;
+    margin-bottom: 8px;
+}
+
+.field__input {
+    width: 100%;
+    padding: 12px 0;
+    background: transparent;
+    border: none;
+    border-bottom: 1px solid #E5DCCE;
+    font-size: 18px;
+    color: var(--black);
+    outline: none;
+    font-family: inherit;
+    transition: border-color 0.2s ease;
+}
+
+.field__input::placeholder {
+    color: #8A7B6E;
+    opacity: 0.6;
+}
+
+.field__input:focus {
+    border-bottom-color: var(--black);
+}
+
+.field__hint {
+    display: block;
+    font-size: 13px;
+    color: #8A7B6E;
+    margin-top: 8px;
+}
+
+/* Botón Continuar */
+.btn {
+    display: block;
+    width: 100%;
+    padding: 18px 22px;
+    background: var(--black);
+    color: var(--cream);
+    border: none;
+    font-size: 15px;
+    font-weight: 500;
+    letter-spacing: 0.04em;
+    cursor: pointer;
+    font-family: inherit;
+    margin-top: 40px;
+    transition: opacity 0.2s;
+}
+
+.btn:active {
+    opacity: 0.8;
+}
+
+/* Logo Círculo Negro */
+.logo {
+    width: 64px;
+    height: 64px;
+    border-radius: 50%;
+    background: var(--black);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+}
+
+.logo__script {
+    font-family: 'Allura', cursive;
+    color: #fff;
+    font-size: 22px;
+    line-height: 1;
+    margin-top: 6px;
+}
+
+.logo__caps {
+    font-size: 6px;
+    letter-spacing: 0.3em;
+    color: #fff;
+    margin-top: 2px;
+}
+
+.spacer-md {
+    height: 16px;
+}
+
+/* Áreas de Texto (Textareas) */
+.field__textarea {
+    width: 100%;
+    padding: 16px;
+    background: var(--warm);
+    border: none;
+    border-bottom: 1px solid var(--line);
+    font-size: 16px;
+    color: var(--black);
+    outline: none;
+    resize: vertical;
+    font-family: inherit;
+}
+
+.field__textarea::placeholder {
+    color: #8A7B6E;
+    opacity: 0.8;
+}
+
+.field__textarea:focus {
+    border-bottom-color: var(--black);
+}
+
+/* Botones tipo "Píldora" (Pills) */
+.pill-row {
+    display: flex;
+    gap: 12px;
+    margin-top: 12px;
+}
+
+.pill {
+    padding: 14px 20px;
+    background: transparent;
+    color: var(--black);
+    border: 1px solid var(--black);
+    font-size: 14px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    font-family: inherit;
+}
+
+.pill--active {
+    background: var(--black);
+    color: var(--cream);
+}
+
+/* Agrega esta variable dentro de tu bloque :host existente si no la tienes */
+:host {
+    /* ... tus otras variables ... */
+    --beige: #C9A582;
+}
+
+/* Modificamos sutilmente el .card base que ya tenías */
+.card {
+    /* ... lo que ya tenías ... */
+    padding: 24px 22px; /* Un poco más de aire vertical según el mock */
+}
+
+/* Clases de Layout para las tarjetas */
+.between-rows {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.card__content {
+    text-align: left;
+}
+
+/* Modificadores de la tarjeta */
+.card--accent {
+    border-left: 4px solid var(--beige);
+    padding-left: 18px; /* Compensamos el grosor del borde */
+}
+
+/* Tipografía de la tarjeta */
+.card__title {
+    font-family: 'Playfair Display', serif;
+    font-size: 24px;
+    margin-bottom: 6px;
+    color: var(--black);
+}
+
+.card__eyebrow {
+    font-family: 'DM Sans', sans-serif;
+    font-size: 11px;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    color: #8A7B6E;
+}
+
+/* El icono de la flecha (Chevron) */
+.chevron {
+    font-size: 26px;
+    color: #8A7B6E;
+    font-weight: 300;
+    line-height: 1;
+    margin-top: -4px; /* Ajuste óptico fino */
+}
+
+/* Enlace sutil para volver ("Cambiar categoría") */
+.change-link {
+    background: transparent;
+    border: none;
+    color: #8A7B6E;
+    font-size: 13px;
+    padding: 0;
+    margin-bottom: 20px;
+    cursor: pointer;
+    font-family: inherit;
+    transition: color 0.2s ease;
+}
+
+.change-link:hover {
+    color: var(--black);
+}
+
+/* Ajustes específicos para las tarjetas de servicio */
+.card--service {
+    padding: 20px 22px;
+}
+
+.card__title--sm {
+    font-size: 20px;
+    line-height: 1.2;
+}
+
+.card__desc {
+    font-family: 'DM Sans', sans-serif;
+    font-size: 14px;
+    color: #8A7B6E;
+    margin-top: 4px;
+    line-height: 1.4;
+}
+
+/* Estilo para la duración (ej: "30 MIN") */
+.card__duration {
+    font-family: 'DM Sans', sans-serif;
+    font-size: 11px;
+    letter-spacing: 0.3em;
+    text-transform: uppercase;
+    color: #8A7B6E;
+    margin-top: 14px;
+}
+
+/* Bloque de sub-opciones (Retiro externo) */
+.notice-block {
+    background: var(--warm);
+    padding: 24px;
+    margin-top: 24px;
+    border-left: 3px solid var(--beige);
+}
+
+.notice-block__title {
+    font-family: 'Playfair Display', serif;
+    font-size: 18px;
+    margin-bottom: 16px;
+    color: var(--black);
+    font-weight: 400;
+}
+
+/* --- Selector de Días (Horizontal Scroll) --- */
+.day-picker {
+    display: flex;
+    gap: 12px;
+    overflow-x: auto;
+    padding-bottom: 8px; /* Espacio para que el scroll no corte el borde */
+    margin: 0 -24px 32px; /* Margen negativo para que ocupe todo el ancho de la pantalla */
+    padding-left: 24px;
+    padding-right: 24px;
+    -webkit-overflow-scrolling: touch; /* Suavidad en iOS */
+}
+
+/* Ocultar la barra de scroll visualmente pero mantener la función */
+.day-picker::-webkit-scrollbar {
+    display: none;
+}
+
+.day-pill {
+    flex-shrink: 0;
+    min-width: 76px;
+    padding: 16px 0;
+    background: transparent;
+    color: var(--black);
+    border: 1px solid var(--line);
+    cursor: pointer;
+    text-align: center;
+    transition: all 0.2s ease;
+    font-family: inherit;
+}
+
+.day-pill--selected {
+    background: var(--black);
+    color: var(--cream);
+    border-color: var(--black);
+}
+
+.day-pill__dow {
+    font-size: 11px;
+    letter-spacing: 0.15em;
+    opacity: 0.8;
+}
+
+.day-pill__num {
+    font-family: 'Playfair Display', serif;
+    font-size: 28px;
+    margin: 4px 0;
+    line-height: 1;
+}
+
+.day-pill__mon {
+    font-size: 11px;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    opacity: 0.8;
+}
+
+/* --- Grilla de Horas --- */
+.slot-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 12px;
+}
+
+.slot-btn {
+    padding: 18px 0;
+    background: transparent;
+    color: var(--black);
+    border: 1px solid var(--line);
+    font-size: 16px;
+    font-family: inherit;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.slot-btn--selected {
+    background: var(--black);
+    color: var(--cream);
+    border-color: var(--black);
+}
+
+/* Estado deshabilitado para el botón principal */
+.btn:disabled {
+    opacity: 0.3;
+    cursor: not-allowed;
+}
+
+/* --- Caja de Resumen --- */
+.resumen {
+    background: var(--warm);
+    padding: 24px 28px;
+    margin-top: 24px;
+}
+
+.resumen__row {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    margin-bottom: 20px;
+}
+
+.label-caps {
+    font-family: 'DM Sans', sans-serif;
+    font-size: 11px;
+    letter-spacing: 0.18em;
+    color: #8A7B6E;
+    text-transform: uppercase;
+    flex-shrink: 0;
+}
+
+.text-right {
+    text-align: right;
+    max-width: 65%; /* Evita que los textos largos empujen el label */
+}
+
+.resumen__spacer {
+    height: 32px;
+}
+
+.resumen__total {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.price-text {
+    font-family: 'Playfair Display', serif;
+    font-size: 32px;
+    color: var(--black);
+    line-height: 1;
+}
+
+/* --- Bloque Rojo de Políticas --- */
+.notice--red {
+    background: rgba(139, 26, 26, 0.05); /* Fondo rojo muy sutil */
+    border-left: 4px solid #8B1A1A;
+    padding: 18px 20px;
+    margin-top: 32px;
+    margin-bottom: 32px;
+    font-size: 13px;
+    color: var(--black);
+    line-height: 1.5;
+}
+
+.notice--red strong {
+    color: #8B1A1A;
+    font-weight: 600;
+}
+
+/* --- Botón Fantasma --- */
+.btn-ghost {
+    background: transparent;
+    border: none;
+    color: #8A7B6E;
+    font-size: 14px;
+    text-decoration: underline;
+    text-underline-offset: 4px;
+    cursor: pointer;
+    font-family: inherit;
+}
+
+.btn-ghost:hover {
+    color: var(--black);
+}
+
+/* --- Pantalla de Éxito (Paso 8) --- */
+
+/* Usamos Flexbox para empujar la parte de abajo */
+.success-screen {
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    min-height: calc(100vh - 64px); /* Asumiendo padding de la clase .screen */
+    padding-top: 40px; 
+}
+
+.success-screen__top {
+    text-align: center;
+}
+
+.success-screen__bottom {
+    margin-top: auto;
+    padding-top: 40px;
+}
+
+/* El círculo negro con el check */
+.success-circle {
+    width: 64px;
+    height: 64px;
+    background-color: var(--black);
+    color: var(--cream);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 28px;
+    margin: 0 auto;
+}
+
+/* Letras doradas / accent para el Eyebrow */
+.label-caps--accent {
+    color: var(--beige);
+}
+
+.h-display {
+    font-family: 'Playfair Display', serif;
+}
+
+/* Variación del notice-block para la pantalla final */
+.notice-block--final {
+    margin-top: 0;
+    margin-bottom: 24px;
+    padding: 24px;
+    font-size: 14px;
+}
+
+/* --- Tarjetas de Mis Turnos --- */
+.turno-card {
+    background: var(--cream);
+    border: 1px solid var(--line);
+    padding: 24px;
+    margin-bottom: 24px;
+}
+
+.turno-card__header {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    margin-bottom: 8px;
+}
+
+.turno-card__date {
+    font-family: 'Playfair Display', serif;
+    font-size: 24px;
+    color: var(--black);
+}
+
+.turno-card__time {
+    font-family: 'DM Sans', sans-serif;
+    font-size: 20px;
+    color: var(--black);
+    letter-spacing: 0.05em;
+}
+
+.turno-card__service {
+    font-size: 16px;
+    color: var(--black);
+    margin-bottom: 4px;
+}
+
+.turno-card__meta {
+    font-size: 14px;
+    color: #8A7B6E;
+    margin-bottom: 24px;
+}
+
+/* --- Botones Outline --- */
+.turno-card__actions {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.turno-card__actions-row {
+    display: flex;
+    gap: 12px;
+}
+
+.btn-outline {
+    flex: 1;
+    padding: 14px 0;
+    background: transparent;
+    font-family: inherit;
+    font-size: 14px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.btn-outline--success {
+    border: 1px solid #3D6B45;
+    color: #3D6B45;
+}
+
+.btn-outline--success:hover {
+    background: #3D6B45;
+    color: var(--cream);
+}
+
+.btn-outline--dark {
+    border: 1px solid var(--black);
+    color: var(--black);
+}
+
+.btn-outline--dark:hover {
+    background: var(--black);
+    color: var(--cream);
+}
+
+.btn-outline--danger {
+    width: 100%;
+    border: 1px solid #8B1A1A;
+    color: #8B1A1A;
+}
+
+.btn-outline--danger:hover {
+    background: #8B1A1A;
+    color: var(--cream);
+}
+
+/* --- Pantalla de Precios y Servicios --- */
+.precios-group {
+    margin-bottom: 48px;
+}
+
+.precios-group__title {
+    font-family: 'Playfair Display', serif;
+    font-size: 26px;
+    color: var(--black);
+    font-weight: 400;
+    margin-bottom: 8px;
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+}
+
+.precios-group__rule {
+    width: 38px;
+    height: 1px;
+    background: var(--beige);
+    margin-bottom: 24px;
+}
+
+.precio-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    padding: 18px 0;
+    border-bottom: 1px solid var(--line);
+}
+
+/* Evitar línea en el último elemento de la categoría */
+.precio-row:last-child {
+    border-bottom: none;
+}
+
+.precio-row__info {
+    flex: 1;
+    padding-right: 16px;
+}
+
+.precio-row__name {
+    font-family: 'DM Sans', sans-serif;
+    font-size: 16px;
+    font-weight: 500;
+    color: var(--black);
+    margin-bottom: 4px;
+}
+
+.precio-row__desc {
+    font-size: 14px;
+    color: #8A7B6E;
+    line-height: 1.4;
+}
+
+.precio-row__price {
+    font-family: 'Playfair Display', serif;
+    font-size: 24px;
+    color: var(--black);
+    white-space: nowrap; /* Evita que el precio se rompa en dos líneas */
+}
+
+/* --- Pantalla Otra Consulta (WhatsApp) --- */
+
+/* Modificador para achicar el logo en las cabeceras */
+.logo--sm {
+    width: 56px;
+    height: 56px;
+}
+
+.logo--sm .logo__script {
+    font-size: 18px;
+    margin-top: 6px;
+}
+
+.logo--sm .logo__caps {
+    font-size: 5px;
+    letter-spacing: 0.3em;
+    margin-top: 1px;
+}
+
+/* Bloque rojo que ocupa todo el ancho */
+.wa-redirect {
+    background: #8B1A1A; 
+    color: #ffffff;
+    padding: 40px 24px;
+    margin: 0 -24px; /* Expande el fondo hacia los bordes de .screen */
+    text-align: left;
+}
+
+.wa-redirect__eyebrow {
+    font-family: 'DM Sans', sans-serif;
+    font-size: 18px;
+    font-weight: 700;
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+    color: #ffffff;
+    line-height: 1;
+    margin-bottom: 24px;
+}
+
+.wa-redirect__title {
+    font-family: 'Playfair Display', serif;
+    font-size: 36px;
+    line-height: 1.1;
+    color: #ffffff;
+    margin-bottom: 16px;
+    font-weight: 400;
+}
+
+.wa-redirect__body {
+    font-family: 'DM Sans', sans-serif;
+    font-size: 16px;
+    line-height: 1.6;
+    color: rgba(255, 255, 255, 0.95);
+    margin-bottom: 32px;
+}
+
+/* Botón blanco de WhatsApp */
+.wa-redirect__cta {
+    display: inline-block;
+    padding: 16px 24px;
+    background: #ffffff;
+    color: #8B1A1A;
+    text-decoration: none;
+    font-weight: 600;
+    font-size: 16px;
+    font-family: 'DM Sans', sans-serif;
+    transition: opacity 0.2s ease;
+}
+
+.wa-redirect__cta:active {
+    opacity: 0.8;
+}
+
+/* --- LOGIN DEL EQUIPO --- */
+.staff-link-container {
+    text-align: center;
+    margin-top: 60px;
+    padding-bottom: 20px;
+}
+
+.staff-link {
+    background: transparent;
+    border: 1px solid var(--line);
+    padding: 14px 28px;
+    font-size: 11px;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    color: #8A7B6E;
+    cursor: pointer;
+    font-family: inherit;
+    transition: all 0.2s ease;
+}
+
+.staff-link:hover {
+    color: var(--black);
+    border-color: var(--black);
+}
+
+.btn--bordo {
+    background-color: #8B1A1A;
+    color: #ffffff;
+}
+
+/* --- PANEL DE ADMINISTRACIÓN (DARK THEME) --- */
+.admin-wrapper {
+    background-color: #111111;
+    min-height: 100vh;
+    padding: 32px 24px;
+    color: #F4EEE4;
+}
+
+.admin-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 48px;
+}
+
+.btn-outline-light {
+    background: transparent;
+    border: 1px solid #F4EEE4;
+    color: #F4EEE4;
+    padding: 10px 20px;
+    font-size: 14px;
+    cursor: pointer;
+    font-family: inherit;
+}
+
+/* Scroll Horizontal para profesionales */
+.prof-pill-container {
+    display: flex;
+    gap: 8px;
+    overflow-x: auto;
+    padding-bottom: 8px;
+    -webkit-overflow-scrolling: touch;
+}
+
+.prof-pill-container::-webkit-scrollbar {
+    display: none;
+}
+
+.prof-pill {
+    flex-shrink: 0;
+    padding: 10px 16px;
+    background: transparent;
+    border: 1px solid #333;
+    color: #8A7B6E;
+    font-size: 13px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-family: inherit;
+}
+
+.prof-pill--active {
+    background: #C9A582;
+    color: var(--black);
+    border-color: #C9A582;
+}
+
+.prof-dot {
+    display: inline-block;
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+}
+
+/* Tabs del Admin */
+.admin-tabs-container {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-bottom: 1px solid #333;
+    margin-bottom: 24px;
+}
+
+.admin-tab {
+    background: transparent;
+    border: none;
+    color: #8A7B6E;
+    padding: 12px 16px;
+    font-size: 14px;
+    cursor: pointer;
+    font-family: inherit;
+    border-bottom: 2px solid transparent;
+    margin-bottom: -1px;
+}
+
+.admin-tab--active {
+    color: #F4EEE4;
+    border-bottom-color: #F4EEE4;
+}
+
+/* Elementos de la Lista (Agenda) */
+.admin-date-header {
+    font-family: 'Playfair Display', serif;
+    font-size: 22px;
+    color: #F4EEE4;
+    margin-top: 32px;
+    margin-bottom: 16px;
+    font-weight: 400;
+}
+
+.admin-card {
+    background: #222222;
+    padding: 20px;
+    margin-bottom: 12px;
+}
+
+.admin-card__top {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    margin-bottom: 12px;
+}
+
+.admin-card__time {
+    font-family: 'Playfair Display', serif;
+    font-size: 24px;
+    color: #F4EEE4;
+}
+
+.admin-card__status {
+    font-family: 'DM Sans', sans-serif;
+    font-size: 11px;
+    letter-spacing: 0.15em;
+    color: #C9A582;
+}
+
+.admin-card__client {
+    font-size: 18px;
+    color: #F4EEE4;
+    margin-bottom: 4px;
+}
+
+.admin-card__service {
+    font-size: 14px;
+    color: #8A7B6E;
+    margin-bottom: 20px;
+}
+
+.admin-card__footer {
+    display: flex;
+    justify-content: space-between;
+    border-top: 1px solid #333;
+    padding-top: 16px;
+    margin-bottom: 12px;
+}
+
+.admin-card__meta {
+    font-size: 13px;
+    color: #8A7B6E;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.admin-card__payment {
+    font-size: 13px;
+    color: #C9A582;
+}
+
+.admin-gap {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 16px 20px;
+    border: 1px dashed #333;
+    color: #8A7B6E;
+    font-size: 14px;
+    margin-bottom: 12px;
+}
