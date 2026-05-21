@@ -26,6 +26,7 @@
 		<members>AA_Employee_Working_Hour__c</members>
 		<members>AA_Employee__c</members>
 		<members>AA_Service__c</members>
+		<members>AA_Service_Category__c</members>
 		<name>CustomObject</name>
 	</types>
 	<types>
@@ -41,9 +42,14 @@
 		<members>AA_Employee_Working_Hour__c</members>
 		<members>AA_Employee__c</members>
 		<members>AA_Service__c</members>
+		<members>AA_Service_Category__c</members>
 		<members>Log__c</members>
 		<name>CustomTab</name>
 	</types>
+	 <types>
+        <members>*</members>
+        <name>FlexiPage</name>
+    </types>
 	<types>
 		<members>AA_Book_It_Admin</members>
 		<name>PermissionSet</name>

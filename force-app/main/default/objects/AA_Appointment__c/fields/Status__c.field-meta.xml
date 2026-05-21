@@ -17,11 +17,6 @@
                 <label>Pending</label>
             </value>
             <value>
-                <fullName>Done</fullName>
-                <default>false</default>
-                <label>Done</label>
-            </value>
-            <value>
                 <fullName>Cancelled</fullName>
                 <default>false</default>
                 <label>Cancelled</label>
@@ -35,6 +30,11 @@
                 <fullName>No Show</fullName>
                 <default>false</default>
                 <label>No Show</label>
+            </value>
+            <value>
+                <fullName>Done</fullName>
+                <default>false</default>
+                <label>Done</label>
             </value>
         </valueSetDefinition>
     </valueSet>
