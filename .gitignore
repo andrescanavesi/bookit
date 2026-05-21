@@ -82,3 +82,15 @@ force-app/main/default/objects/AA_WhatsApp_Interaction__c/fields/WhatsApp_Sessio
 force-app/main/default/objects/AA_WhatsApp_Interaction__c/listViews/All.listView-meta.xml
 force-app/main/default/sites/AA_WhatsappWebhook.site-meta.xml
 force-app/main/default/tabs/WhatsApp_Interaction__c.tab-meta.xml
+force-app/main/default/flexipages/SalesCloudMobile_UtilityBar.flexipage-meta.xml
+force-app/main/default/flexipages/RevenueCloudConsole_UtilityBar.flexipage-meta.xml
+force-app/main/default/flexipages/LightningService_UtilityBar.flexipage-meta.xml
+force-app/main/default/flexipages/LightningSalesConsole_UtilityBar.flexipage-meta.xml
+force-app/main/default/flexipages/LightningSales_UtilityBar.flexipage-meta.xml
+force-app/main/default/flexipages/Integration_UtilityBar.flexipage-meta.xml
+force-app/main/default/flexipages/FlowsApp_UtilityBar.flexipage-meta.xml
+force-app/main/default/flexipages/ExpressionSetConsole_UtilityBar.flexipage-meta.xml
+force-app/main/default/flexipages/CrisisCenter_UtilityBar.flexipage-meta.xml
+force-app/main/default/flexipages/ContactCenter_UtilityBar.flexipage-meta.xml
+force-app/main/default/flexipages/AcademicOperations_UtilityBar.flexipage-meta.xml
+force-app/main/default/flexipages/AA_WhatsApp_Interaction_Record_Page.flexipage-meta.xml
