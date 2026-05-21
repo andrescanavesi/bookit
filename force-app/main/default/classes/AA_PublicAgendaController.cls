@@ -113,7 +113,7 @@ public without sharing class AA_PublicAgendaController {
         
     }
 
-    @AuraEnabled
+    @AuraEnabled(cacheable=false)
     public static AA_Appointment__c saveAppointment(Id customerId, Id employeeId, Id serviceId, String dayString, String hourString) {
         AA_Logger logger = new AA_Logger(true);
         logger.info('saveAppointment customerId: '+customerId+' employeeId: '+employeeId+' serviceId: '+serviceId+' dayString: '+dayString+' hourString: '+hourString);
@@ -126,6 +126,23 @@ public without sharing class AA_PublicAgendaController {
             // Empaquetamos el error para que el LWC lo entienda correctamente
             throw new AuraHandledException('Error al confirmar la reserva: ' + e.getMessage());
         }
+    }
+
+    @AuraEnabled(cacheable=false)
+    public static List<AA_Appointment__c> getMisTurnos(String celular) {
+        // Limpiamos el número por si el usuario ingresó espacios o guiones
+        String cleanPhone = celular != null ? celular.replaceAll('[^0-9]', '') : '';
+        
+        return [
+           SELECT Id, Name, Employee__r.Name, Start_Date_Time__c, End_Date_Time__c, Duration_Minutes__c, Service__r.Name, 
+           Status__c, Customer__r.Name, Amount__c 
+           FROM AA_Appointment__c 
+           WHERE Customer__r.Phone_Number__c = :celular 
+           AND Start_Date_Time__c >= TODAY  
+           AND Service__r.Business_Branch__c = :BRANCH_ID
+           ORDER BY Start_Date_Time__c ASC
+            LIMIT 10
+        ];
     }
     
 }

@@ -361,19 +361,13 @@
         <template if:true={isMisTurnos}>
             <div class="screen">
                 
-                <!-- PASO 1: Identificación -->
-                <template if:true={isMisTurnosPaso1}>
+               <template if:true={isMisTurnosPaso1}>
                     <div class="step-head">
                         <div class="step-head__top">
                             <button class="step-back" onclick={navToWelcome}>&larr; Volver</button>
                         </div>
                         <h2 class="h2">Mis turnos</h2>
-                        <p class="subtitle">Identificate para ver tus reservas.</p>
-                    </div>
-
-                    <div class="field">
-                        <label class="field__label">NOMBRE Y APELLIDO</label>
-                        <input class="field__input" type="text" data-id="nombre" placeholder="Silvina Schnyder" value={misTurnosLogin.nombre} onchange={handleMisTurnosInput}>
+                        <p class="subtitle">Ingresá tu celular para ver tus próximas reservas.</p>
                     </div>
 
                     <div class="field">
@@ -382,43 +376,53 @@
                     </div>
 
                     <div class="spacer-md"></div>
-                    <button class="btn" onclick={handleBuscarTurnos}>Ver mis turnos</button>
+                    <button class="btn" onclick={handleBuscarTurnos} disabled={isLoadingTurnos}>
+                        <template if:false={isLoadingTurnos}>Ver mis turnos</template>
+                        <template if:true={isLoadingTurnos}>Buscando...</template>
+                    </button>
                 </template>
 
-              <!-- PASO 2: Lista de turnos -->
                 <template if:true={isMisTurnosPaso2}>
                     <div class="step-head">
                         <div class="step-head__top">
                             <button class="step-back" onclick={volverMisTurnosPaso1}>&larr; Volver</button>
                         </div>
-                        <h2 class="h2">Hola {primerNombreMisTurnos}</h2>
-                        <p class="subtitle">Tus próximos turnos.</p>
+                        <h2 class="h2">Tus próximos turnos</h2>
                     </div>
 
-                    <!-- Lista Dinámica de Turnos -->
-                    <div class="turnos-list">
-                        <template for:each={turnosEncontrados} for:item="turno">
-                            <div key={turno.Id} class="turno-card">
-                                
-                                <div class="turno-card__header">
-                                    <div class="turno-card__date">{turno.fechaStr}</div>
-                                    <div class="turno-card__time">{turno.horaStr}</div>
-                                </div>
-                                
-                                <div class="turno-card__service">{turno.servicio}</div>
-                                <div class="turno-card__meta">con {turno.profesional}</div>
-                                
-                                <div class="turno-card__actions">
-                                    <div class="turno-card__actions-row">
-                                        <button class="btn-outline btn-outline--success" data-id={turno.Id} onclick={handleConfirmarAsistencia}>Confirmar asistencia</button>
-                                        <button class="btn-outline btn-outline--dark" data-id={turno.Id} onclick={handleRecoordinar}>Recoordinar</button>
+                    <template if:true={hasTurnos}>
+                        <div class="turnos-list">
+                            <template for:each={misTurnosEncontrados} for:item="turno">
+                                <div key={turno.Id} class="turno-card">
+                                    <div class="turno-card__header">
+                                        <div class="turno-card__date">{turno.fechaStr}</div>
+                                        <div class="turno-card__time">{turno.horaStr}</div>
                                     </div>
-                                    <button class="btn-outline btn-outline--danger" data-id={turno.Id} onclick={handleCancelarTurno}>Cancelar</button>
+                                    
+                                    <div class="turno-card__service">{turno.servicio}</div>
+                                    <div class="turno-card__meta">con {turno.profesional}</div>
+                                    
+                                    <div class="turno-card__actions">
+                                        <div class="turno-card__actions-row">
+                                            <button class="btn-outline btn-outline--success" data-id={turno.Id} onclick={handleConfirmarAsistencia}>Confirmar asistencia</button>
+                                            <button class="btn-outline btn-outline--dark" data-id={turno.Id} onclick={handleRecoordinar}>Recoordinar</button>
+                                        </div>
+                                        <button class="btn-outline btn-outline--danger" data-id={turno.Id} onclick={handleCancelarTurno}>Cancelar</button>
+                                    </div>
                                 </div>
-                                
-                            </div>
-                        </template>
-                    </div>
+                            </template>
+                        </div>
+                    </template>
+
+                    <template if:false={hasTurnos}>
+                        <div style="text-align: center; margin-top: 48px; padding: 24px;">
+                            <div style="font-size: 48px; margin-bottom: 16px;">📅</div>
+                            <h3 style="font-family: 'DM Sans', sans-serif; font-size: 20px; font-weight: 500; color: var(--black); margin-bottom: 8px;">No tenés turnos agendados</h3>
+                            <p style="color: #8A7B6E; line-height: 1.5; margin-bottom: 32px;">Actualmente no encontramos reservas futuras asociadas a este número de celular.</p>
+                            
+                            <button class="btn-outline btn-outline--dark" onclick={navToReserva} style="width: 100%;">Agendar un turno ahora</button>
+                        </div>
+                    </template>
                 </template>
 
             </div>

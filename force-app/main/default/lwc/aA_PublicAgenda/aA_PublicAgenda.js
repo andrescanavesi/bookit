@@ -6,6 +6,7 @@ import getServices from '@salesforce/apex/AA_PublicAgendaController.getServices'
 import updateCustomer from '@salesforce/apex/AA_PublicAgendaController.updateCustomer';
 import getAvailableSlots from '@salesforce/apex/AA_PublicAgendaController.getAvailableSlots';
 import saveAppointment from '@salesforce/apex/AA_PublicAgendaController.saveAppointment';
+import getMisTurnos from '@salesforce/apex/AA_PublicAgendaController.getMisTurnos';
 
 export default class AAPublicAgenda extends LightningElement {
     // --- ESTADO GLOBAL ---
@@ -36,7 +37,9 @@ export default class AAPublicAgenda extends LightningElement {
         customerId: null 
     };
 
-    @track misTurnosLogin = { nombre: '', celular: '' };
+    @track misTurnosLogin = { celular: '099999999' };
+    @track misTurnosEncontrados = []; // Array real para los resultados
+    @track isLoadingTurnos = false;
 
     tieneIndicaciones = false;
     mostrarSubOpcionesRetiro = false;
@@ -78,6 +81,9 @@ export default class AAPublicAgenda extends LightningElement {
         return !this.reserva.formaPago || this.isConfirming; 
     }
 
+    get hasTurnos() {
+        return this.misTurnosEncontrados && this.misTurnosEncontrados.length > 0;
+    }
     get preciosAgrupados() {
         console.info('preciosAgrupados');
        return this.categories.map(cat => {
@@ -132,7 +138,7 @@ export default class AAPublicAgenda extends LightningElement {
         return service
     }
 
-    get turnosEncontrados() { return [{ Id: 'turno_001', fechaStr: 'mar 5 de mayo', horaStr: '09:00', servicio: 'Manicuría sin esmalte', profesional: 'Soledad' }]; }
+    
 
     get isBotonFechaContinuarDeshabilitado() { return !this.reserva.horaSel; }
 
@@ -329,7 +335,47 @@ export default class AAPublicAgenda extends LightningElement {
     }
     
     handleMisTurnosInput(event) { this.misTurnosLogin[event.target.dataset.id] = event.target.value; }
-    handleBuscarTurnos() { if(!this.misTurnosLogin.nombre) { this.misTurnosLogin.nombre = 'Juan'; } this.misTurnosStep = 2; }
+   
+    async handleBuscarTurnos() {
+        if (!this.misTurnosLogin.celular) {
+            alert('Por favor, ingresá tu celular para buscar tus turnos.');
+            return;
+        }
+
+        this.isLoadingTurnos = true;
+
+        try {
+            const turnosDB = await getMisTurnos({ celular: this.misTurnosLogin.celular });
+
+            const DOW = ['dom', 'lun', 'mar', 'mié', 'jue', 'vie', 'sáb'];
+            const MESES = ['enero', 'febrero', 'marzo', 'abril', 'mayo', 'junio', 'julio', 'agosto', 'setiembre', 'octubre', 'noviembre', 'diciembre'];
+
+            // Mapeamos los datos de Salesforce para la vista
+            this.misTurnosEncontrados = turnosDB.map(t => {
+                // Instanciamos la fecha. Si usas fechas UTC desde Apex, asegúrate de la zona horaria.
+                const dt = new Date(t.Start_Date_Time__c);
+                
+                return {
+                    Id: t.Id,
+                    fechaStr: `${DOW[dt.getDay()]} ${dt.getDate()} de ${MESES[dt.getMonth()]}`,
+                    // Formato HH:mm
+                    horaStr: dt.toLocaleTimeString('es-UY', { hour: '2-digit', minute: '2-digit' }),
+                    servicio: t.Service__r ? t.Service__r.Name : 'Servicio',
+                    profesional: t.Employee__r ? t.Employee__r.Name : 'El equipo',
+                    status: t.Status__c
+                };
+            });
+
+            this.misTurnosStep = 2;
+
+        } catch (error) {
+            console.error('Error buscando mis turnos:', JSON.stringify(error));
+            alert('Hubo un problema al buscar tus turnos. Intentá de nuevo.');
+        } finally {
+            this.isLoadingTurnos = false;
+        }
+    }
+   
     handleConfirmarAsistencia(event) {}
     handleRecoordinar(event) {}
     handleCancelarTurno(event) {}
