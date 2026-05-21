@@ -123,6 +123,7 @@ public without sharing class AA_PublicAgendaController {
             logger.info('appointment created, id: '+appointment.Id);
             return appointment;
         } catch (Exception e) {
+             logger.error('error updating customer: '+e.getMessage()+' '+e.getStackTraceString());
             // Empaquetamos el error para que el LWC lo entienda correctamente
             throw new AuraHandledException('Error al confirmar la reserva: ' + e.getMessage());
         }
@@ -140,9 +141,26 @@ public without sharing class AA_PublicAgendaController {
            WHERE Customer__r.Phone_Number__c = :celular 
            AND Start_Date_Time__c >= TODAY  
            AND Service__r.Business_Branch__c = :BRANCH_ID
+           AND Status__c = 'Pending'
            ORDER BY Start_Date_Time__c ASC
             LIMIT 10
         ];
+    }
+
+    @AuraEnabled(cacheable=false)
+    public static void cancelarAppointment(Id appointmentId) {
+         AA_Logger logger = new AA_Logger(true);
+        logger.info('cancelarAppointment appointmentId: '+appointmentId);
+        try {
+            AA_Appointment__c app = new AA_Appointment__c(
+                Id = appointmentId,
+                Status__c = 'Cancelled'
+            );
+            update app;
+        } catch (Exception e) {
+             logger.error('cancelarAppointment error: '+e.getMessage()+' '+e.getStackTraceString());
+            throw new AuraHandledException('Error al cancelar el turno: ' + e.getMessage());
+        }
     }
     
 }

@@ -7,6 +7,7 @@ import updateCustomer from '@salesforce/apex/AA_PublicAgendaController.updateCus
 import getAvailableSlots from '@salesforce/apex/AA_PublicAgendaController.getAvailableSlots';
 import saveAppointment from '@salesforce/apex/AA_PublicAgendaController.saveAppointment';
 import getMisTurnos from '@salesforce/apex/AA_PublicAgendaController.getMisTurnos';
+import cancelarAppointment from '@salesforce/apex/AA_PublicAgendaController.cancelarAppointment';
 
 export default class AAPublicAgenda extends LightningElement {
     // --- ESTADO GLOBAL ---
@@ -378,7 +379,33 @@ export default class AAPublicAgenda extends LightningElement {
    
     handleConfirmarAsistencia(event) {}
     handleRecoordinar(event) {}
-    handleCancelarTurno(event) {}
+    
+    async handleCancelarTurno(event) {
+        // Obtenemos el Id del turno desde el dataset del botón configurado en el HTML
+        const appointmentId = event.currentTarget.dataset.id;
+        
+        if (!appointmentId) return;
+
+        this.isLoadingTurnos = true;
+
+        try {
+            console.info('Cancelando turno en Salesforce con ID:', appointmentId);
+            
+            // Llamada al backend
+            await cancelarAppointment({ appointmentId: appointmentId });
+            
+            console.info('Turno cancelado con éxito.');
+            
+            // Refrescamos la lista de turnos llamando al método que ya consulta el backend
+            // Esto asegura que la UI se actualice sola de inmediato
+            await this.handleBuscarTurnos();
+
+        } catch (error) {
+            console.error('Error al cancelar el turno:', JSON.stringify(error));
+            alert('Hubo un problema al cancelar tu turno. Por favor, intenta nuevamente.');
+            this.isLoadingTurnos = false;
+        }
+    }
 
     // --- ACCIONES ADMIN ---
     handleLoginInput(event) {
