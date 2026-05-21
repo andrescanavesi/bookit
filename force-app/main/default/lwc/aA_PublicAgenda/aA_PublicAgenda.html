@@ -301,7 +301,10 @@
                         <strong>Política de cancelación:</strong> con menos de 12 horas de aviso, se cobra el costo mínimo del servicio. Te enviamos un recordatorio el día anterior.
                     </div>
 
-                    <button class="btn" disabled={isBotonConfirmarDeshabilitado} onclick={handleConfirmarReserva}>Confirmar reserva</button>
+                    <button class="btn" disabled={isBotonConfirmarDeshabilitado} onclick={handleConfirmarReserva}>
+                        <template if:false={isConfirming}>Confirmar reserva</template>
+                        <template if:true={isConfirming}>Procesando...</template>
+                    </button>
                     
                     <div style="text-align: center; margin-top: 24px;">
                         <button class="btn-ghost" onclick={volverPaso6}>Cambiar día u hora</button>

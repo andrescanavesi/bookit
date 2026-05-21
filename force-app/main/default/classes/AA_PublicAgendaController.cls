@@ -112,5 +112,20 @@ public without sharing class AA_PublicAgendaController {
         return slots;
         
     }
+
+    @AuraEnabled
+    public static AA_Appointment__c saveAppointment(Id customerId, Id employeeId, Id serviceId, String dayString, String hourString) {
+        AA_Logger logger = new AA_Logger(true);
+        logger.info('saveAppointment customerId: '+customerId+' employeeId: '+employeeId+' serviceId: '+serviceId+' dayString: '+dayString+' hourString: '+hourString);
+        try {
+            // Llamamos a tu clase de servicio para mantener la lógica separada
+            AA_Appointment__c appointment = AA_AppointmentService.saveAppointment(customerId, employeeId, serviceId, dayString, hourString);
+            logger.info('appointment created, id: '+appointment.Id);
+            return appointment;
+        } catch (Exception e) {
+            // Empaquetamos el error para que el LWC lo entienda correctamente
+            throw new AuraHandledException('Error al confirmar la reserva: ' + e.getMessage());
+        }
+    }
     
 }

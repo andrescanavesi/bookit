@@ -5,6 +5,7 @@ import getCategories from '@salesforce/apex/AA_PublicAgendaController.getCategor
 import getServices from '@salesforce/apex/AA_PublicAgendaController.getServices';
 import updateCustomer from '@salesforce/apex/AA_PublicAgendaController.updateCustomer';
 import getAvailableSlots from '@salesforce/apex/AA_PublicAgendaController.getAvailableSlots';
+import saveAppointment from '@salesforce/apex/AA_PublicAgendaController.saveAppointment';
 
 export default class AAPublicAgenda extends LightningElement {
     // --- ESTADO GLOBAL ---
@@ -19,9 +20,10 @@ export default class AAPublicAgenda extends LightningElement {
     @track diasDisponiblesList = [];
     @track horasDisponiblesList = [];
     @track isLoadingHours = false;
+    @track isConfirming = false; // Nueva bandera para evitar doble clic
 
 
-    @track persona = { id: '', nombre: '', celular: '', email: '', preferencias: '', indicaciones: '' };
+    @track persona = { id: '', nombre: 'nueve nueve', celular: '099999999', email: 'a@a.com', preferencias: '', indicaciones: '' };
    
    @track reserva = { 
         grupoSel: null, 
@@ -71,6 +73,10 @@ export default class AAPublicAgenda extends LightningElement {
     get pillClaseSi() { return this.tieneIndicaciones ? 'pill pill--active' : 'pill'; }
     get primerNombre() { return this.persona.nombre ? this.persona.nombre.split(' ')[0] : ''; }
     get primerNombreMisTurnos() { return this.misTurnosLogin.nombre ? this.misTurnosLogin.nombre.split(' ')[0] : ''; }
+
+    get isBotonConfirmarDeshabilitado() { 
+        return !this.reserva.formaPago || this.isConfirming; 
+    }
 
     get preciosAgrupados() {
         console.info('preciosAgrupados');
@@ -287,11 +293,41 @@ export default class AAPublicAgenda extends LightningElement {
         this.goToStep6(); 
     }
 
-
     handleSelectFecha(event) { this.reserva.fechaSel = event.currentTarget.dataset.fecha; this.reserva.horaSel = null; }
     handleSelectHora(event) { this.reserva.horaSel = event.currentTarget.dataset.hora; }
     handleSelectPago(event) { this.reserva.formaPago = event.target.dataset.pago; }
-    handleConfirmarReserva() { this.reservaStep = 8; }
+    
+    async handleConfirmarReserva() {
+        this.isConfirming = true; // Deshabilita el botón
+        
+        try {
+            // Tomamos los datos de nuestro estado local
+            const params = {
+                customerId: this.persona.id,
+                employeeId: this.reserva.slotData.employeeId, // Viene del objeto AA_AvailableSlot
+                serviceId: this.reserva.servicioSel,
+                dayString: this.reserva.fechaSel, // Ej: '2026-05-21'
+                hourString: this.reserva.horaSel  // Ej: '09:00'
+            };
+
+            console.info('Enviando datos de reserva a Salesforce:', JSON.stringify(params));
+
+            // Llamada al backend
+            const nuevaReserva = await saveAppointment(params);
+            
+            console.info('¡Reserva creada exitosamente!', nuevaReserva.Id);
+            
+            // Avanzamos a la pantalla de éxito (Paso 8)
+            this.reservaStep = 8; 
+
+        } catch (error) {
+            console.error('Error al crear la reserva:', JSON.stringify(error));
+            alert('Hubo un problema al procesar tu reserva. Por favor, intenta nuevamente.');
+        } finally {
+            this.isConfirming = false; // Rehabilitar botón por si falló y quiere reintentar
+        }
+    }
+    
     handleMisTurnosInput(event) { this.misTurnosLogin[event.target.dataset.id] = event.target.value; }
     handleBuscarTurnos() { if(!this.misTurnosLogin.nombre) { this.misTurnosLogin.nombre = 'Juan'; } this.misTurnosStep = 2; }
     handleConfirmarAsistencia(event) {}
