@@ -218,7 +218,7 @@
 
                     <!-- Selector de Días (Horizontal Scroll) -->
                     <div class="day-picker">
-                        <template for:each={diasDisponibles} for:item="dia">
+                        <template for:each={diasDisponiblesList} for:item="dia">
                             <button key={dia.iso} class={dia.cssClass} data-fecha={dia.iso} onclick={handleSelectFecha}>
                                 <div class="day-pill__dow">{dia.dow}</div>
                                 <div class="day-pill__num">{dia.num}</div>
@@ -229,7 +229,7 @@
 
                     <!-- Grilla de Horas -->
                     <div class="slot-grid">
-                        <template for:each={horasDisponibles} for:item="hora">
+                        <template for:each={horasDisponiblesList} for:item="hora">
                             <button key={hora.val} class={hora.cssClass} data-hora={hora.val} onclick={handleSelectHora}>
                                 {hora.val}
                             </button>

@@ -4,6 +4,7 @@ import getOrCreateCustomer from '@salesforce/apex/AA_PublicAgendaController.getO
 import getCategories from '@salesforce/apex/AA_PublicAgendaController.getCategories';
 import getServices from '@salesforce/apex/AA_PublicAgendaController.getServices';
 import updateCustomer from '@salesforce/apex/AA_PublicAgendaController.updateCustomer';
+import getAvailableSlots from '@salesforce/apex/AA_PublicAgendaController.getAvailableSlots';
 
 export default class AAPublicAgenda extends LightningElement {
     // --- ESTADO GLOBAL ---
@@ -14,10 +15,25 @@ export default class AAPublicAgenda extends LightningElement {
     @track categories = [];
     @track services = [];
 
+      // --- ESTADO DE DISPONIBILIDAD ---
+    @track diasDisponiblesList = [];
+    @track horasDisponiblesList = [];
+    @track isLoadingHours = false;
+
+
     @track persona = { id: '', nombre: '', celular: '', email: '', preferencias: '', indicaciones: '' };
-    @track reserva = { grupoSel: null, servicioSel: null, 
-    retiro: null, fechaSel: null, horaSel: null, formaPago: null, isNewCustomer: true,
-    customerId: null };
+   
+   @track reserva = { 
+        grupoSel: null, 
+        servicioSel: null, 
+        retiro: null, 
+        fechaSel: null, 
+        horaSel: null, 
+        formaPago: null, 
+        isNewCustomer: true,
+        customerId: null 
+    };
+
     @track misTurnosLogin = { nombre: '', celular: '' };
 
     tieneIndicaciones = false;
@@ -103,44 +119,40 @@ export default class AAPublicAgenda extends LightningElement {
     }
 
     get servicioSeleccionadoInfo() {
-        console.info('servicioSeleccionadoInfo: '+this.reserva.servicioSel);
+        //console.info('servicioSeleccionadoInfo...: '+this.reserva.servicioSel); 
         if (!this.reserva.servicioSel) return null;
-        return this.serviciosFiltrados.find(s => s.Id === this.reserva.servicioSel);
+        const service =  this.serviciosFiltrados.find(s => s.Id === this.reserva.servicioSel);
+        //console.info('servicioSeleccionadoInfo: '+JSON.stringify(service, null, 2));
+        return service
     }
 
     get turnosEncontrados() { return [{ Id: 'turno_001', fechaStr: 'mar 5 de mayo', horaStr: '09:00', servicio: 'Manicuría sin esmalte', profesional: 'Soledad' }]; }
 
-    get diasDisponibles() { 
-        const DOW = ['DOM', 'LUN', 'MAR', 'MIÉ', 'JUE', 'VIE', 'SÁB'];
-        const MESES = ['ENE', 'FEB', 'MAR', 'ABR', 'MAY', 'JUN', 'JUL', 'AGO', 'SEP', 'OCT', 'NOV', 'DIC'];
-        let dias = []; let hoy = new Date();
-        for(let i=1; i<=14; i++) {
-            let d = new Date(hoy); d.setDate(d.getDate() + i);
-            if(d.getDay() === 0) continue; 
-            let iso = d.toISOString().split('T')[0];
-            let isSelected = this.reserva.fechaSel === iso;
-            dias.push({ iso: iso, dow: DOW[d.getDay()], num: d.getDate(), mon: MESES[d.getMonth()], cssClass: isSelected ? 'day-pill day-pill--selected' : 'day-pill' });
-        }
-        if (!this.reserva.fechaSel && dias.length > 0) { this.reserva.fechaSel = dias[0].iso; dias[0].cssClass = 'day-pill day-pill--selected'; }
-        return dias;
-    }
-
-    get horasDisponibles() { 
-        if (!this.reserva.fechaSel) return [];
-        const horasMock = ['09:00', '11:00', '11:30', '13:00', '14:00', '14:30', '16:00', '16:30', '17:30', '18:00', '19:00'];
-        return horasMock.map(h => ({ val: h, cssClass: this.reserva.horaSel === h ? 'slot-btn slot-btn--selected' : 'slot-btn' }));
-    }
-
     get isBotonFechaContinuarDeshabilitado() { return !this.reserva.horaSel; }
 
-    get resumenDatos() {
-        if (!this.reserva.servicioSel || !this.reserva.fechaSel) return {};
-        const srv = this.serviciosBD.find(s => s.Id === this.reserva.servicioSel);
-        // ... formato de fecha existente ...
+  get resumenDatos() {
+        console.info('resumen datos');
+        console.info(JSON.stringify(this.reserva, null, 2));
+        if (!this.reserva.servicioSel || !this.reserva.fechaSel || !this.reserva.slotData) return {};
+        
+        const srv = this.services.find(s => s.Id === this.reserva.servicioSel);
+        
         let totalCalculado = srv.Precio__c;
         if (this.reserva.retiro && this.reserva.retiro.material === 'blando') totalCalculado += 200;
         if (this.reserva.retiro && this.reserva.retiro.material === 'duro') totalCalculado += 300;
-        return { cliente: this.persona.nombre, servicio: srv.Nombre_Visible__c, profesional: 'Soledad', fecha: `mar 5 de mayo`, hora: this.reserva.horaSel, duracion: `${srv.Duracion_Base_Min__c} min`, total: totalCalculado };
+        
+        // Extraemos los datos formateados directamente desde la respuesta de Apex
+        const slot = this.reserva.slotData;
+
+        return { 
+            cliente: this.persona.nombre, 
+            servicio: srv.Nombre_Visible__c, 
+            profesional: slot.employeeName, // <-- Dinámico desde el backend
+            fecha: `${slot.dayOfTheWeek} ${slot.dayNumber} de ${slot.monthName}`, // Ej: Miércoles 5 de Mayo
+            hora: slot.hour24, 
+            duracion: `${srv.Duracion_Base_Min__c} min`, 
+            total: totalCalculado 
+        };
     }
 
     get opcionesPago() {
@@ -219,7 +231,7 @@ export default class AAPublicAgenda extends LightningElement {
                 Duracion_Base_Min__c: s.Duration_Minutes__c,
                 Precio__c: s.Price__c,
                 Grupo_Servicio__c: s.AA_Service_Category__c, // Ahora es el ID de la categoría
-                Descripcion_Extendida__c: 'descripcion extendida test'
+                Descripcion_Extendida__c: s.Description__c || ''
             }));
 
         } catch (error) {
@@ -252,15 +264,30 @@ export default class AAPublicAgenda extends LightningElement {
             this.reservaStep = 5; 
         } else { 
             console.info('handleSelectServicio, to step 6');
-            this.reservaStep = 6; 
+            //this.reservaStep = 6; 
+             this.goToStep6(); 
         }
     }
 
+   
     handleSelectRetiro(event) {
-        const tipo = event.currentTarget.dataset.tipo; this.reserva.retiro = { tipo: tipo };
-        if (tipo === 'externo') { this.mostrarSubOpcionesRetiro = true; } else { this.mostrarSubOpcionesRetiro = false; this.reservaStep = 6; }
+        const tipo = event.currentTarget.dataset.tipo; 
+        this.reserva.retiro = { tipo: tipo };
+        if (tipo === 'externo') { 
+            this.mostrarSubOpcionesRetiro = true; 
+        } else { 
+            this.mostrarSubOpcionesRetiro = false; 
+            this.goToStep6(); 
+        }
     }
-    handleSelectRetiroMaterial(event) { this.reserva.retiro.material = event.target.dataset.material; this.mostrarSubOpcionesRetiro = false; this.reservaStep = 6; }
+
+    handleSelectRetiroMaterial(event) { 
+        this.reserva.retiro.material = event.target.dataset.material; 
+        this.mostrarSubOpcionesRetiro = false; 
+        this.goToStep6(); 
+    }
+
+
     handleSelectFecha(event) { this.reserva.fechaSel = event.currentTarget.dataset.fecha; this.reserva.horaSel = null; }
     handleSelectHora(event) { this.reserva.horaSel = event.currentTarget.dataset.hora; }
     handleSelectPago(event) { this.reserva.formaPago = event.target.dataset.pago; }
@@ -385,10 +412,124 @@ export default class AAPublicAgenda extends LightningElement {
     volverPaso4()  { this.mostrarSubOpcionesRetiro = false; this.reservaStep = 4; }
     volverPaso5()  { this.reservaStep = 5; }
     volverPasoDesde6() {
-        const srv = this.serviciosBD.find(s => s.Id === this.reserva.servicioSel);
+        const srv = this.services.find(s => s.Id === this.reserva.servicioSel);
         if (srv && srv.Requiere_Pregunta_Retiro__c) { this.reservaStep = 5; } else { this.reservaStep = 4; }
     }
     avanzarPaso7() { this.reservaStep = 7; } 
     volverPaso6()  { this.reservaStep = 6; }
     volverMisTurnosPaso1() { this.misTurnosStep = 1; }
+
+     // --- DISPONIBILIDAD LÓGICA ---
+    goToStep6() {
+        console.info('goToStep6');
+        this.generarDiasDisponibles();
+        this.reservaStep = 6;
+    }
+
+    generarDiasDisponibles() {
+        console.info('generarDiasDisponibles');
+        const DOW = ['DOM', 'LUN', 'MAR', 'MIÉ', 'JUE', 'VIE', 'SÁB'];
+        const MESES = ['ENE', 'FEB', 'MAR', 'ABR', 'MAY', 'JUN', 'JUL', 'AGO', 'SEP', 'OCT', 'NOV', 'DIC'];
+        let dias = []; 
+        let hoy = new Date();
+        
+        for(let i=1; i<=14; i++) {
+            let d = new Date(hoy); 
+            d.setDate(d.getDate() + i);
+            if(d.getDay() === 0) continue; // Salteamos domingos
+            
+            let iso = d.toISOString().split('T')[0];
+            dias.push({ 
+                iso: iso, 
+                dow: DOW[d.getDay()], 
+                num: d.getDate(), 
+                mon: MESES[d.getMonth()], 
+                cssClass: 'day-pill' 
+            });
+        }
+
+        // Auto-seleccionar primer día disponible
+        if (dias.length > 0) {
+            this.reserva.fechaSel = dias[0].iso;
+            dias[0].cssClass = 'day-pill day-pill--selected';
+        }
+        
+        this.diasDisponiblesList = dias;
+        this.fetchHorasDisponibles();
+    }
+
+   async fetchHorasDisponibles() {
+        console.info('fetchHorasDisponibles, date: '+this.reserva.fechaSel+' service: '+this.reserva.servicioSel);
+        if (!this.reserva.fechaSel || !this.reserva.servicioSel) return;
+        //console.info(JSON.stringify(this.reserva, null, 2));
+        
+        this.isLoadingHours = true;
+        this.horasDisponiblesList = [];
+        this.reserva.horaSel = null; 
+        this.reserva.slotData = null; // Limpiamos el objeto guardado previamente
+
+        try {
+            const params = { 
+                serviceId: this.reserva.servicioSel,  
+                targetDateStr: this.reserva.fechaSel 
+            };
+            console.info('getAvailableSlots params: '+JSON.stringify(params));
+            const availableSlots = await getAvailableSlots(params);
+            
+            // Desduplicación: Si hay dos empleadas libres a la misma hora, mostramos un solo botón.
+            const uniqueTimes = new Map();
+            console.info('availableSlots');
+            console.info(JSON.stringify(availableSlots, null, 2));
+            availableSlots.forEach(slot => {
+                // Usamos hour24 (Ej: '09:00') como clave única
+                if (!uniqueTimes.has(slot.hour24)) {
+                    uniqueTimes.set(slot.hour24, { 
+                        val: slot.hour24, 
+                        cssClass: 'slot-btn',
+                        slotData: slot // Guardamos el objeto AA_AvailableSlot completo
+                    });
+                }
+            });
+            
+            // Convertimos el Map a Array para el iterador del HTML
+            this.horasDisponiblesList = Array.from(uniqueTimes.values());
+            console.info('horasDisponiblesList');
+            console.info(JSON.stringify(this.horasDisponiblesList, null, 2));
+            
+        } catch (error) {
+            console.error('Error cargando disponibilidad:', JSON.stringify(error));
+        } finally {
+            this.isLoadingHours = false;
+        }
+    }
+
+    handleSelectFecha(event) { 
+        console.info('handleSelectFecha, '+event.currentTarget.dataset.fecha);
+        this.reserva.fechaSel = event.currentTarget.dataset.fecha; 
+        
+        // Actualizar visualmente la pastilla del día
+        this.diasDisponiblesList = this.diasDisponiblesList.map(d => ({
+            ...d,
+            cssClass: d.iso === this.reserva.fechaSel ? 'day-pill day-pill--selected' : 'day-pill'
+        }));
+
+        this.fetchHorasDisponibles();
+    }
+
+    handleSelectHora(event) { 
+        console.info('handleSelectHora, '+event.currentTarget.dataset.hora);
+        this.reserva.horaSel = event.currentTarget.dataset.hora; 
+        
+        // Buscamos la hora seleccionada para guardar todos sus detalles
+        const selectedItem = this.horasDisponiblesList.find(h => h.val === this.reserva.horaSel);
+        if (selectedItem) {
+            this.reserva.slotData = selectedItem.slotData;
+        }
+        
+        // Actualizar visualmente el botón de la hora
+        this.horasDisponiblesList = this.horasDisponiblesList.map(h => ({
+            ...h,
+            cssClass: h.val === this.reserva.horaSel ? 'slot-btn slot-btn--selected' : 'slot-btn'
+        }));
+    }
 }

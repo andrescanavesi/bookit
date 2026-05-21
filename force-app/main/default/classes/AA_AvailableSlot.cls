@@ -1,24 +1,22 @@
 public class AA_AvailableSlot {
-    // Wrapper for the final JSON response to WhatsApp
+   @AuraEnabled public Datetime slotTime;        // Almacenado en UTC
+    @AuraEnabled public String slotTimeFormatted; // Almacenado como GMT-3 String
+    @AuraEnabled public Id employeeId;
+    @AuraEnabled public String employeeName;
+    @AuraEnabled public String serviceName;
+    @AuraEnabled public Id serviceId;
+    @AuraEnabled public String branchName;
+    @AuraEnabled public Id branchId;
+    @AuraEnabled public String compositeId;
+    @AuraEnabled public String slotDayString;
+    @AuraEnabled public String slotTimeString;
     
-    public Datetime slotTime;        // Stored in UTC (Native Apex format)
-    public String slotTimeFormatted; // Stored as GMT-3 String for display
-    public Id employeeId;
-    public String employeeName;
-    public String serviceName;
-    public Id serviceId;
-    public String branchName;
-    public Id branchId;
-    public String compositeId;
-    public String slotDayString;
-    public String slotTimeString;
-    
-    public String dayNumber;
-    public String dayOfTheWeek;
-    public String monthName;
-    public String hourAmPm;
-    public String hour24;
-    public String fullDateTime;
+    @AuraEnabled public String dayNumber;
+    @AuraEnabled public String dayOfTheWeek;
+    @AuraEnabled public String monthName;
+    @AuraEnabled public String hourAmPm;
+    @AuraEnabled public String hour24;
+    @AuraEnabled public String fullDateTime;
     
     
     public AA_AvailableSlot(Datetime slotTime, Id employeeId, String employeeName, String serviceName, 

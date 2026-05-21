@@ -97,5 +97,20 @@ public without sharing class AA_PublicAgendaController {
         
         return services;
     }
+
+    @AuraEnabled(cacheable=false)
+    public static List<AA_AvailableSlot> getAvailableSlots(Id serviceId, String targetDateStr) {
+        // 1. Convertimos el string que llega de JS ('YYYY-MM-DD') al tipo Date de Apex
+        AA_Logger logger = new AA_Logger(true);
+        logger.info('getting available slots for service: '+serviceId+' targetDateStr: '+targetDateStr);
+        Date targetDate = Date.valueOf(targetDateStr);
+        
+        
+        logger.info('getting available slots for service: '+serviceId+' and date: '+targetDate);
+        List<AA_AvailableSlot> slots =  AA_AppointmentService.getAvailableSlots(serviceId, targetDate);
+        logger.info(JSON.serializePretty(slots));
+        return slots;
+        
+    }
     
 }

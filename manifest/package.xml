@@ -26,7 +26,6 @@
 		<members>AA_Employee_Working_Hour__c</members>
 		<members>AA_Employee__c</members>
 		<members>AA_Service__c</members>
-		<members>AA_WhatsApp_Interaction__c</members>
 		<name>CustomObject</name>
 	</types>
 	<types>
@@ -42,9 +41,7 @@
 		<members>AA_Employee_Working_Hour__c</members>
 		<members>AA_Employee__c</members>
 		<members>AA_Service__c</members>
-		<members>AA_WhatsApp_Interaction__c</members>
 		<members>Log__c</members>
-		<members>WhatsApp_Interaction__c</members>
 		<name>CustomTab</name>
 	</types>
 	<types>
