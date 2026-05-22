@@ -25,7 +25,7 @@ export default class AAPublicAgenda extends LightningElement {
     @track isConfirming = false; // Nueva bandera para evitar doble clic
 
 
-    @track persona = { id: '', nombre: 'nueve nueve', celular: '099999999', email: 'a@a.com', preferencias: '', indicaciones: '' };
+    @track persona = { id: '', firstName: '', lastName: '', celular: '099999999', email: 'a@a.com', indicaciones: '' };
    
    @track reserva = { 
         grupoSel: null, 
@@ -75,7 +75,11 @@ export default class AAPublicAgenda extends LightningElement {
 
     get pillClaseNo() { return this.tieneIndicaciones ? 'pill' : 'pill pill--active'; }
     get pillClaseSi() { return this.tieneIndicaciones ? 'pill pill--active' : 'pill'; }
-    get primerNombre() { return this.persona.nombre ? this.persona.nombre.split(' ')[0] : ''; }
+
+    get primerNombre() { 
+        return this.persona.firstName || ''; 
+    }
+
     get primerNombreMisTurnos() { return this.misTurnosLogin.nombre ? this.misTurnosLogin.nombre.split(' ')[0] : ''; }
 
     get isBotonConfirmarDeshabilitado() { 
@@ -158,7 +162,7 @@ export default class AAPublicAgenda extends LightningElement {
         const slot = this.reserva.slotData;
 
         return { 
-            cliente: this.persona.nombre, 
+            cliente: `${this.persona.firstName} ${this.persona.lastName}`.trim(),
             servicio: srv.Nombre_Visible__c, 
             profesional: slot.employeeName, // <-- Dinámico desde el backend
             fecha: `${slot.dayOfTheWeek} ${slot.dayNumber} de ${slot.monthName}`, // Ej: Miércoles 5 de Mayo
@@ -456,16 +460,16 @@ export default class AAPublicAgenda extends LightningElement {
             const clienteExistente = await getOrCreateCustomer({ phoneNumber: this.persona.celular });
             
             if (clienteExistente.Email__c) {
-                // ¡El cliente ya existe en Salesforce!
                 console.log('Cliente encontrado en SF: '+ clienteExistente.Id);
                 this.reserva.isNewCustomer = false;
                 this.persona.email = clienteExistente.Email__c || '';
                 this.reserva.customerId = clienteExistente.Id; 
                 this.persona.id = clienteExistente.Id; 
+                this.persona.firstName = clienteExistente.First_Name__c || '';
+                this.persona.lastName = clienteExistente.Last_Name__c || '';
                 this.reservaStep = 3;
 
             } else {
-                // Es un cliente nuevo
                 console.log('No se encontraron registros. Es cliente fue creado con el id: '+ clienteExistente.Id);
                 this.reserva.isNewCustomer = true;
                 this.reserva.customerId = clienteExistente.Id; 
@@ -489,10 +493,29 @@ export default class AAPublicAgenda extends LightningElement {
     volverPaso1()  { this.reservaStep = 1; }
 
     async avanzarPaso3() { 
+
+        if (!this.persona.firstName || !this.persona.firstName.trim()) {
+            alert('Por favor, ingresá tu nombre para continuar.');
+            return;
+        }
+        if (!this.persona.lastName || !this.persona.lastName.trim()) {
+            alert('Por favor, ingresá tu apellido para continuar.');
+            return;
+        }
+        if (!this.persona.email || !this.persona.email.trim()) {
+            alert('Por favor, ingresá tu email para continuar.');
+            return;
+        }
       
         // update customer
         try{
-            const data = { customerId: this.persona.id, fullName: this.persona.nombre, email: this.persona.email};
+            const data = { 
+                customerId: this.persona.id, 
+                firstName: this.persona.firstName, 
+                lastName: this.persona.lastName,
+                email: this.persona.email,
+                comments: this.persona.indicaciones
+            };
             console.info('data to update:');
             console.info(JSON.stringify(data));
             const customer = await updateCustomer(data);

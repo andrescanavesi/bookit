@@ -61,29 +61,29 @@
                 </template>
 
                <!-- PASO 2: Bienvenida -->
-               <template if:true={isReservaPaso2}>
+              <template if:true={isReservaPaso2}>
                     <div class="step-head">
                         <div class="step-head__top">
                             <button class="step-back" onclick={volverPaso1}>&larr; Volver</button>
                         </div>
-                        <h2 class="h2">Bienvenida 👋</h2>
+                        <h2 class="h2">Bienvenid@ 👋</h2>
                         <p class="subtitle">Es tu primera vez con nosotros. Contanos un poco para acompañarte mejor.</p>
                     </div>
 
                     <div class="field">
-                        <label class="field__label">NOMBRE Y APELLIDO</label>
-                        <input class="field__input" type="text" data-id="nombre" placeholder="Silvina Schnyder" value={persona.nombre} onchange={handleInputChange}>
+                        <label class="field__label">NOMBRE</label>
+                        <input class="field__input" type="text" data-id="firstName" placeholder="Silvina" value={persona.firstName} onchange={handleInputChange}>
+                    </div>
+
+                    <div class="field">
+                        <label class="field__label">APELLIDO</label>
+                        <input class="field__input" type="text" data-id="lastName" placeholder="Schnyder" value={persona.lastName} onchange={handleInputChange}>
                     </div>
 
                     <div class="field">
                         <label class="field__label">EMAIL</label>
                         <input class="field__input" type="email" data-id="email" placeholder="vos@email.com" value={persona.email} onchange={handleInputChange}>
-                        <span class="field__hint">Recibís invitación al calendario.</span>
-                    </div>
-
-                    <div class="field">
-                        <label class="field__label">¿DÍAS U HORARIOS QUE PREFERÍS?</label>
-                        <textarea class="field__textarea" data-id="preferencias" rows="3" placeholder="Ej: viernes tarde o sábados por la mañana." value={persona.preferencias} onchange={handleInputChange}></textarea>
+                        <span class="field__hint">Recibís invitación al calendario y confirmaciones.</span>
                     </div>
 
                     <div class="field">
@@ -96,15 +96,14 @@
 
                     <template if:true={tieneIndicaciones}>
                         <div class="field">
-                            <textarea class="field__textarea" data-id="indicaciones" rows="3" placeholder="Diabetes, alergias, embarazo, lactancia, condiciones de piel..." value={persona.indicaciones} onchange={handleInputChange}></textarea>
-                            <span class="field__hint">Esta información sólo la ve el equipo.</span>
+                            <textarea class="field__textarea" data-id="indicaciones" rows="3" placeholder="Diabetes, allergies, embarazo, condiciones de la piel..." value={persona.indicaciones} onchange={handleInputChange}></textarea>
+                            <span class="field__hint">Esta información sólo la ve el equipo del salón.</span>
                         </div>
                     </template>
 
                     <div class="spacer-md"></div>
                     <button class="btn" onclick={avanzarPaso3}>Continuar</button>
                 </template>
-
                <!-- PASO 3: Selección de Categoría (Visualmente Paso 2) -->
                 <template if:true={isReservaPaso3}>
                     <div class="step-head">

@@ -1,6 +1,7 @@
 public without sharing class AA_PublicAgendaController {
     
     private static Id BRANCH_ID = 'a03gL00000YGsWJQA1'; 
+    private static String BUSSINESS_PHONE_ID = '1036897699507386';
     
     @AuraEnabled(cacheable=false)
     public static AA_Customer__c getOrCreateCustomer(String phoneNumber){
@@ -28,31 +29,38 @@ public without sharing class AA_PublicAgendaController {
     }
     
     @AuraEnabled(cacheable=false)
-    public static AA_Customer__c updateCustomer(String customerId, String fullName, String email){
+    public static AA_Customer__c updateCustomer(Id customerId, String firstName, String lastName, String email, String comments){
         AA_Logger logger = new AA_Logger(true);
-        logger.info('updateCustomer, customerId '+customerId+ ' fullName: '+fullName+' email: '+email);
+        logger.info('updateCustomer, customerId '+customerId+ ' firstName: '+firstName+' lastName: '+lastName+' email: '+email+' comments: '+comments);
         try{
-            AA_Customer__c customer = [SELECT Id, Name, Email__c FROM AA_Customer__c WHERE Id = :customerId];
-            customer.Name = fullName;
-            customer.Email__c = email;
+
+            AA_Customer__c customer = new AA_Customer__c(
+                Id = customerId,
+                Name = firstName+' '+lastName ,
+                First_Name__c = firstName,
+                Last_Name__c = lastName,
+                Email__c = email,
+                Comments_From_Customer__c = comments
+            );
+
             update customer;
-            logger.info('customer updated, customerId '+customerId+ ' fullName: '+fullName+' email: '+email);
+            logger.info('customer updated, customerId '+customerId+ ' firstName: '+firstName+' lastName: '+lastName+' email: '+email+' comments: '+comments);
             return customer;
         }catch(Exception e){
-            logger.error('error updating customer: '+e.getMessage()+' '+e.getStackTraceString());
-            //throw e;
-            return null;
+            String message = 'error updating customer: '+e.getMessage()+' '+e.getStackTraceString();
+            logger.error(message);
+            throw new AuraHandledException(message);
         }
         
     }
     
     private static AA_Business__c getBusiness(){
-        String businessPhoneId = '1036897699507386';
+        
         List<AA_Business__c> businesses = [SELECT Id FROM AA_Business__c 
-                                           WHERE Business_Phone_Id__c = :businessPhoneId
+                                           WHERE Business_Phone_Id__c = :BUSSINESS_PHONE_ID
                                            LIMIT 1];
         if(businesses.isEmpty()){
-            throw new HandledException('business not found by phone number id '+businessPhoneId);
+            throw new HandledException('business not found by phone number id '+BUSSINESS_PHONE_ID);
         }
         return businesses.get(0);
     }
