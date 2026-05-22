@@ -1,0 +1,58 @@
+<template>
+    <div class="slds-card slds-p-around_medium">
+        <div class="slds-card__header slds-grid">
+            <header class="slds-media slds-media_center slds-has-flexi-truncate">
+                <div class="slds-media__body">
+                    <h2 class="slds-card__header-title">
+                        <span class="slds-text-heading_small">Próximas Citas del Salón</span>
+                    </h2>
+                </div>
+            </header>
+        </div>
+        
+        <div class="slds-card__body">
+            <template if:true={isLoading}>
+                <div class="slds-align_absolute-center slds-p-around_large">
+                    <lightning-spinner alternative-text="Cargando citas..." size="medium"></lightning-spinner>
+                </div>
+            </template>
+
+            <template if:false={isLoading}>
+                <template if:true={hasAppointments}>
+                    <div class="slds-table_edit_container slds-is-relative">
+                        <table class="slds-table slds-table_cell-buffer slds-table_bordered slds-table_striped">
+                            <thead>
+                                <tr class="slds-line-height_reset">
+                                    <th scope="col"><div class="slds-truncate" title="Fecha y Hora">Fecha / Hora</div></th>
+                                    <th scope="col"><div class="slds-truncate" title="Cliente">Cliente</div></th>
+                                    <th scope="col"><div class="slds-truncate" title="Servicio">Servicio</div></th>
+                                    <th scope="col"><div class="slds-truncate" title="Profesional">Atendido por</div></th>
+                                    <th scope="col"><div class="slds-truncate" title="Estado">Estado</div></th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <template for:each={appointments} for:item="appt">
+                                    <tr key={appt.Id} class="slds-hint-parent">
+                                        <td><div class="slds-truncate">{appt.formattedDateTime}</div></td>
+                                        <td><div class="slds-truncate"><strong>{appt.customerName}</strong></div></td>
+                                        <td><div class="slds-truncate">{appt.serviceName}</div></td>
+                                        <td><div class="slds-truncate">{appt.employeeName}</div></td>
+                                        <td>
+                                            <span class={appt.statusClass}>{appt.Status__c}</span>
+                                        </td>
+                                    </tr>
+                                </template>
+                            </tbody>
+                        </table>
+                    </div>
+                </template>
+
+                <template if:false={hasAppointments}>
+                    <div class="slds-align_absolute-center slds-p-around_large slds-text-color_weak">
+                        No hay próximas citas registradas para tu sucursal.
+                    </div>
+                </template>
+            </template>
+        </div>
+    </div>
+</template>

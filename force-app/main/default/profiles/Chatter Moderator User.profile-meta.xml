@@ -26,6 +26,10 @@
         <enabled>false</enabled>
     </classAccesses>
     <classAccesses>
+        <apexClass>AA_SalonAppointmentsController</apexClass>
+        <enabled>false</enabled>
+    </classAccesses>
+    <classAccesses>
         <apexClass>AA_TimeBlock</apexClass>
         <enabled>false</enabled>
     </classAccesses>
@@ -202,6 +206,11 @@
     </fieldPermissions>
     <fieldPermissions>
         <editable>false</editable>
+        <field>AA_Appointment__c.Business_Id__c</field>
+        <readable>false</readable>
+    </fieldPermissions>
+    <fieldPermissions>
+        <editable>false</editable>
         <field>AA_Appointment__c.Business_Name__c</field>
         <readable>false</readable>
     </fieldPermissions>
@@ -258,6 +267,16 @@
     <fieldPermissions>
         <editable>false</editable>
         <field>AA_Employee_Working_Hour__c.Start_Default_Break_Hour__c</field>
+        <readable>false</readable>
+    </fieldPermissions>
+    <fieldPermissions>
+        <editable>false</editable>
+        <field>AA_Employee__c.Business_Id__c</field>
+        <readable>false</readable>
+    </fieldPermissions>
+    <fieldPermissions>
+        <editable>false</editable>
+        <field>AA_Employee__c.User__c</field>
         <readable>false</readable>
     </fieldPermissions>
     <fieldPermissions>

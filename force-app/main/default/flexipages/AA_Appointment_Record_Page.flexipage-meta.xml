@@ -193,6 +193,12 @@
                 <identifier>RecordBusiness_Name_cField</identifier>
             </fieldInstance>
         </itemInstances>
+        <itemInstances>
+            <fieldInstance>
+                <fieldItem>Record.Business_Id__c</fieldItem>
+                <identifier>RecordBusiness_Id__cField</identifier>
+            </fieldInstance>
+        </itemInstances>
         <name>Facet-adced6cf-3125-4996-b02a-8adf1ba0d393</name>
         <type>Facet</type>
     </flexiPageRegions>
