@@ -2,22 +2,15 @@ import { LightningElement, track, wire } from 'lwc';
 import getSalonAppointments from '@salesforce/apex/AA_SalonAppointmentsController.getSalonAppointments';
 
 export default class AA_CitasSalon extends LightningElement {
-   @track allAppointments = [];      // Lista maestra original
-    @track filteredAppointments = []; // Lista filtrada que se muestra en el HTML
+    @track allAppointments = [];
     @track isLoading = true;
 
-    // Estado de los filtros
-    selectedEmployee = 'All';
-    selectedStatus = 'All';
-    selectedDate = '';
+    // Filtros activos
+    @track selectedEmployeeId = 'ALL';
+    @track selectedTab = 'HOY'; // HOY, PROXIMOS, CANCELADOS
 
-    // Opciones fijas para el filtro de estados
-    statusOptions = [
-        { label: 'Todos', value: 'All' },
-        { label: 'Pending', value: 'Pending' },
-        { label: 'Done', value: 'Done' },
-        { label: 'Cancelled', value: 'Cancelled' }
-    ];
+    // Paleta de colores para los empleados (como en tu mock original)
+    employeeColors = ['#B23A3A', '#D4A017', '#3A70A1', '#5A8A4F', '#6B4F8E'];
 
     @wire(getSalonAppointments)
     wiredAppointments({ error, data }) {
@@ -25,85 +18,148 @@ export default class AA_CitasSalon extends LightningElement {
             this.allAppointments = data.map(appt => {
                 const dt = new Date(appt.Start_Date_Time__c);
                 
-                const formattedDateTime = dt.toLocaleString('es-UY', {
-                    day: '2-digit', month: '2-digit', hour: '2-digit', minute: '2-digit'
-                }) + ' Hs';
-
-                // Extraemos la fecha en formato YYYY-MM-DD para comparar con el input de tipo date
-                const dateString = dt.toISOString().split('T')[0];
-
+                // Formateo de fechas y horas
+                const DOW = ['Dom', 'Lun', 'Mar', 'Mié', 'Jue', 'Vie', 'Sáb'];
+                const MESES = ['Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio', 'Julio', 'Agosto', 'Setiembre', 'Octubre', 'Noviembre', 'Diciembre'];
+                
+                const fechaHeader = `${DOW[dt.getDay()]} ${dt.getDate()} De ${MESES[dt.getMonth()]}`;
+                const horaStr = dt.toLocaleTimeString('es-UY', { hour: '2-digit', minute: '2-digit' });
+                
                 const firstName = appt.Customer__r?.First_Name__c || '';
                 const lastName = appt.Customer__r?.Last_Name__c || '';
-
-                // Asignación de clases dinámicas para los badges según el estado
-                let badgeClass = 'slds-badge ';
-                if (appt.Status__c === 'Pending') badgeClass += 'slds-theme_warning';
-                else if (appt.Status__c === 'Cancelled') badgeClass += 'slds-theme_error';
-                else if (appt.Status__c === 'Done') badgeClass += 'slds-theme_success';
-
+                
                 return {
                     ...appt,
-                    formattedDateTime: formattedDateTime,
-                    dateString: dateString,
-                    customerName: `${firstName} ${lastName}`.trim() || 'Cliente Sin Nombre',
-                    serviceName: appt.Service__r?.Name || 'N/A',
-                    employeeName: appt.Employee__r?.Name || 'N/A',
+                    fechaRaw: dt,
+                    fechaHeader: fechaHeader,
+                    horaStr: horaStr,
+                    customerName: `${firstName} ${lastName}`.trim() || 'Sin Nombre',
+                    phone: appt.Customer__r?.Phone || 'Sin teléfono',
+                    serviceName: appt.Service__r?.Name || 'Servicio',
+                    duration: appt.Service__r?.Duration_Minutes__c || 30,
+                    employeeName: appt.Employee__r?.Name || 'Equipo',
                     employeeId: appt.Employee__c,
-                    statusClass: badgeClass
+                    isCancelled: appt.Status__c === 'Cancelled'
                 };
             });
-            
-            this.filterData();
             this.isLoading = false;
         } else if (error) {
-            console.error('Error invocando getSalonAppointments:', JSON.stringify(error));
+            console.error('Error cargando citas:', JSON.stringify(error));
             this.isLoading = false;
         }
     }
 
-    // Genera dinámicamente la lista de empleados únicos presentes en las citas
-    get employeeOptions() {
-        const options = [{ label: 'Todos', value: 'All' }];
-        const seenEmployees = new Set();
+    // 1. GENERAR FILTRO DE EMPLEADOS (PILLS)
+    get employeePills() {
+        const pills = [];
+        const seen = new Set();
+        let colorIndex = 0;
 
+        // Botón "Todo el equipo"
+        pills.push({
+            id: 'ALL',
+            label: 'Todo el equipo',
+            isAll: true,
+            cssClass: this.selectedEmployeeId === 'ALL' ? 'prof-pill prof-pill--active' : 'prof-pill'
+        });
+
+        // Botones dinámicos por empleado
         this.allAppointments.forEach(appt => {
-            if (appt.employeeId && !seenEmployees.has(appt.employeeId)) {
-                seenEmployees.add(appt.employeeId);
-                options.push({ label: appt.employeeName, value: appt.employeeId });
+            if (appt.employeeId && !seen.has(appt.employeeId)) {
+                seen.add(appt.employeeId);
+                const color = this.employeeColors[colorIndex % this.employeeColors.length];
+                colorIndex++;
+                
+                pills.push({
+                    id: appt.employeeId,
+                    label: appt.employeeName,
+                    color: color,
+                    isAll: false,
+                    style: `background-color: ${color};`,
+                    cssClass: this.selectedEmployeeId === appt.employeeId ? 'prof-pill prof-pill--active' : 'prof-pill'
+                });
             }
         });
-
-        return options;
+        return pills;
     }
 
-    // Escuchadores de cambios en los filtros
-    handleEmployeeChange(event) {
-        this.selectedEmployee = event.detail.value;
-        this.filterData();
+    // 2. GENERAR PESTAÑAS (TABS)
+    get tabs() {
+        return [
+            { id: 'HOY', label: 'Hoy', cssClass: this.selectedTab === 'HOY' ? 'admin-tab admin-tab--active' : 'admin-tab' },
+            { id: 'PROXIMOS', label: 'Próximos', cssClass: this.selectedTab === 'PROXIMOS' ? 'admin-tab admin-tab--active' : 'admin-tab' },
+            { id: 'CANCELADOS', label: 'Cancelados', cssClass: this.selectedTab === 'CANCELADOS' ? 'admin-tab admin-tab--active' : 'admin-tab' }
+        ];
     }
 
-    handleStatusChange(event) {
-        this.selectedStatus = event.detail.value;
-        this.filterData();
-    }
+    // 3. FILTRAR Y AGRUPAR CITAS PARA LA VISTA
+    get groupedAppointments() {
+        if (!this.allAppointments || this.allAppointments.length === 0) return [];
 
-    handleDateChange(event) {
-        this.selectedDate = event.target.value; // Formato YYYY-MM-DD
-        this.filterData();
-    }
+        const hoy = new Date();
+        hoy.setHours(0, 0, 0, 0); // Inicio del día de hoy
 
-    // Lógica combinada de filtrado
-    filterData() {
-        this.filteredAppointments = this.allAppointments.filter(appt => {
-            const matchEmployee = this.selectedEmployee === 'All' || appt.employeeId === this.selectedEmployee;
-            const matchStatus = this.selectedStatus === 'All' || appt.Status__c === this.selectedStatus;
-            const matchDate = !this.selectedDate || appt.dateString === this.selectedDate;
-            
-            return matchEmployee && matchStatus && matchDate;
+        // A. Filtrar por Empleado, Pestaña y Estado
+        const filtered = this.allAppointments.filter(appt => {
+            // Filtro de empleado
+            if (this.selectedEmployeeId !== 'ALL' && appt.employeeId !== this.selectedEmployeeId) return false;
+
+            // Filtro de Pestaña/Fecha
+            const apptDate = new Date(appt.fechaRaw);
+            apptDate.setHours(0, 0, 0, 0);
+
+            if (this.selectedTab === 'CANCELADOS') {
+                return appt.isCancelled;
+            } else if (this.selectedTab === 'HOY') {
+                return !appt.isCancelled && apptDate.getTime() === hoy.getTime();
+            } else if (this.selectedTab === 'PROXIMOS') {
+                return !appt.isCancelled && apptDate.getTime() > hoy.getTime();
+            }
+            return false;
+        });
+
+        if (filtered.length === 0) return [];
+
+        // B. Agrupar por Fecha (para el encabezado "Sáb 23 De Mayo")
+        const groups = {};
+        filtered.forEach(appt => {
+            if (!groups[appt.fechaHeader]) {
+                groups[appt.fechaHeader] = [];
+            }
+            // Agregamos estilos a la tarjeta
+            const statusLabel = appt.isCancelled ? 'CANCELADO' : (appt.Status__c === 'Pending' ? 'PENDIENTE' : 'CONFIRMADO');
+            const statusClass = appt.isCancelled ? 'status-label status-label--cancelled' : 'status-label status-label--pending';
+            // Buscamos el color del empleado asignado arriba
+            const empPill = this.employeePills.find(p => p.id === appt.employeeId);
+            const borderColor = empPill && empPill.color ? empPill.color : '#333';
+
+            groups[appt.fechaHeader].push({
+                ...appt,
+                statusLabel: statusLabel,
+                statusClass: statusClass,
+                cardStyle: `border-left: 4px solid ${borderColor};`
+            });
+        });
+
+        // Convertir el objeto a Array para el iterador HTML
+        return Object.keys(groups).map(dateStr => {
+            return {
+                dateHeader: dateStr,
+                appointments: groups[dateStr]
+            };
         });
     }
 
-    get hasAppointments() {
-        return this.filteredAppointments && this.filteredAppointments.length > 0;
+    get hasData() {
+        return this.groupedAppointments.length > 0;
     }
+
+    // EVENTOS DE LA UI
+    handleEmployeeSelect(event) {
+        this.selectedEmployeeId = event.currentTarget.dataset.id;
+    }
+
+    handleTabSelect(event) {
+        this.selectedTab = event.currentTarget.dataset.id;
+    }  
 }

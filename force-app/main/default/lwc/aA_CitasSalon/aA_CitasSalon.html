@@ -1,58 +1,79 @@
 <template>
-    <div class="slds-card slds-p-around_medium">
-        <div class="slds-card__header slds-grid">
-            <header class="slds-media slds-media_center slds-has-flexi-truncate">
-                <div class="slds-media__body">
-                    <h2 class="slds-card__header-title">
-                        <span class="slds-text-heading_small">Próximas Citas del Salón</span>
-                    </h2>
-                </div>
-            </header>
-        </div>
+    <div class="admin-container">
         
-        <div class="slds-card__body">
-            <template if:true={isLoading}>
-                <div class="slds-align_absolute-center slds-p-around_large">
-                    <lightning-spinner alternative-text="Cargando citas..." size="medium"></lightning-spinner>
-                </div>
-            </template>
-
-            <template if:false={isLoading}>
-                <template if:true={hasAppointments}>
-                    <div class="slds-table_edit_container slds-is-relative">
-                        <table class="slds-table slds-table_cell-buffer slds-table_bordered slds-table_striped">
-                            <thead>
-                                <tr class="slds-line-height_reset">
-                                    <th scope="col"><div class="slds-truncate" title="Fecha y Hora">Fecha / Hora</div></th>
-                                    <th scope="col"><div class="slds-truncate" title="Cliente">Cliente</div></th>
-                                    <th scope="col"><div class="slds-truncate" title="Servicio">Servicio</div></th>
-                                    <th scope="col"><div class="slds-truncate" title="Profesional">Atendido por</div></th>
-                                    <th scope="col"><div class="slds-truncate" title="Estado">Estado</div></th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                <template for:each={appointments} for:item="appt">
-                                    <tr key={appt.Id} class="slds-hint-parent">
-                                        <td><div class="slds-truncate">{appt.formattedDateTime}</div></td>
-                                        <td><div class="slds-truncate"><strong>{appt.customerName}</strong></div></td>
-                                        <td><div class="slds-truncate">{appt.serviceName}</div></td>
-                                        <td><div class="slds-truncate">{appt.employeeName}</div></td>
-                                        <td>
-                                            <span class={appt.statusClass}>{appt.Status__c}</span>
-                                        </td>
-                                    </tr>
-                                </template>
-                            </tbody>
-                        </table>
-                    </div>
-                </template>
-
-                <template if:false={hasAppointments}>
-                    <div class="slds-align_absolute-center slds-p-around_large slds-text-color_weak">
-                        No hay próximas citas registradas para tu sucursal.
-                    </div>
-                </template>
-            </template>
+        <div class="header">
+            <span class="header__eyebrow">PANEL DEL EQUIPO</span>
+            <h1 class="header__title">Agenda</h1>
         </div>
+
+        <template if:true={isLoading}>
+            <div style="text-align:center; padding: 40px;">Cargando agenda...</div>
+        </template>
+
+        <template if:false={isLoading}>
+            <div class="filter-section">
+                <span class="filter-label">VER AGENDA DE</span>
+                <div class="pills-scroll">
+                    <template for:each={employeePills} for:item="pill">
+                        <button key={pill.id} class={pill.cssClass} data-id={pill.id} onclick={handleEmployeeSelect}>
+                            <template if:false={pill.isAll}>
+                                <span class="prof-dot" style={pill.style}></span>
+                            </template>
+                            {pill.label}
+                        </button>
+                    </template>
+                </div>
+            </div>
+
+            <div class="tabs-container">
+                <div class="tabs-row">
+                    <template for:each={tabs} for:item="tab">
+                        <button key={tab.id} class={tab.cssClass} data-id={tab.id} onclick={handleTabSelect}>
+                            {tab.label}
+                        </button>
+                    </template>
+                </div>
+                <button class="btn-refresh">↻</button>
+            </div>
+
+            <div class="agenda-content">
+                
+                <template if:true={hasData}>
+                    <template for:each={groupedAppointments} for:item="group">
+                        <div key={group.dateHeader} class="date-group">
+                            <h2 class="date-header">{group.dateHeader}</h2>
+                            
+                            <template for:each={group.appointments} for:item="appt">
+                                <div key={appt.Id} class="appt-card" style={appt.cardStyle}>
+                                    
+                                    <div class="appt-card__top">
+                                        <span class="time">{appt.horaStr}</span>
+                                        <div class="badges">
+                                            <span class="emp-badge">{appt.employeeName}</span>
+                                            <span class={appt.statusClass}>{appt.statusLabel}</span>
+                                        </div>
+                                    </div>
+                                    
+                                    <h3 class="customer-name">{appt.customerName}</h3>
+                                    <p class="service-desc">{appt.serviceName} · {appt.duration} min</p>
+                                    
+                                    <div class="contact-info">
+                                        📞 {appt.phone}
+                                    </div>
+                                    
+                                    </div>
+                            </template>
+                        </div>
+                    </template>
+                </template>
+
+                <template if:false={hasData}>
+                    <div class="empty-state">
+                        Día sin turnos para {selectedEmployeeId === 'ALL' ? 'todo el equipo' : 'el empleado seleccionado'}.
+                    </div>
+                </template>
+
+            </div>
+        </template>
     </div>
 </template>

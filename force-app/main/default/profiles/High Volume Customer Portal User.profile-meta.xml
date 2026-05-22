@@ -30,6 +30,10 @@
         <enabled>false</enabled>
     </classAccesses>
     <classAccesses>
+        <apexClass>AA_Scripts</apexClass>
+        <enabled>false</enabled>
+    </classAccesses>
+    <classAccesses>
         <apexClass>AA_TimeBlock</apexClass>
         <enabled>false</enabled>
     </classAccesses>
@@ -293,6 +297,11 @@
         <editable>true</editable>
         <field>AA_Service__c.Duration_Minutes__c</field>
         <readable>true</readable>
+    </fieldPermissions>
+    <fieldPermissions>
+        <editable>false</editable>
+        <field>Log__c.Log__c</field>
+        <readable>false</readable>
     </fieldPermissions>
     <tabVisibilities>
         <tab>AA_Appointment__c</tab>
