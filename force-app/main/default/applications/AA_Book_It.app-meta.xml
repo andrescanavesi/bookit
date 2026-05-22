@@ -11,19 +11,16 @@
     <isNavTabPersistenceDisabled>false</isNavTabPersistenceDisabled>
     <label>AA Book It</label>
     <navType>Standard</navType>
-    <tabs>AA_Business__c</tabs>
     <tabs>AA_Public_Agenda_Test</tabs>
+    <tabs>AA_Appointment__c</tabs>
+    <tabs>AA_Customer__c</tabs>
+    <tabs>AA_Business__c</tabs>
     <tabs>AA_Business_Branch__c</tabs>
     <tabs>AA_Service__c</tabs>
+    <tabs>AA_Service_Category__c</tabs>
     <tabs>AA_Employee__c</tabs>
     <tabs>AA_Employee_Absence__c</tabs>
-    <tabs>AA_Customer__c</tabs>
-    <tabs>AA_Appointment__c</tabs>
-    <tabs>AA_WhatsApp_Interaction__c</tabs>
     <tabs>AA_Employee_Working_Hour__c</tabs>
-    <tabs>AA_WhatsApp_Session__c</tabs>
-    <tabs>AA_My_Custom_Object__c</tabs>
-    <tabs>AA_Service_Category__c</tabs>
     <uiType>Lightning</uiType>
     <utilityBar>AA_Book_It_UtilityBar</utilityBar>
 </CustomApplication>

@@ -9,5 +9,12 @@
 		<target>lightning__AppPage</target>
         <target>lightning__RecordPage</target>
         <target>lightning__HomePage</target>
+		<target>lightningCommunity__Page</target>
+        <target>lightningCommunity__Default</target>
 	</targets>
+	<targetConfigs>
+		<targetConfig targets="lightningCommunity__Default">
+			<property name="businessId" type="String" label="ID Business" description="Ingresa el ID del Business de este cliente" />
+		</targetConfig>
+	</targetConfigs>
 </LightningComponentBundle>

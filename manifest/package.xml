@@ -54,5 +54,9 @@
 		<members>AA_Book_It_Admin</members>
 		<name>PermissionSet</name>
 	</types>
+	<types>
+		<members>*</members>
+		<name>Profile</name>
+	</types>
 	<version>66.0</version>
 </Package>

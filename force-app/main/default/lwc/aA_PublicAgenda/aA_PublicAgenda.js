@@ -1,4 +1,4 @@
-import { LightningElement, track } from 'lwc';
+import { LightningElement, track, api } from 'lwc';
 
 import getOrCreateCustomer from '@salesforce/apex/AA_PublicAgendaController.getOrCreateCustomer';
 import getCategories from '@salesforce/apex/AA_PublicAgendaController.getCategories';
@@ -10,6 +10,8 @@ import getMisTurnos from '@salesforce/apex/AA_PublicAgendaController.getMisTurno
 import cancelarAppointment from '@salesforce/apex/AA_PublicAgendaController.cancelarAppointment';
 
 export default class AAPublicAgenda extends LightningElement {
+    @api businessId
+
     // --- ESTADO GLOBAL ---
     currentScreen = 'welcome';
     reservaStep = 1;
@@ -211,7 +213,9 @@ export default class AAPublicAgenda extends LightningElement {
     // --- ACCIONES GENERALES ---
 
     connectedCallback() {
-        this.loadData();
+        if(this.businessId) {
+            this.loadData();
+        }
     }
 
     async loadData() {
