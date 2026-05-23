@@ -1,56 +1,63 @@
 public with sharing class AA_SalonAppointmentsController {
 
-    @AuraEnabled(cacheable=true)
-    public static List<AA_Appointment__c> getSalonAppointments2() {
-        return new List<AA_Appointment__c>();
+    public class AgendaContext {
+        @AuraEnabled public Boolean isAdmin { get; set; }
+        @AuraEnabled public List<AA_Appointment__c> appointments { get; set; }
     }
 
-	@AuraEnabled(cacheable=true)
-    public static List<AA_Appointment__c> getSalonAppointments() {
-		 AA_Logger logger = new AA_Logger(true);
+    @AuraEnabled(cacheable=true)
+    public static AgendaContext getSalonAppointments() {
+        AA_Logger logger = new AA_Logger(true);
+        String businessId = '';
         
-		String businessId = 'a02gL00000Ix6AH';
         try {
-            // 1. Identificamos al usuario de la comunidad que está navegando el Back Office
             Id currentUserId = UserInfo.getUserId();
-			logger.info('getSalonAppointments for user id '+currentUserId);
+            logger.info('getSalonAppointments for user id ' + currentUserId);
             
-            // 2. Buscamos el registro de empleado vinculado a ese usuario para extraer su sucursal
             List<AA_Employee__c> employees = [
-                SELECT Id, Business_Branch__c, Business_Id__c
+                SELECT Id, Business_Branch__c, Business_Id__c, Is_Admin__c
                 FROM AA_Employee__c 
                 WHERE User__c = :currentUserId 
                 LIMIT 1
             ];
-            
-            // Si el usuario no está configurado como empleado, retornamos una lista vacía de seguridad
-            //if (employees.isEmpty()) {
-             //   return new List<AA_Appointment__c>();
-            //}
-            
-            //Id branchId = employees[0].Business_Branch__c;
-			//Id businessId = employees[0].Business_Id__c;
-			//businessId = 'a02gL00000Ix6AHQAZ'.left(15);
 
-			
+            if (employees.isEmpty()) {
+                throw new AuraHandledException('El empleado no está configurado como usuario');
+            }
             
-            // 3. Traemos las citas activas pertenecientes únicamente a este business (todos los branches)
-            List<AA_Appointment__c> appointments =  [
-                SELECT Id, Start_Date_Time__c, Status__c,
-                       Customer__r.First_Name__c, Customer__r.Last_Name__c,
-                       Service__r.Name, Employee__r.Name
-                FROM AA_Appointment__c
-                WHERE Business_Id__c = :businessId
-                ORDER BY Start_Date_Time__c ASC
-				LIMIT 1000
-            ];
-			logger.info('getSalonAppointments, size: '+appointments.size()+' business id: '+businessId);
-			return appointments;
+            AA_Employee__c currentEmployee = employees[0];
+            businessId = currentEmployee.Business_Id__c;
+            
+            // Inicializamos la consulta base
+            String query = 'SELECT Id, Start_Date_Time__c, Status__c, Customer__r.First_Name__c, Customer__r.Last_Name__c, Customer__r.Phone_Number__c, Service__r.Name, Service__r.Duration_Minutes__c, Employee__r.Name, Employee__c ';
+                query += 'FROM AA_Appointment__c WHERE Business_Id__c = \'' + businessId + '\'';
+            
+            // Si NO es admin, agregamos un filtro estricto por su propio ID de empleado
+            if (!currentEmployee.Is_Admin__c) {
+                query += ' AND Employee__c = \'' + currentEmployee.Id + '\'';
+            }
+            
+            query += ' ORDER BY Start_Date_Time__c ASC LIMIT 1000';
+            logger.info('getSalonAppointments query ' + query);
+            
+            List<AA_Appointment__c> appointments = Database.query(query);
+            
+            // Armamos la respuesta
+            AgendaContext response = new AgendaContext();
+            response.isAdmin = currentEmployee.Is_Admin__c;
+            response.appointments = appointments;
+            
+            logger.info('getSalonAppointments success. Size: ' + appointments.size() + '. IsAdmin: ' + response.isAdmin);
+            
+            return response;
+            
         } catch (Exception e) {
-			 String message = 'error getting appointments for the business '+businessId+' '+e.getMessage()+' '+e.getStackTraceString();
-            logger.error(message);
+            String message = 'Error getting appointments for business ' + businessId + ': ' + e.getMessage();
+            logger.error(message + ' ' + e.getStackTraceString());
             throw new AuraHandledException(message);
         }
     }
+
+	
 
 }

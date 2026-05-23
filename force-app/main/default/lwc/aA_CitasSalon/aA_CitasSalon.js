@@ -4,6 +4,7 @@ import getSalonAppointments from '@salesforce/apex/AA_SalonAppointmentsControlle
 export default class AA_CitasSalon extends LightningElement {
     @track allAppointments = [];
     @track isLoading = true;
+    @track isAdmin = false;
 
     // Filtros activos
     @track selectedEmployeeId = 'ALL';
@@ -15,7 +16,13 @@ export default class AA_CitasSalon extends LightningElement {
     @wire(getSalonAppointments)
     wiredAppointments({ error, data }) {
         if (data) {
-            this.allAppointments = data.map(appt => {
+            console.info(JSON.stringify(data, null, 2));
+            if (!data.appointments) {
+                console.warn('Estructura de datos inesperada (posible caché). Forzando recarga...');
+                return; 
+            }
+            this.isAdmin = data.isAdmin;
+            this.allAppointments = data.appointments.map(appt => {
                 const dt = new Date(appt.Start_Date_Time__c);
                 
                 // Formateo de fechas y horas
@@ -34,7 +41,7 @@ export default class AA_CitasSalon extends LightningElement {
                     fechaHeader: fechaHeader,
                     horaStr: horaStr,
                     customerName: `${firstName} ${lastName}`.trim() || 'Sin Nombre',
-                    phone: appt.Customer__r?.Phone || 'Sin teléfono',
+                    phone: appt.Customer__r?.Phone_Number__c || 'Sin teléfono',
                     serviceName: appt.Service__r?.Name || 'Servicio',
                     duration: appt.Service__r?.Duration_Minutes__c || 30,
                     employeeName: appt.Employee__r?.Name || 'Equipo',

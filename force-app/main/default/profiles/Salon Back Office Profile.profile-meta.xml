@@ -280,6 +280,11 @@
     </fieldPermissions>
     <fieldPermissions>
         <editable>false</editable>
+        <field>AA_Employee__c.Is_Admin__c</field>
+        <readable>false</readable>
+    </fieldPermissions>
+    <fieldPermissions>
+        <editable>false</editable>
         <field>AA_Employee__c.User__c</field>
         <readable>false</readable>
     </fieldPermissions>

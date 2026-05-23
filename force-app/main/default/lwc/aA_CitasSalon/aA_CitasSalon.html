@@ -11,19 +11,21 @@
         </template>
 
         <template if:false={isLoading}>
-            <div class="filter-section">
-                <span class="filter-label">VER AGENDA DE</span>
-                <div class="pills-scroll">
-                    <template for:each={employeePills} for:item="pill">
-                        <button key={pill.id} class={pill.cssClass} data-id={pill.id} onclick={handleEmployeeSelect}>
-                            <template if:false={pill.isAll}>
-                                <span class="prof-dot" style={pill.style}></span>
-                            </template>
-                            {pill.label}
-                        </button>
-                    </template>
+            <template if:true={isAdmin}>
+                <div class="filter-section">
+                    <span class="filter-label">VER AGENDA DE</span>
+                    <div class="pills-scroll">
+                        <template for:each={employeePills} for:item="pill">
+                            <button key={pill.id} class={pill.cssClass} data-id={pill.id} onclick={handleEmployeeSelect}>
+                                <template if:false={pill.isAll}>
+                                    <span class="prof-dot" style={pill.style}></span>
+                                </template>
+                                {pill.label}
+                            </button>
+                        </template>
+                    </div>
                 </div>
-            </div>
+            </template>
 
             <div class="tabs-container">
                 <div class="tabs-row">
