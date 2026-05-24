@@ -29,7 +29,7 @@ public with sharing class AA_SalonAppointmentsController {
             businessId = currentEmployee.Business_Id__c;
             
             // Inicializamos la consulta base
-            String query = 'SELECT Id, Start_Date_Time__c, Status__c, Customer__r.First_Name__c, Customer__r.Last_Name__c, Customer__r.Phone_Number__c, Service__r.Name, Service__r.Duration_Minutes__c, Employee__r.Name, Employee__c ';
+            String query = 'SELECT Id, Reminder_Sent_Date__c, Is_Reminder_Sent__c,  Customer_Confirmation_Date__c, Is_Customer_Confirmed__c, Start_Date_Time__c, Status__c, Customer__r.First_Name__c, Customer__r.Last_Name__c, Customer__r.Phone_Number__c, Service__r.Name, Service__r.Duration_Minutes__c, Employee__r.Name, Employee__c ';
                 query += 'FROM AA_Appointment__c WHERE Business_Id__c = \'' + businessId + '\'';
             
             // Si NO es admin, agregamos un filtro estricto por su propio ID de empleado
@@ -37,7 +37,7 @@ public with sharing class AA_SalonAppointmentsController {
                 query += ' AND Employee__c = \'' + currentEmployee.Id + '\'';
             }
             
-            query += ' ORDER BY Start_Date_Time__c ASC LIMIT 1000';
+            query += ' ORDER BY Start_Date_Time__c ASC LIMIT 250';
             logger.info('getSalonAppointments query ' + query);
             
             List<AA_Appointment__c> appointments = Database.query(query);
@@ -58,6 +58,17 @@ public with sharing class AA_SalonAppointmentsController {
         }
     }
 
-	
+	@AuraEnabled
+    public static void markReminderAsSent(Id appointmentId) {
+    try {
+        AA_Appointment__c appt = new AA_Appointment__c(
+            Id = appointmentId,
+            Reminder_Sent_Date__c = System.now()
+        );
+        update appt;
+    } catch (Exception e) {
+        throw new AuraHandledException('Error al registrar el envío del recordatorio: ' + e.getMessage());
+    }
+}
 
 }
