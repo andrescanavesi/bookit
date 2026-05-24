@@ -37,8 +37,7 @@
     </types>
     
     <types>
-         <members>Salon_Admin</members>
-		<members>agenda</members>
+		<members>*</members>
         <name>Network</name>
     </types>
     
