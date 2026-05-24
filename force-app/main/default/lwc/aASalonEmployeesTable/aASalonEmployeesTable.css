@@ -1,0 +1,148 @@
+.table-container {
+    background-color: #F1ECE3; /* Fondo crema global */
+    min-height: 100vh;
+    padding: 24px;
+    font-family: 'DM Sans', sans-serif;
+    color: #1A1A1A;
+}
+
+.table-header-section {
+    margin-bottom: 32px;
+}
+.table-eyebrow {
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 2px;
+    color: #8C2417; /* Rojo óxido insignia */
+    text-transform: uppercase;
+    display: block;
+    margin-bottom: 8px;
+}
+.table-title {
+    font-size: 36px;
+    font-weight: 400;
+    margin: 0 0 8px 0;
+    color: #1A1A1A;
+}
+.table-subtitle {
+    color: #8A8175;
+    font-size: 16px;
+    margin: 0;
+}
+
+/* ENVOLTORIO DE LA TABLA */
+.custom-table-wrapper {
+    background: #F8F5EF; /* Blanco lino */
+    border: 1px solid #D9D2C5;
+    border-radius: 8px;
+    padding: 8px 24px;
+    overflow-x: auto;
+}
+
+.premium-table {
+    width: 100%;
+    border-collapse: collapse;
+    min-width: 700px;
+}
+
+/* CONFIGURACIÓN DE ENCABEZADOS (TH) */
+.premium-table th {
+    color: #8A8175;
+    padding: 20px 16px;
+    font-size: 13px;
+    font-weight: 500;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    border-bottom: 1px solid #D9D2C5;
+    text-align: left;
+}
+
+/* FILAS DE LA TABLA (TR) */
+.table-row {
+    transition: background-color 0.2s ease;
+}
+/* El hover cambia sutilmente el fondo, preparando la fila para futuras acciones clicleables */
+.table-row:hover {
+    background-color: rgba(140, 36, 23, 0.02); 
+    cursor: default;
+}
+
+.premium-table td {
+    padding: 16px;
+    border-bottom: 1px dashed #E5DFD5; /* Separación punteada premium */
+    vertical-align: middle;
+}
+.premium-table tr:last-child td {
+    border-bottom: none; /* Quitamos borde a la última fila */
+}
+
+/* GRUPO DE PERFIL (AVATAR + NOMBRE) */
+.profile-group {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+}
+
+.avatar {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+    font-weight: 700;
+    font-size: 13px;
+    letter-spacing: 0.5px;
+}
+
+.avatar-dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    position: absolute;
+    bottom: 0;
+    right: 0;
+    border: 2px solid #F8F5EF; /* Margen para despegar el punto del fondo */
+}
+
+.emp-name {
+    font-size: 16px;
+    font-weight: 500;
+    color: #1A1A1A;
+}
+
+/* TEXTOS INTERNOS */
+.role-text, .branch-text, .perm-text {
+    font-size: 15px;
+    color: #4A4A4A;
+}
+.perm-text {
+    font-weight: 500;
+}
+
+/* BADGES DE ESTADO (ETIQUETAS MINIMALISTAS) */
+.badge {
+    display: inline-block;
+    padding: 4px 12px;
+    border-radius: 4px;
+    font-size: 12px;
+    font-weight: 600;
+    letter-spacing: 0.5px;
+    text-transform: uppercase;
+}
+
+.badge--active {
+    background-color: #E2ECE9;
+    color: #2D6A4F;
+}
+
+.badge--away {
+    background-color: #FFF3CD;
+    color: #856404;
+}
+
+.badge--inactive {
+    background-color: #F8D7DA;
+    color: #721C24;
+}

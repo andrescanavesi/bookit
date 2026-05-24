@@ -1,0 +1,123 @@
+.table-container {
+    background-color: #F1ECE3;
+    min-height: 100vh;
+    padding: 24px;
+    font-family: 'DM Sans', sans-serif;
+    color: #1A1A1A;
+}
+
+.table-header-section {
+    margin-bottom: 32px;
+}
+.table-eyebrow {
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 2px;
+    color: #8C2417; /* Rojo insignia */
+    text-transform: uppercase;
+    display: block;
+    margin-bottom: 8px;
+}
+.table-title {
+    font-size: 36px;
+    font-weight: 400;
+    margin: 0 0 8px 0;
+    color: #1A1A1A;
+}
+.table-subtitle {
+    color: #8A8175;
+    font-size: 16px;
+    margin: 0;
+}
+
+/* ENVOLTORIO DE LA TABLA */
+.custom-table-wrapper {
+    background: #F8F5EF;
+    border: 1px solid #D9D2C5;
+    border-radius: 8px;
+    padding: 8px 24px;
+    overflow-x: auto;
+}
+
+.premium-table {
+    width: 100%;
+    border-collapse: collapse;
+    min-width: 800px; /* Un poco más ancha para soportar cómodamente el email y comentarios */
+}
+
+/* CONFIGURACIÓN DE CABECERAS */
+.premium-table th {
+    color: #8A8175;
+    padding: 20px 16px;
+    font-size: 13px;
+    font-weight: 500;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    border-bottom: 1px solid #D9D2C5;
+    text-align: left;
+}
+
+/* FILAS (TR) */
+.table-row {
+    transition: background-color 0.2s ease;
+}
+.table-row:hover {
+    background-color: rgba(140, 36, 23, 0.02);
+}
+
+.premium-table td {
+    padding: 16px;
+    border-bottom: 1px dashed #E5DFD5;
+    vertical-align: middle;
+}
+.premium-table tr:last-child td {
+    border-bottom: none;
+}
+
+/* AVATARES Y TEXTOS DE CONFIGURACIÓN */
+.profile-group {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.avatar {
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 700;
+    font-size: 12px;
+    flex-shrink: 0;
+}
+
+.text-highlight {
+    font-size: 15px;
+    font-weight: 500;
+    color: #1A1A1A;
+}
+
+.standard-text, .phone-text, .email-text {
+    font-size: 15px;
+    color: #4A4A4A;
+}
+
+.phone-text {
+    font-variant-numeric: tabular-nums; /* Mantiene alineados los números de celular */
+}
+
+/* COLUMNA DE COMENTARIOS INTELIGENTE */
+.cell-comments {
+    max-width: 280px; /* Limita el ancho para dar prioridad a los datos de contacto */
+}
+
+.comments-box {
+    font-size: 14px;
+    color: #666;
+    line-height: 1.4;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis; /* Corta el texto largo con tres puntitos (...) */
+}

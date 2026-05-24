@@ -1,0 +1,58 @@
+<template>
+    <div class="table-container">
+        
+        <div class="table-header-section">
+            <span class="table-eyebrow">BASE DE DATOS</span>
+            <h1 class="table-title">Clientes Registrados</h1>
+            <p class="table-subtitle">Consulta de información de contacto, correos electrónicos y notas internas de atención.</p>
+        </div>
+
+        <div class="custom-table-wrapper">
+            <table class="premium-table">
+                <thead>
+                    <tr>
+                        <th>Nombre</th>
+                        <th>Apellido</th>
+                        <th>Celular</th>
+                        <th>Email</th>
+                        <th>Comentarios</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <template for:each={customers} for:item="cust">
+                        <tr key={cust.id} class="table-row">
+                            
+                            <td class="cell-profile">
+                                <div class="profile-group">
+                                    <div class="avatar" style={cust.avatarStyle}>
+                                        <span class="avatar-text">{cust.initial}</span>
+                                    </div>
+                                    <span class="text-highlight">{cust.firstName}</span>
+                                </div>
+                            </td>
+
+                            <td class="cell-text">
+                                <span class="standard-text">{cust.lastName}</span>
+                            </td>
+
+                            <td class="cell-text">
+                                <span class="phone-text">{cust.phone}</span>
+                            </td>
+
+                            <td class="cell-text">
+                                <span class="email-text">{cust.email}</span>
+                            </td>
+
+                            <td class="cell-comments">
+                                <div class="comments-box" title={cust.comments}>
+                                    {cust.comments}
+                                </div>
+                            </td>
+
+                        </tr>
+                    </template>
+                </tbody>
+            </table>
+        </div>
+    </div>
+</template>

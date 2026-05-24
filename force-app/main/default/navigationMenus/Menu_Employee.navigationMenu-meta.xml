@@ -24,4 +24,11 @@
         <target>/customers</target>
         <type>InternalLink</type>
     </navigationMenuItem>
+    <navigationMenuItem>
+        <label>Calendario</label>
+        <position>4</position>
+        <publiclyAvailable>false</publiclyAvailable>
+        <target>/calendar</target>
+        <type>InternalLink</type>
+    </navigationMenuItem>
 </NavigationMenu>

@@ -213,13 +213,20 @@ export default class AAPublicAgenda extends LightningElement {
     // --- ACCIONES GENERALES ---
 
     connectedCallback() {
+
+        // TODO this is for testing. Remove it for prod
+        if(!this.businessId){
+            this.businessId = 'a02gL00000Ix6AHQAZ';
+        }
         if(this.businessId) {
             this.loadData();
+        } else{
+            console.error('no business selected');
         }
     }
 
     async loadData() {
-        console.info('loading data...');
+        console.info('loading data for the business: '+this.businessId);
         try {
             // Cargamos categorías y servicios en paralelo para ganar velocidad
             const [categoriesDB, servicesDB] = await Promise.all([

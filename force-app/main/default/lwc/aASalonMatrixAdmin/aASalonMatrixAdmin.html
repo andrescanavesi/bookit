@@ -1,35 +1,43 @@
 <template>
-    <div class="matrix-container">
-        <div class="matrix-header">
-            <h2>Disponibilidad del Día</h2>
-            <p>Selecciona un hueco vacío para agendar un turno manualmente.</p>
+    <div class="admin-container">
+        
+        <div class="header">
+            <span class="header__eyebrow">PANEL DEL EQUIPO</span>
+            <h1 class="header__title">Matriz de Disponibilidad</h1>
+            <p class="header__subtitle">Selecciona un hueco vacío para agendar un turno manualmente.</p>
+        </div>
+
+        <div class="date-selector-wrapper">
+            <template for:each={weekDays} for:item="day">
+                <button key={day.dateKey} class={day.cssClass} data-date={day.dateKey} onclick={handleDateSelect}>
+                    <span class="ds-dow">{day.dayOfWeek}</span>
+                    <span class="ds-number">{day.dayNumber}</span>
+                    <span class="ds-month">{day.month}</span>
+                </button>
+            </template>
         </div>
 
         <div class="table-scroll-wrapper">
             <table class="matrix-table">
-                
                 <thead>
                     <tr>
                         <template for:each={gridHeaders} for:item="header">
                             <th key={header.id} class={header.cssClass}>
+                                <template if:false={header.isTime}>
+                                    <span class="prof-dot" style={header.dotStyle}></span>
+                                </template>
                                 {header.label}
                             </th>
                         </template>
                     </tr>
                 </thead>
-
                 <tbody>
                     <template for:each={gridRows} for:item="row">
                         <tr key={row.id}>
-                            
                             <template for:each={row.cells} for:item="cell">
-                                
                                 <template if:true={cell.isTimeLabel}>
-                                    <td key={cell.id} class="time-label-cell">
-                                        {cell.label}
-                                    </td>
+                                    <td key={cell.id} class="time-label-cell">{cell.label}</td>
                                 </template>
-
                                 <template if:true={cell.isOccupied}>
                                     <td key={cell.id} class="appt-cell">
                                         <div class={cell.cssClass} style={cell.style}>
@@ -40,22 +48,17 @@
                                         </div>
                                     </td>
                                 </template>
-
                                 <template if:false={cell.isTimeLabel}>
                                     <template if:false={cell.isOccupied}>
                                         <td key={cell.id} class="free-cell" data-time={cell.time} data-empid={cell.empId} onclick={handleEmptySlotClick}>
-                                            <div class={cell.cssClass}>
-                                                <span class="add-icon">+</span>
-                                            </div>
+                                            <div class={cell.cssClass}><span class="add-icon">+</span></div>
                                         </td>
                                     </template>
                                 </template>
-
                             </template>
                         </tr>
                     </template>
                 </tbody>
-
             </table>
         </div>
     </div>

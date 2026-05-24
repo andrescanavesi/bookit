@@ -1,0 +1,57 @@
+<template>
+    <div class="table-container">
+        
+        <div class="table-header-section">
+            <span class="table-eyebrow">ADMINISTRACIÓN</span>
+            <h1 class="table-title">Equipo del Salón</h1>
+            <p class="table-subtitle">Listado completo de profesionales, sucursales asignadas y niveles de acceso.</p>
+        </div>
+
+        <div class="custom-table-wrapper">
+            <table class="premium-table">
+                <thead>
+                    <tr>
+                        <th>Profesional</th>
+                        <th>Especialidad / Rol</th>
+                        <th>Sucursal</th>
+                        <th>Permisos</th>
+                        <th>Estado</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <template for:each={employees} for:item="emp">
+                        <tr key={emp.id} class="table-row">
+                            
+                            <td class="cell-profile">
+                                <div class="profile-group">
+                                    <div class="avatar" style={emp.avatarStyle}>
+                                        <span class="avatar-text">{emp.initials}</span>
+                                        <span class="avatar-dot" style={emp.dotStyle}></span>
+                                    </div>
+                                    <span class="emp-name">{emp.name}</span>
+                                </div>
+                            </td>
+
+                            <td class="cell-text">
+                                <span class="role-text">{emp.role}</span>
+                            </td>
+
+                            <td class="cell-text">
+                                <span class="branch-text">{emp.branch}</span>
+                            </td>
+
+                            <td class="cell-text">
+                                <span class="perm-text">{emp.permRole}</span>
+                            </td>
+
+                            <td class="cell-badge">
+                                <span class={emp.statusClass}>{emp.status}</span>
+                            </td>
+
+                        </tr>
+                    </template>
+                </tbody>
+            </table>
+        </div>
+    </div>
+</template>
