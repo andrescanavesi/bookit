@@ -308,6 +308,11 @@
         <field>Log__c.Log__c</field>
         <readable>false</readable>
     </fieldPermissions>
+    <fieldPermissions>
+        <editable>false</editable>
+        <field>User.AA_Is_Employee_Admin__c</field>
+        <readable>false</readable>
+    </fieldPermissions>
     <objectPermissions>
         <allowCreate>true</allowCreate>
         <allowDelete>false</allowDelete>

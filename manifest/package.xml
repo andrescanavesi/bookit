@@ -28,12 +28,30 @@
 		<members>AA_Service__c</members>
 		<members>AA_Service_Category__c</members>
 		<members>Log__c</members>
+		<members>User</members>
 		<name>CustomObject</name>
 	</types>
 	<types>
-		<members>*</members>
-		<name>CustomSite</name>
-	</types>
+        <members>*</members>
+        <name>ExperienceBundle</name>
+    </types>
+    
+    <types>
+         <members>Salon_Admin</members>
+		<members>agenda</members>
+        <name>Network</name>
+    </types>
+    
+    <types>
+        <members>Salon_Admin</members>
+		<members>agenda</members>
+        <name>CustomSite</name>
+    </types>
+
+    <types>
+        <members>*</members>
+        <name>NavigationMenu</name>
+    </types>
 	<types>
 		<members>AA_Appointment__c</members>
 		<members>AA_Business_Branch__c</members>

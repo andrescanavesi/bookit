@@ -5,7 +5,6 @@
     <columns>Business_Branch__c</columns>
     <columns>First_Name__c</columns>
     <columns>Last_Name__c</columns>
-    <columns>Is_Admin__c</columns>
     <filterScope>Everything</filterScope>
     <label>All</label>
 </ListView>

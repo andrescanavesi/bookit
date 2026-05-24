@@ -279,7 +279,7 @@
         <readable>true</readable>
     </fieldPermissions>
     <fieldPermissions>
-        <editable>true</editable>
+        <editable>false</editable>
         <field>AA_Employee__c.Is_Admin__c</field>
         <readable>true</readable>
     </fieldPermissions>
@@ -307,6 +307,11 @@
         <editable>false</editable>
         <field>Log__c.Log__c</field>
         <readable>false</readable>
+    </fieldPermissions>
+    <fieldPermissions>
+        <editable>true</editable>
+        <field>User.AA_Is_Employee_Admin__c</field>
+        <readable>true</readable>
     </fieldPermissions>
     <objectPermissions>
         <allowCreate>false</allowCreate>
