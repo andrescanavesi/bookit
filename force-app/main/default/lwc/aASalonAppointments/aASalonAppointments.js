@@ -1,25 +1,23 @@
 import { LightningElement, track, wire } from 'lwc';
-import { refreshApex } from '@salesforce/apex'; // NUEVO: Para refrescar la UI en tiempo real
+import { refreshApex } from '@salesforce/apex';
 import getSalonAppointments from '@salesforce/apex/AA_SalonAppointmentsController.getSalonAppointments';
-import markReminderAsSent from '@salesforce/apex/AA_SalonAppointmentsController.markReminderAsSent'; // NUEVO: El método que acabamos de crear
+import markReminderAsSent from '@salesforce/apex/AA_SalonAppointmentsController.markReminderAsSent';
+import confirmAppointment from '@salesforce/apex/AA_SalonAppointmentsController.confirmAppointment'; // NUEVO
 
 export default class AASalonAppointments extends LightningElement {
     @track allAppointments = [];
     @track isLoading = true;
     @track isAdmin = false;
 
-    // Filtros activos
     @track selectedEmployeeId = 'ALL';
     @track selectedTab = 'HOY'; 
 
-    // Almacenamos el resultado del wire para poder usar refreshApex más adelante
     wiredAppointmentsResult; 
-
     employeeColors = ['#B23A3A', '#D4A017', '#3A70A1', '#5A8A4F', '#6B4F8E'];
 
     @wire(getSalonAppointments)
     wiredAppointments(result) {
-        this.wiredAppointmentsResult = result; // Guardamos la referencia completa
+        this.wiredAppointmentsResult = result; 
         const { error, data } = result;
 
         if (data) {
@@ -42,8 +40,15 @@ export default class AASalonAppointments extends LightningElement {
                 const phone = appt.Customer__r?.Phone_Number__c || '';
                 const serviceName = appt.Service__r?.Name || 'Servicio';
                 
-                // NUEVO: Validamos si ya fue enviado analizando si el campo Date/Time tiene valor
                 const isSent = !!appt.Reminder_Sent_Date__c;
+                const isCancelled = appt.Status__c === 'Cancelled';
+                
+                // NUEVO: El botón de confirmar se muestra solo si la cita está en estado "Pending" y no está cancelada
+                const isPending = appt.Status__c === 'Pending';
+                const showConfirm = isPending && !isCancelled;
+                
+                // Modificamos el label de WA para diferenciarlo de la confirmación física
+                const showWa = this.selectedTab === 'MANANA' && !!phone;
 
                 return {
                     ...appt,
@@ -56,11 +61,14 @@ export default class AASalonAppointments extends LightningElement {
                     duration: appt.Service__r?.Duration_Minutes__c || 30,
                     employeeName: appt.Employee__r?.Name || 'Equipo',
                     employeeId: appt.Employee__c,
-                    isCancelled: appt.Status__c === 'Cancelled',
-                    isReminderSent: isSent, // Guardamos el booleano para el HTML
-                    waButtonLabel: isSent ? 'Reenviar Recordatorio' : 'Confirmar Asistencia', // Texto dinámico
-                    waButtonClass: isSent ? 'wa-btn wa-btn--sent' : 'wa-btn', // Estilo dinámico
-                    waLink: this.generateWhatsAppLink(phone, firstName, serviceName, horaStr)
+                    isCancelled: isCancelled,
+                    isReminderSent: isSent, 
+                    waButtonLabel: isSent ? 'Reenviar Recordatorio' : 'Enviar Recordatorio', 
+                    waButtonClass: isSent ? 'wa-btn wa-btn--sent' : 'wa-btn', 
+                    waLink: this.generateWhatsAppLink(phone, firstName, serviceName, horaStr),
+                    showWaButton: showWa,
+                    showConfirmButton: showConfirm, // NUEVO
+                    hasFooterActions: showWa || showConfirm // NUEVO: Controla si se dibuja el contenedor gris inferior
                 };
             });
             this.isLoading = false;
@@ -74,19 +82,14 @@ export default class AASalonAppointments extends LightningElement {
         if (!phone) return null;
         const cleanPhone = phone.replace(/\D/g, '');
         if (!cleanPhone) return null;
-
         const text = `Hola ${firstName}, te escribimos del salón para recordarte tu turno de ${serviceName} mañana a las ${timeStr} hs. ¿Nos confirmas tu asistencia?`;
         return `https://wa.me/${cleanPhone}?text=${encodeURIComponent(text)}`;
     }
 
-    // NUEVO: Evento al hacer clic en el botón de WhatsApp
     handleWhatsAppClick(event) {
         const apptId = event.currentTarget.dataset.id;
-
-        // Ejecutamos el método de Apex imperativamente para sellar la fecha por detrás
         markReminderAsSent({ appointmentId: apptId })
             .then(() => {
-                // Forzamos al componente a limpiar caché y traer los datos frescos, cambiando el botón al estado "Enviado"
                 return refreshApex(this.wiredAppointmentsResult);
             })
             .catch(error => {
@@ -94,32 +97,31 @@ export default class AASalonAppointments extends LightningElement {
             });
     }
 
+    // NUEVO: Evento imperativo para confirmar la cita
+    handleConfirmClick(event) {
+        const apptId = event.currentTarget.dataset.id;
+        
+        confirmAppointment({ appointmentId: apptId })
+            .then(() => {
+                return refreshApex(this.wiredAppointmentsResult);
+            })
+            .catch(error => {
+                console.error('Error al confirmar la cita:', error);
+            });
+    }
+
+    // ... (Tus getters de employeePills, tabs, groupedAppointments y eventos de selección quedan exactamente idénticos)
     get employeePills() {
         const pills = [];
         const seen = new Set();
         let colorIndex = 0;
-
-        pills.push({
-            id: 'ALL',
-            label: 'Todo el equipo',
-            isAll: true,
-            cssClass: this.selectedEmployeeId === 'ALL' ? 'prof-pill prof-pill--active' : 'prof-pill'
-        });
-
+        pills.push({ id: 'ALL', label: 'Todo el equipo', isAll: true, cssClass: this.selectedEmployeeId === 'ALL' ? 'prof-pill prof-pill--active' : 'prof-pill' });
         this.allAppointments.forEach(appt => {
             if (appt.employeeId && !seen.has(appt.employeeId)) {
                 seen.add(appt.employeeId);
                 const color = this.employeeColors[colorIndex % this.employeeColors.length];
                 colorIndex++;
-                
-                pills.push({
-                    id: appt.employeeId,
-                    label: appt.employeeName,
-                    color: color,
-                    isAll: false,
-                    style: `background-color: ${color};`,
-                    cssClass: this.selectedEmployeeId === appt.employeeId ? 'prof-pill prof-pill--active' : 'prof-pill'
-                });
+                pills.push({ id: appt.employeeId, label: appt.employeeName, color: color, isAll: false, style: `background-color: ${color};`, cssClass: this.selectedEmployeeId === appt.employeeId ? 'prof-pill prof-pill--active' : 'prof-pill' });
             }
         });
         return pills;
@@ -136,28 +138,19 @@ export default class AASalonAppointments extends LightningElement {
 
     get groupedAppointments() {
         if (!this.allAppointments || this.allAppointments.length === 0) return [];
-
         const hoy = new Date();
         hoy.setHours(0, 0, 0, 0);
-
         const manana = new Date(hoy);
         manana.setDate(manana.getDate() + 1);
 
         const filtered = this.allAppointments.filter(appt => {
             if (this.selectedEmployeeId !== 'ALL' && appt.employeeId !== this.selectedEmployeeId) return false;
-
             const apptDate = new Date(appt.fechaRaw);
             apptDate.setHours(0, 0, 0, 0);
-
-            if (this.selectedTab === 'CANCELADOS') {
-                return appt.isCancelled;
-            } else if (this.selectedTab === 'HOY') {
-                return !appt.isCancelled && apptDate.getTime() === hoy.getTime();
-            } else if (this.selectedTab === 'MANANA') {
-                return !appt.isCancelled && apptDate.getTime() === manana.getTime();
-            } else if (this.selectedTab === 'PROXIMOS') {
-                return !appt.isCancelled && apptDate.getTime() > manana.getTime();
-            }
+            if (this.selectedTab === 'CANCELADOS') return appt.isCancelled;
+            if (this.selectedTab === 'HOY') return !appt.isCancelled && apptDate.getTime() === hoy.getTime();
+            if (this.selectedTab === 'MANANA') return !appt.isCancelled && apptDate.getTime() === manana.getTime();
+            if (this.selectedTab === 'PROXIMOS') return !appt.isCancelled && apptDate.getTime() > manana.getTime();
             return false;
         });
 
@@ -165,13 +158,9 @@ export default class AASalonAppointments extends LightningElement {
 
         const groups = {};
         filtered.forEach(appt => {
-            if (!groups[appt.fechaHeader]) {
-                groups[appt.fechaHeader] = [];
-            }
-            
+            if (!groups[appt.fechaHeader]) groups[appt.fechaHeader] = [];
             const statusLabel = appt.isCancelled ? 'CANCELADO' : (appt.Status__c === 'Pending' ? 'PENDIENTE' : 'CONFIRMADO');
-            const statusClass = appt.isCancelled ? 'status-label status-label--cancelled' : 'status-label status-label--pending';
-            
+            const statusClass = appt.isCancelled ? 'status-label status-label--cancelled' : (appt.Status__c === 'Pending' ? 'status-label status-label--pending' : 'status-label status-label--confirmed'); // NUEVO: Asegura clase confirmado
             const empPill = this.employeePills.find(p => p.id === appt.employeeId);
             const borderColor = empPill && empPill.color ? empPill.color : '#333';
 
@@ -179,28 +168,14 @@ export default class AASalonAppointments extends LightningElement {
                 ...appt,
                 statusLabel: statusLabel,
                 statusClass: statusClass,
-                cardStyle: `border-left: 4px solid ${borderColor};`,
-                showWaButton: this.selectedTab === 'MANANA' && !!appt.waLink
+                cardStyle: `border-left: 4px solid ${borderColor};`
             });
         });
 
-        return Object.keys(groups).map(dateStr => {
-            return {
-                dateHeader: dateStr,
-                appointments: groups[dateStr]
-            };
-        });
+        return Object.keys(groups).map(dateStr => { return { dateHeader: dateStr, appointments: groups[dateStr] }; });
     }
 
-    get hasData() {
-        return this.groupedAppointments.length > 0;
-    }
-
-    handleEmployeeSelect(event) {
-        this.selectedEmployeeId = event.currentTarget.dataset.id;
-    }
-
-    handleTabSelect(event) {
-        this.selectedTab = event.currentTarget.dataset.id;
-    }  
+    get hasData() { return this.groupedAppointments.length > 0; }
+    handleEmployeeSelect(event) { this.selectedEmployeeId = event.currentTarget.dataset.id; }
+    handleTabSelect(event) { this.selectedTab = event.currentTarget.dataset.id; }  
 }

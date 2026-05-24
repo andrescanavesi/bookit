@@ -5,7 +5,7 @@ public with sharing class AA_SalonAppointmentsController {
         @AuraEnabled public List<AA_Appointment__c> appointments { get; set; }
     }
 
-    @AuraEnabled(cacheable=true)
+    @AuraEnabled(cacheable=false)
     public static AgendaContext getSalonAppointments() {
         AA_Logger logger = new AA_Logger(true);
         String businessId = '';
@@ -60,15 +60,29 @@ public with sharing class AA_SalonAppointmentsController {
 
 	@AuraEnabled
     public static void markReminderAsSent(Id appointmentId) {
-    try {
-        AA_Appointment__c appt = new AA_Appointment__c(
-            Id = appointmentId,
-            Reminder_Sent_Date__c = System.now()
-        );
-        update appt;
-    } catch (Exception e) {
-        throw new AuraHandledException('Error al registrar el envío del recordatorio: ' + e.getMessage());
+        try {
+            AA_Appointment__c appt = new AA_Appointment__c(
+                Id = appointmentId,
+                Reminder_Sent_Date__c = System.now()
+            );
+            update appt;
+        } catch (Exception e) {
+            throw new AuraHandledException('Error al registrar el envío del recordatorio: ' + e.getMessage());
+        }
     }
-}
+
+    @AuraEnabled
+    public static void confirmAppointment(Id appointmentId) {
+        try {
+            AA_Appointment__c appt = new AA_Appointment__c(
+                Id = appointmentId,
+                Customer_Confirmation_Date__c = System.now(),
+                Status__c = 'Confirmed' // Cambiamos el estado de la cita automáticamente
+            );
+            update appt;
+        } catch (Exception e) {
+            throw new AuraHandledException('Error al confirmar la cita: ' + e.getMessage());
+        }
+    }
 
 }

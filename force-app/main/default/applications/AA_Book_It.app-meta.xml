@@ -12,6 +12,7 @@
     <label>AA Book It</label>
     <navType>Standard</navType>
     <tabs>AA_Public_Agenda_Test</tabs>
+    <tabs>AA_Salon_Appointments</tabs>
     <tabs>AA_Salon_Matrix</tabs>
     <tabs>AA_Citas_Salon_Test</tabs>
     <tabs>AA_Appointment__c</tabs>

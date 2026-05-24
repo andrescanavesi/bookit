@@ -17,6 +17,11 @@
                 <label>Pending</label>
             </value>
             <value>
+                <fullName>Confirmed</fullName>
+                <default>false</default>
+                <label>Confirmed</label>
+            </value>
+            <value>
                 <fullName>Cancelled</fullName>
                 <default>false</default>
                 <label>Cancelled</label>

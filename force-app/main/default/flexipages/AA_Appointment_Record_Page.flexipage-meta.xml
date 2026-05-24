@@ -199,6 +199,30 @@
                 <identifier>RecordBusiness_Id__cField</identifier>
             </fieldInstance>
         </itemInstances>
+        <itemInstances>
+            <fieldInstance>
+                <fieldItem>Record.Reminder_Sent_Date__c</fieldItem>
+                <identifier>RecordReminder_Sent_Date__cField</identifier>
+            </fieldInstance>
+        </itemInstances>
+        <itemInstances>
+            <fieldInstance>
+                <fieldItem>Record.Is_Reminder_Sent__c</fieldItem>
+                <identifier>RecordIs_Reminder_Sent__cField</identifier>
+            </fieldInstance>
+        </itemInstances>
+        <itemInstances>
+            <fieldInstance>
+                <fieldItem>Record.Customer_Confirmation_Date__c</fieldItem>
+                <identifier>RecordCustomer_Confirmation_Date__cField</identifier>
+            </fieldInstance>
+        </itemInstances>
+        <itemInstances>
+            <fieldInstance>
+                <fieldItem>Record.Is_Customer_Confirmed__c</fieldItem>
+                <identifier>RecordIs_Customer_Confirmed__cField</identifier>
+            </fieldInstance>
+        </itemInstances>
         <name>Facet-adced6cf-3125-4996-b02a-8adf1ba0d393</name>
         <type>Facet</type>
     </flexiPageRegions>

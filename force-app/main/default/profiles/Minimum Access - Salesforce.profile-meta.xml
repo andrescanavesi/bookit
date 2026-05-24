@@ -219,6 +219,11 @@
         <readable>true</readable>
     </fieldPermissions>
     <fieldPermissions>
+        <editable>true</editable>
+        <field>AA_Appointment__c.Customer_Confirmation_Date__c</field>
+        <readable>true</readable>
+    </fieldPermissions>
+    <fieldPermissions>
         <editable>false</editable>
         <field>AA_Appointment__c.Duration_Minutes__c</field>
         <readable>true</readable>
@@ -231,6 +236,21 @@
     <fieldPermissions>
         <editable>false</editable>
         <field>AA_Appointment__c.End_Date_Time__c</field>
+        <readable>true</readable>
+    </fieldPermissions>
+    <fieldPermissions>
+        <editable>false</editable>
+        <field>AA_Appointment__c.Is_Customer_Confirmed__c</field>
+        <readable>true</readable>
+    </fieldPermissions>
+    <fieldPermissions>
+        <editable>false</editable>
+        <field>AA_Appointment__c.Is_Reminder_Sent__c</field>
+        <readable>true</readable>
+    </fieldPermissions>
+    <fieldPermissions>
+        <editable>true</editable>
+        <field>AA_Appointment__c.Reminder_Sent_Date__c</field>
         <readable>true</readable>
     </fieldPermissions>
     <fieldPermissions>

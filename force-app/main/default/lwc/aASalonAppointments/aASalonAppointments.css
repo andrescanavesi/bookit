@@ -294,3 +294,39 @@
     background-color: #D9D2C5 !important;
     color: #1A1A1A !important;
 }
+
+/* CONTENEDOR GRIS INFERIOR UNIFICADO */
+.appt-card-footer {
+    border-top: 1px dashed #E5DFD5;
+    padding: 12px 16px;
+    display: flex;
+    justify-content: flex-end;
+    gap: 12px; /* Alineación y separación perfecta entre ambos botones */
+    background-color: #FAFAFA;
+    border-bottom-left-radius: 8px;
+    border-bottom-right-radius: 8px;
+}
+
+/* BOTÓN CONFIRMAR CITA (Negro Editorial) */
+.btn-confirm {
+    background-color: #121212;
+    color: #FFFFFF;
+    border: none;
+    padding: 8px 16px;
+    border-radius: 6px;
+    font-size: 13px;
+    font-weight: 600;
+    cursor: pointer;
+    font-family: inherit;
+    transition: background-color 0.2s ease;
+}
+
+.btn-confirm:hover {
+    background-color: #333333; /* Aclara levemente al pasar el mouse */
+}
+
+/* Ajuste por si falta el estilo de confirmado en los badges */
+.status-label--confirmed {
+    background-color: #E2ECE9;
+    color: #2D6A4F;
+}
