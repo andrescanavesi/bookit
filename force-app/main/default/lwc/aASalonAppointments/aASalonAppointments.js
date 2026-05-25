@@ -2,7 +2,8 @@ import { LightningElement, track, wire } from 'lwc';
 import { refreshApex } from '@salesforce/apex';
 import getSalonAppointments from '@salesforce/apex/AA_SalonAppointmentsController.getSalonAppointments';
 import markReminderAsSent from '@salesforce/apex/AA_SalonAppointmentsController.markReminderAsSent';
-import confirmAppointment from '@salesforce/apex/AA_SalonAppointmentsController.confirmAppointment'; // NUEVO
+import confirmAppointment from '@salesforce/apex/AA_SalonAppointmentsController.confirmAppointment';
+import cancelAppointment from '@salesforce/apex/AA_SalonAppointmentsController.cancelAppointment'; // NUEVO
 
 export default class AASalonAppointments extends LightningElement {
     @track allAppointments = [];
@@ -26,6 +27,8 @@ export default class AASalonAppointments extends LightningElement {
                 return; 
             }
             this.isAdmin = data.isAdmin;
+            
+            // Aquí solo procesamos los datos "crudos", sin lógica de interfaz (pestañas)
             this.allAppointments = data.appointments.map(appt => {
                 const dt = new Date(appt.Start_Date_Time__c);
                 
@@ -41,14 +44,6 @@ export default class AASalonAppointments extends LightningElement {
                 const serviceName = appt.Service__r?.Name || 'Servicio';
                 
                 const isSent = !!appt.Reminder_Sent_Date__c;
-                const isCancelled = appt.Status__c === 'Cancelled';
-                
-                // NUEVO: El botón de confirmar se muestra solo si la cita está en estado "Pending" y no está cancelada
-                const isPending = appt.Status__c === 'Pending';
-                const showConfirm = isPending && !isCancelled;
-                
-                // Modificamos el label de WA para diferenciarlo de la confirmación física
-                const showWa = this.selectedTab === 'MANANA' && !!phone;
 
                 return {
                     ...appt,
@@ -61,14 +56,13 @@ export default class AASalonAppointments extends LightningElement {
                     duration: appt.Service__r?.Duration_Minutes__c || 30,
                     employeeName: appt.Employee__r?.Name || 'Equipo',
                     employeeId: appt.Employee__c,
-                    isCancelled: isCancelled,
+                    // Dejamos marcados los estados para usarlos fácilmente abajo
+                    isCancelled: appt.Status__c === 'Cancelled',
+                    isPending: appt.Status__c === 'Pending',
                     isReminderSent: isSent, 
                     waButtonLabel: isSent ? 'Reenviar Recordatorio' : 'Enviar Recordatorio', 
                     waButtonClass: isSent ? 'wa-btn wa-btn--sent' : 'wa-btn', 
-                    waLink: this.generateWhatsAppLink(phone, firstName, serviceName, horaStr),
-                    showWaButton: showWa,
-                    showConfirmButton: showConfirm, // NUEVO
-                    hasFooterActions: showWa || showConfirm // NUEVO: Controla si se dibuja el contenedor gris inferior
+                    waLink: this.generateWhatsAppLink(phone, firstName, serviceName, horaStr)
                 };
             });
             this.isLoading = false;
@@ -97,20 +91,63 @@ export default class AASalonAppointments extends LightningElement {
             });
     }
 
-    // NUEVO: Evento imperativo para confirmar la cita
     handleConfirmClick(event) {
         const apptId = event.currentTarget.dataset.id;
         
+        // 1. FEEDBACK INMEDIATO: Marcamos la cita actual como "en proceso de confirmación"
+        this.allAppointments = this.allAppointments.map(appt => {
+            if (appt.Id === apptId) {
+                return { ...appt, isConfirming: true };
+            }
+            return appt;
+        });
+
+        // 2. Disparamos la acción en el servidor
         confirmAppointment({ appointmentId: apptId })
             .then(() => {
                 return refreshApex(this.wiredAppointmentsResult);
             })
             .catch(error => {
                 console.error('Error al confirmar la cita:', error);
+                
+                // Si hay un error, revertimos el estado de carga para que pueda reintentar
+                this.allAppointments = this.allAppointments.map(appt => {
+                    if (appt.Id === apptId) {
+                        return { ...appt, isConfirming: false };
+                    }
+                    return appt;
+                });
             });
     }
 
-    // ... (Tus getters de employeePills, tabs, groupedAppointments y eventos de selección quedan exactamente idénticos)
+    handleCancelClick(event) {
+        const apptId = event.currentTarget.dataset.id;
+        
+        // 1. Feedback UI: Marcamos la cita como "en proceso de cancelación"
+        this.allAppointments = this.allAppointments.map(appt => {
+            if (appt.Id === apptId) {
+                return { ...appt, isCancelling: true };
+            }
+            return appt;
+        });
+
+        // 2. Disparamos la acción en el servidor
+        cancelAppointment({ appointmentId: apptId })
+            .then(() => {
+                return refreshApex(this.wiredAppointmentsResult);
+            })
+            .catch(error => {
+                console.error('Error al cancelar la cita:', error);
+                // Si falla, revertimos el estado
+                this.allAppointments = this.allAppointments.map(appt => {
+                    if (appt.Id === apptId) {
+                        return { ...appt, isCancelling: false };
+                    }
+                    return appt;
+                });
+            });
+    }
+
     get employeePills() {
         const pills = [];
         const seen = new Set();
@@ -136,7 +173,7 @@ export default class AASalonAppointments extends LightningElement {
         ];
     }
 
-    get groupedAppointments() {
+   get groupedAppointments() {
         if (!this.allAppointments || this.allAppointments.length === 0) return [];
         const hoy = new Date();
         hoy.setHours(0, 0, 0, 0);
@@ -159,16 +196,34 @@ export default class AASalonAppointments extends LightningElement {
         const groups = {};
         filtered.forEach(appt => {
             if (!groups[appt.fechaHeader]) groups[appt.fechaHeader] = [];
-            const statusLabel = appt.isCancelled ? 'CANCELADO' : (appt.Status__c === 'Pending' ? 'PENDIENTE' : 'CONFIRMADO');
-            const statusClass = appt.isCancelled ? 'status-label status-label--cancelled' : (appt.Status__c === 'Pending' ? 'status-label status-label--pending' : 'status-label status-label--confirmed'); // NUEVO: Asegura clase confirmado
+            
+            const statusLabel = appt.isCancelled ? 'CANCELADO' : (appt.isPending ? 'PENDIENTE' : 'CONFIRMADO');
+            const statusClass = appt.isCancelled ? 'status-label status-label--cancelled' : (appt.isPending ? 'status-label status-label--pending' : 'status-label status-label--confirmed');
+            
             const empPill = this.employeePills.find(p => p.id === appt.employeeId);
             const borderColor = empPill && empPill.color ? empPill.color : '#333';
+
+            // --- LÓGICA DE VISIBILIDAD DE BOTONES ---
+            
+            // 1. WhatsApp: Solo en Mañana
+            const showWa = (this.selectedTab === 'MANANA' && !appt.isCancelled && !!appt.waLink);
+            
+            // 2. Confirmar: Solo si está Pendiente
+            const showConfirm = (appt.isPending && !appt.isCancelled);
+            
+            // 3. Cancelar: Siempre disponible si no está cancelada ya
+            const showCancel = !appt.isCancelled; 
 
             groups[appt.fechaHeader].push({
                 ...appt,
                 statusLabel: statusLabel,
                 statusClass: statusClass,
-                cardStyle: `border-left: 4px solid ${borderColor};`
+                cardStyle: `border-left: 4px solid ${borderColor};`,
+                showWaButton: showWa,
+                showConfirmButton: showConfirm,
+                showCancelButton: showCancel,
+                // CLAVE: El footer se muestra si CUALQUIERA de los 3 botones debe estar visible
+                hasFooterActions: showWa || showConfirm || showCancel 
             });
         });
 

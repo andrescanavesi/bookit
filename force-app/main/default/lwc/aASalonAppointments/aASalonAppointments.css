@@ -245,7 +245,7 @@
     display: flex;
     padding: 16px;
 }
-.appt-card-footer {
+/*.appt-card-footer {
     border-top: 1px dashed #E5DFD5;
     padding: 12px 16px;
     display: flex;
@@ -253,7 +253,7 @@
     background-color: #FAFAFA;
     border-bottom-left-radius: 8px;
     border-bottom-right-radius: 8px;
-}
+}*/
 
 /* BOTÓN DE WHATSAPP */
 .wa-btn {
@@ -296,16 +296,16 @@
 }
 
 /* CONTENEDOR GRIS INFERIOR UNIFICADO */
-.appt-card-footer {
+/*.appt-card-footer {
     border-top: 1px dashed #E5DFD5;
     padding: 12px 16px;
     display: flex;
     justify-content: flex-end;
-    gap: 12px; /* Alineación y separación perfecta entre ambos botones */
+    gap: 12px; 
     background-color: #FAFAFA;
     border-bottom-left-radius: 8px;
     border-bottom-right-radius: 8px;
-}
+}*/
 
 /* BOTÓN CONFIRMAR CITA (Negro Editorial) */
 .btn-confirm {
@@ -329,4 +329,55 @@
 .status-label--confirmed {
     background-color: #E2ECE9;
     color: #2D6A4F;
+}
+
+/* Estado de carga para el botón de confirmación */
+.btn-confirm:disabled {
+    background-color: #555555; /* Gris intermedio */
+    color: #DDDDDD;
+    cursor: not-allowed; /* Cambia el cursor a un círculo de prohibición */
+    opacity: 0.8;
+    transition: none; /* Evita parpadeos con el hover */
+}
+
+/* AJUSTE DEL CONTENEDOR DEL FOOTER PARA SEPARAR EL CANCELAR DE LOS DEMÁS */
+.appt-card-footer {
+    border-top: 1px dashed #E5DFD5;
+    padding: 12px 16px;
+    display: flex;
+    justify-content: space-between; /* Envía Cancelar a la izq y los positivos a la der */
+    align-items: center;
+    background-color: #FAFAFA;
+    border-bottom-left-radius: 8px;
+    border-bottom-right-radius: 8px;
+}
+.footer-actions-right {
+    display: flex;
+    gap: 12px;
+}
+
+/* BOTÓN CANCELAR (Diseño Destructivo Suave) */
+.btn-cancel {
+    background-color: transparent;
+    color: #8C2417; /* Rojo óxido */
+    border: 1px solid #E5DFD5;
+    padding: 8px 12px;
+    border-radius: 6px;
+    font-size: 13px;
+    font-weight: 500;
+    cursor: pointer;
+    font-family: inherit;
+    transition: all 0.2s ease;
+}
+
+.btn-cancel:hover {
+    border-color: #8C2417;
+    background-color: rgba(140, 36, 23, 0.04);
+}
+
+.btn-cancel:disabled {
+    color: #8A8175;
+    border-color: #D9D2C5;
+    cursor: not-allowed;
+    background-color: transparent;
 }
