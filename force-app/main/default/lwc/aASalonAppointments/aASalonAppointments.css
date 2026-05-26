@@ -381,3 +381,31 @@
     cursor: not-allowed;
     background-color: transparent;
 }
+
+/* BOTÓN ATENDIDO (Premium Green) */
+.btn-done {
+    background-color: #2D6A4F; /* Verde bosque elegante */
+    color: #FFFFFF;
+    border: none;
+    padding: 8px 16px;
+    border-radius: 6px;
+    font-size: 13px;
+    font-weight: 600;
+    cursor: pointer;
+    font-family: inherit;
+    transition: background-color 0.2s ease;
+}
+.btn-done:hover {
+    background-color: #1B4332;
+}
+.btn-done:disabled {
+    background-color: #74C69D;
+    color: #FFFFFF;
+    cursor: not-allowed;
+}
+
+/* BADGE ESTADO REALIZADA (Gris humo ultra limpio) */
+.status-label--done {
+    background-color: #EAEAEA;
+    color: #4A4A4A;
+}

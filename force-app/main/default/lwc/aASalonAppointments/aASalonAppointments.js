@@ -3,7 +3,8 @@ import { refreshApex } from '@salesforce/apex';
 import getSalonAppointments from '@salesforce/apex/AA_SalonAppointmentsController.getSalonAppointments';
 import markReminderAsSent from '@salesforce/apex/AA_SalonAppointmentsController.markReminderAsSent';
 import confirmAppointment from '@salesforce/apex/AA_SalonAppointmentsController.confirmAppointment';
-import cancelAppointment from '@salesforce/apex/AA_SalonAppointmentsController.cancelAppointment'; // NUEVO
+import completeAppointment from '@salesforce/apex/AA_SalonAppointmentsController.completeAppointment'; // NUEVO
+import cancelAppointment from '@salesforce/apex/AA_SalonAppointmentsController.cancelAppointment';
 
 export default class AASalonAppointments extends LightningElement {
     @track allAppointments = [];
@@ -28,10 +29,8 @@ export default class AASalonAppointments extends LightningElement {
             }
             this.isAdmin = data.isAdmin;
             
-            // Aquí solo procesamos los datos "crudos", sin lógica de interfaz (pestañas)
             this.allAppointments = data.appointments.map(appt => {
                 const dt = new Date(appt.Start_Date_Time__c);
-                
                 const DOW = ['Dom', 'Lun', 'Mar', 'Mié', 'Jue', 'Vie', 'Sáb'];
                 const MESES = ['Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio', 'Julio', 'Agosto', 'Setiembre', 'Octubre', 'Noviembre', 'Diciembre'];
                 
@@ -56,9 +55,11 @@ export default class AASalonAppointments extends LightningElement {
                     duration: appt.Service__r?.Duration_Minutes__c || 30,
                     employeeName: appt.Employee__r?.Name || 'Equipo',
                     employeeId: appt.Employee__c,
-                    // Dejamos marcados los estados para usarlos fácilmente abajo
+                    // Mapeo de estados nativos
                     isCancelled: appt.Status__c === 'Cancelled',
                     isPending: appt.Status__c === 'Pending',
+                    isConfirmed: appt.Status__c === 'Confirmed',
+                    isDone: appt.Status__c === 'Done', // NUEVO
                     isReminderSent: isSent, 
                     waButtonLabel: isSent ? 'Reenviar Recordatorio' : 'Enviar Recordatorio', 
                     waButtonClass: isSent ? 'wa-btn wa-btn--sent' : 'wa-btn', 
@@ -83,69 +84,55 @@ export default class AASalonAppointments extends LightningElement {
     handleWhatsAppClick(event) {
         const apptId = event.currentTarget.dataset.id;
         markReminderAsSent({ appointmentId: apptId })
-            .then(() => {
-                return refreshApex(this.wiredAppointmentsResult);
-            })
-            .catch(error => {
-                console.error('Error al guardar fecha de recordatorio:', error);
-            });
+            .then(() => { return refreshApex(this.wiredAppointmentsResult); })
+            .catch(error => { console.error('Error al guardar fecha de recordatorio:', error); });
     }
 
     handleConfirmClick(event) {
         const apptId = event.currentTarget.dataset.id;
-        
-        // 1. FEEDBACK INMEDIATO: Marcamos la cita actual como "en proceso de confirmación"
-        this.allAppointments = this.allAppointments.map(appt => {
-            if (appt.Id === apptId) {
-                return { ...appt, isConfirming: true };
-            }
-            return appt;
-        });
+        this.updateAppointmentLoadingState(apptId, 'isConfirming', true);
 
-        // 2. Disparamos la acción en el servidor
         confirmAppointment({ appointmentId: apptId })
-            .then(() => {
-                return refreshApex(this.wiredAppointmentsResult);
-            })
-            .catch(error => {
+            .then(() => { return refreshApex(this.wiredAppointmentsResult); })
+            .catch(error => { 
                 console.error('Error al confirmar la cita:', error);
-                
-                // Si hay un error, revertimos el estado de carga para que pueda reintentar
-                this.allAppointments = this.allAppointments.map(appt => {
-                    if (appt.Id === apptId) {
-                        return { ...appt, isConfirming: false };
-                    }
-                    return appt;
-                });
+                this.updateAppointmentLoadingState(apptId, 'isConfirming', false);
+            });
+    }
+
+    // NUEVO: Manejador para finalizar la cita
+    handleDoneClick(event) {
+        const apptId = event.currentTarget.dataset.id;
+        this.updateAppointmentLoadingState(apptId, 'isCompleting', true);
+
+        completeAppointment({ appointmentId: apptId })
+            .then(() => { return refreshApex(this.wiredAppointmentsResult); })
+            .catch(error => {
+                console.error('Error al finalizar la cita:', error);
+                this.updateAppointmentLoadingState(apptId, 'isCompleting', false);
             });
     }
 
     handleCancelClick(event) {
         const apptId = event.currentTarget.dataset.id;
-        
-        // 1. Feedback UI: Marcamos la cita como "en proceso de cancelación"
+        this.updateAppointmentLoadingState(apptId, 'isCancelling', true);
+
+        cancelAppointment({ appointmentId: apptId })
+            .then(() => { return refreshApex(this.wiredAppointmentsResult); })
+            .catch(error => {
+                console.error('Error al cancelar la cita:', error);
+                this.updateAppointmentLoadingState(apptId, 'isCancelling', false);
+            });
+    }
+
+    // Función auxiliar para actualizar estados de carga individuales de forma limpia
+    updateAppointmentLoadingState(apptId, propertyName, value) {
         this.allAppointments = this.allAppointments.map(appt => {
             if (appt.Id === apptId) {
-                return { ...appt, isCancelling: true };
+                return { ...appt, [propertyName]: value };
             }
             return appt;
         });
-
-        // 2. Disparamos la acción en el servidor
-        cancelAppointment({ appointmentId: apptId })
-            .then(() => {
-                return refreshApex(this.wiredAppointmentsResult);
-            })
-            .catch(error => {
-                console.error('Error al cancelar la cita:', error);
-                // Si falla, revertimos el estado
-                this.allAppointments = this.allAppointments.map(appt => {
-                    if (appt.Id === apptId) {
-                        return { ...appt, isCancelling: false };
-                    }
-                    return appt;
-                });
-            });
     }
 
     get employeePills() {
@@ -173,7 +160,7 @@ export default class AASalonAppointments extends LightningElement {
         ];
     }
 
-   get groupedAppointments() {
+    get groupedAppointments() {
         if (!this.allAppointments || this.allAppointments.length === 0) return [];
         const hoy = new Date();
         hoy.setHours(0, 0, 0, 0);
@@ -197,22 +184,20 @@ export default class AASalonAppointments extends LightningElement {
         filtered.forEach(appt => {
             if (!groups[appt.fechaHeader]) groups[appt.fechaHeader] = [];
             
-            const statusLabel = appt.isCancelled ? 'CANCELADO' : (appt.isPending ? 'PENDIENTE' : 'CONFIRMADO');
-            const statusClass = appt.isCancelled ? 'status-label status-label--cancelled' : (appt.isPending ? 'status-label status-label--pending' : 'status-label status-label--confirmed');
+            // NUEVO: Agregamos etiqueta y estilo para el estado Done
+            const statusLabel = appt.isCancelled ? 'CANCELADO' : (appt.isDone ? 'REALIZADA' : (appt.isPending ? 'PENDIENTE' : 'CONFIRMADO'));
+            const statusClass = appt.isCancelled ? 'status-label status-label--cancelled' : (appt.isDone ? 'status-label status-label--done' : (appt.isPending ? 'status-label status-label--pending' : 'status-label status-label--confirmed'));
             
             const empPill = this.employeePills.find(p => p.id === appt.employeeId);
             const borderColor = empPill && empPill.color ? empPill.color : '#333';
 
-            // --- LÓGICA DE VISIBILIDAD DE BOTONES ---
+            // --- REGLAS DE VISIBILIDAD DE BOTONES ACTUALIZADAS ---
+            const showWa = (this.selectedTab === 'MANANA' && !appt.isCancelled && !appt.isDone && !!appt.waLink);
+            const showConfirm = (appt.isPending && !appt.isCancelled && !appt.isDone);
+            const showCancel = (!appt.isCancelled && !appt.isDone); // Si ya se realizó, no se puede cancelar
             
-            // 1. WhatsApp: Solo en Mañana
-            const showWa = (this.selectedTab === 'MANANA' && !appt.isCancelled && !!appt.waLink);
-            
-            // 2. Confirmar: Solo si está Pendiente
-            const showConfirm = (appt.isPending && !appt.isCancelled);
-            
-            // 3. Cancelar: Siempre disponible si no está cancelada ya
-            const showCancel = !appt.isCancelled; 
+            // NUEVO: El botón de realizar solo vive en la pestaña HOY y si la cita no está cerrada o cancelada
+            const showDone = (this.selectedTab === 'HOY' && !appt.isCancelled && !appt.isDone);
 
             groups[appt.fechaHeader].push({
                 ...appt,
@@ -222,8 +207,8 @@ export default class AASalonAppointments extends LightningElement {
                 showWaButton: showWa,
                 showConfirmButton: showConfirm,
                 showCancelButton: showCancel,
-                // CLAVE: El footer se muestra si CUALQUIERA de los 3 botones debe estar visible
-                hasFooterActions: showWa || showConfirm || showCancel 
+                showDoneButton: showDone, // NUEVO
+                hasFooterActions: showWa || showConfirm || showCancel || showDone
             });
         });
 

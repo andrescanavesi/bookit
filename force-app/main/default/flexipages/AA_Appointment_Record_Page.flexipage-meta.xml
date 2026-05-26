@@ -223,6 +223,18 @@
                 <identifier>RecordIs_Customer_Confirmed__cField</identifier>
             </fieldInstance>
         </itemInstances>
+        <itemInstances>
+            <fieldInstance>
+                <fieldItem>Record.Cancelled_Date__c</fieldItem>
+                <identifier>RecordCancelled_Date__cField</identifier>
+            </fieldInstance>
+        </itemInstances>
+        <itemInstances>
+            <fieldInstance>
+                <fieldItem>Record.Done_Date__c</fieldItem>
+                <identifier>RecordDone_Date__cField</identifier>
+            </fieldInstance>
+        </itemInstances>
         <name>Facet-adced6cf-3125-4996-b02a-8adf1ba0d393</name>
         <type>Facet</type>
     </flexiPageRegions>
