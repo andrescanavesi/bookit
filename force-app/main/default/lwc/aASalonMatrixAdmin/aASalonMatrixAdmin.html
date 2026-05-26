@@ -42,9 +42,18 @@
                                     <td key={cell.id} class="appt-cell">
                                         <div class={cell.cssClass} style={cell.style}>
                                             <template if:true={cell.isStartBlock}>
-                                                <span class="appt-customer">{cell.data.customer}</span>
-                                                <span class="appt-service">{cell.data.service}</span>
-                                            </template>
+                                            <div class="appt-content-wrapper">
+                                                <div class="appt-meta">
+                                                    <span class="appt-time-range">🕒 {cell.data.timeRange}</span>
+                                                    <span class="appt-price">{cell.data.priceText}</span>
+                                                </div>
+                                                
+                                                <div class="appt-main-info">
+                                                    <span class="appt-customer">{cell.data.customer}</span>
+                                                    <span class="appt-service">{cell.data.service}</span>
+                                                </div>
+                                            </div>
+                                        </template>
                                         </div>
                                     </td>
                                 </template>

@@ -155,7 +155,7 @@ public with sharing class AA_SalonAppointmentsController {
             wrapper.appointments = [
                 SELECT Id, Start_Date_Time__c, Status__c, Employee__c,
                        Customer__r.First_Name__c, Customer__r.Last_Name__c, 
-                       Service__r.Name, Service__r.Duration_Minutes__c
+                       Service__r.Name, Service__r.Duration_Minutes__c, Amount__c
                 FROM AA_Appointment__c 
                 WHERE DAY_ONLY(Start_Date_Time__c) = :selectedDate 
                 AND Status__c != 'Cancelled'

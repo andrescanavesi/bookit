@@ -1,32 +1,25 @@
-import { LightningElement, track } from 'lwc';
+import { LightningElement, track, wire } from 'lwc';
+import getMatrixData from '@salesforce/apex/AA_SalonAppointmentsController.getMatrixData';
 
 export default class AASalonMatrixAdmin extends LightningElement {
     
     @track weekDays = [];
-    @track selectedDate = '';
+    @track selectedDate = ''; // Formato YYYY-MM-DD
     @track gridHeaders = [];
     @track gridRows = [];
 
-   // 1. EL NUEVO EQUIPO
-    mockEmployees = [
-        { id: 'E1', name: 'Silvina', color: '#B23A3A' },   // Rojo óxido
-        { id: 'E2', name: 'Dahiana', color: '#D4A017' },   // Mostaza
-        { id: 'E3', name: 'Sophie', color: '#3A70A1' },    // Azul grisáceo
-        { id: 'E4', name: 'Yamila', color: '#5A8A4F' },    // Verde salvia
-        { id: 'E5', name: 'Soledad', color: '#6B4F8E' },   // Violeta apagado
-        { id: 'E6', name: 'Agustina', color: '#A15C3A' }   // Terracota
-    ];
+    // Arrays dinámicos que llenará la base de datos
+    @track activeEmployees = [];
+    @track activeAppointments = [];
 
-    // Mantenemos la variable limpia, la llenaremos en el connectedCallback
-    mockAppointments = [];
+    // Mantenemos la paleta corporativa elegante para asignar dinámicamente a los empleados
+    employeeColors = ['#B23A3A', '#D4A017', '#3A70A1', '#5A8A4F', '#6B4F8E', '#A15C3A'];
 
     connectedCallback() {
-        this.initWeekDays();
-        this.initMockData();
-        this.generateMatrix();
+        this.initWeekDays(); // Inicializa las 7 tarjetas de fechas
     }
 
-    // 1. GENERAR LOS PRÓXIMOS 7 DÍAS
+    // 1. GENERAR LOS PRÓXIMOS 7 DÍAS (Igual a tu versión visual anterior)
     initWeekDays() {
         const today = new Date();
         const days = [];
@@ -36,12 +29,10 @@ export default class AASalonMatrixAdmin extends LightningElement {
         for (let i = 0; i < 7; i++) {
             const d = new Date(today);
             d.setDate(today.getDate() + i);
-
-            // Formato ISO YYYY-MM-DD para usar como ID único
             const isoDate = d.toISOString().split('T')[0];
 
             if (i === 0) {
-                this.selectedDate = isoDate; // Seleccionamos "Hoy" por defecto
+                this.selectedDate = isoDate; // Hoy por defecto
             }
 
             days.push({
@@ -55,43 +46,73 @@ export default class AASalonMatrixAdmin extends LightningElement {
         this.weekDays = days;
     }
 
-    // 2. LOS TURNOS SIMULADOS DISTRIBUIDOS
-    initMockData() {
-        if (this.weekDays.length < 2) return;
-        const hoyStr = this.weekDays[0].dateKey;
-        const mananaStr = this.weekDays[1].dateKey;
+    // 2. CONEXIÓN AL BACKEND: Wire reactivo al cambio de fecha
+    @wire(getMatrixData, { selectedDate: '$selectedDate' })
+    wiredMatrixData({ error, data }) {
+        console.info('wiredMatrixData, date: '+this.selectedDate);
+        if (data) {
+            // A. Procesamos los empleados reales asignándoles un color de la paleta
+            let colorIndex = 0;
+            this.activeEmployees = data.employees.map(emp => {
+                const color = this.employeeColors[colorIndex % this.employeeColors.length];
+                colorIndex++;
+                return {
+                    id: emp.Id,
+                    name: emp.Name,
+                    color: color
+                };
+            });
 
-        this.mockAppointments = [
-            // Turnos de HOY
-            { id: 'A1', date: hoyStr, employeeId: 'E1', startTime: '09:00', duration: 90, customer: 'Lucia P.', service: 'Balayage' },
-            { id: 'A2', date: hoyStr, employeeId: 'E2', startTime: '10:00', duration: 60, customer: 'Juan M.', service: 'Corte y Lavado' },
-            { id: 'A3', date: hoyStr, employeeId: 'E4', startTime: '10:30', duration: 30, customer: 'Carla T.', service: 'Perfilado Cejas' },
-            { id: 'A4', date: hoyStr, employeeId: 'E6', startTime: '14:00', duration: 120, customer: 'Marta G.', service: 'Alisado Keratina' },
-            { id: 'A5', date: hoyStr, employeeId: 'E3', startTime: '15:30', duration: 60, customer: 'Romina L.', service: 'Nutrición' },
-            { id: 'A6', date: hoyStr, employeeId: 'E5', startTime: '17:00', duration: 60, customer: 'Ana S.', service: 'Manicura Semipermanente' },
-            { id: 'A7', date: hoyStr, employeeId: 'E1', startTime: '16:30', duration: 30, customer: 'Valeria C.', service: 'Corte Mujer' },
+            // B. Procesamos las citas reales mapeando los campos
+            this.activeAppointments = data.appointments.map(appt => {
+                const dt = new Date(appt.Start_Date_Time__c);
+                const durationMins = appt.Service__r?.Duration_Minutes__c || 30;
+                
+                // Calculamos la fecha/hora de fin
+                const endDt = new Date(dt.getTime() + durationMins * 60000);
+                
+                const startTimeStr = dt.toLocaleTimeString('es-UY', { hour: '2-digit', minute: '2-digit', hour12: false });
+                const endTimeStr = endDt.toLocaleTimeString('es-UY', { hour: '2-digit', minute: '2-digit', hour12: false });
+                
+                const firstName = appt.Customer__r?.First_Name__c || '';
+                const lastName = appt.Customer__r?.Last_Name__c || '';
+                
+                // Formateamos el precio (Ajusta 'Price__c' si tu campo se llama distinto)
+                const rawPrice = appt.Amount__c;
+                const formattedPrice = rawPrice ? `$${rawPrice}` : 'Sin costo';
 
-            // Turnos de MAÑANA
-            { id: 'B1', date: mananaStr, employeeId: 'E3', startTime: '09:00', duration: 60, customer: 'Sofia C.', service: 'Peinado Evento' },
-            { id: 'B2', date: mananaStr, employeeId: 'E2', startTime: '11:00', duration: 90, customer: 'Diego R.', service: 'Coloración' },
-            { id: 'B3', date: mananaStr, employeeId: 'E4', startTime: '13:00', duration: 60, customer: 'Elena B.', service: 'Maquillaje' },
-            { id: 'B4', date: mananaStr, employeeId: 'E5', startTime: '14:30', duration: 90, customer: 'Julia M.', service: 'Esculpido Acrílico' },
-            { id: 'B5', date: mananaStr, employeeId: 'E6', startTime: '16:00', duration: 60, customer: 'Carmen V.', service: 'Corte y Brushing' }
-        ];
+                return {
+                    id: appt.Id,
+                    employeeId: appt.Employee__c,
+                    startTime: startTimeStr,
+                    duration: durationMins,
+                    customer: `${firstName} ${lastName}`.trim() || 'Sin Nombre',
+                    service: appt.Service__r?.Name || 'Servicio',
+                    // NUEVAS PROPIEDADES PARA LA UI
+                    timeRange: `${startTimeStr} - ${endTimeStr}`,
+                    priceText: formattedPrice
+                };
+            });
+
+            // C. Una vez que la data real está lista y estructurada, dibujamos la matriz
+            this.generateMatrix();
+
+        } else if (error) {
+            console.error('Error al recuperar información de la matriz:', JSON.stringify(error));
+        }
     }
-    // 3. CAMBIAR DE DÍA AL HACER CLIC
+
+    // 3. CAMBIAR DE DÍA (Dispara el @wire automáticamente al alterar la propiedad reactiva)
     handleDateSelect(event) {
         const selected = event.currentTarget.dataset.date;
         this.selectedDate = selected;
+        console.info('handleDateSelect, date: '+this.selectedDate);
 
-        // Actualizamos la clase CSS para pintar de negro el seleccionado
         this.weekDays = this.weekDays.map(day => ({
             ...day,
             cssClass: day.dateKey === selected ? 'date-card date-card--active' : 'date-card'
         }));
-
-        // Re-dibujamos la grilla para este nuevo día
-        this.generateMatrix();
+        //console.info(JSON.stringify(this.weekDays, null, 2));
     }
 
     timeToMins(timeStr) {
@@ -99,13 +120,17 @@ export default class AASalonMatrixAdmin extends LightningElement {
         return (hours * 60) + minutes;
     }
 
-    // 4. GENERAR MATRIZ (AHORA FILTRADA POR FECHA)
+    // 4. GENERAR MATRIZ (Idéntica matemática, pero alimentada por arrays del servidor)
     generateMatrix() {
+        console.info('generateMatrix, selectedDate: '+this.selectedDate);
         this.gridHeaders = [
             { id: 'TIME_COL', label: 'Hora', isTime: true, cssClass: 'th-time' },
-            ...this.mockEmployees.map(emp => ({
-                id: emp.id, label: emp.name, isTime: false,
-                dotStyle: `background-color: ${emp.color};`, cssClass: 'th-emp'
+            ...this.activeEmployees.map(emp => ({
+                id: emp.id,
+                label: emp.name,
+                isTime: false,
+                dotStyle: `background-color: ${emp.color};`,
+                cssClass: 'th-emp'
             }))
         ];
 
@@ -120,22 +145,26 @@ export default class AASalonMatrixAdmin extends LightningElement {
             const slotMins = this.timeToMins(timeLabel);
             let cells = [{ id: `TIME_${timeLabel}`, isTimeLabel: true, label: timeLabel }];
 
-            this.mockEmployees.forEach(emp => {
-                // FILTRO CLAVE: Solo buscamos citas del selectedDate y del empleado
-                const activeAppt = this.mockAppointments.find(appt => {
-                    if (appt.date !== this.selectedDate) return false;
+            this.activeEmployees.forEach(emp => {
+                
+                // Buscamos si hay una cita real que pise este slot de tiempo
+                const activeAppt = this.activeAppointments.find(appt => {
                     if (appt.employeeId !== emp.id) return false;
                     
                     const apptStartMins = this.timeToMins(appt.startTime);
                     const apptEndMins = apptStartMins + appt.duration;
+                    
                     return slotMins >= apptStartMins && slotMins < apptEndMins;
                 });
 
                 if (activeAppt) {
                     const isStart = this.timeToMins(activeAppt.startTime) === slotMins;
+                    
                     cells.push({
                         id: `${emp.id}_${timeLabel}`,
-                        isTimeLabel: false, isOccupied: true, isStartBlock: isStart,
+                        isTimeLabel: false,
+                        isOccupied: true,
+                        isStartBlock: isStart,
                         data: isStart ? activeAppt : null,
                         style: `background-color: ${emp.color};`,
                         cssClass: isStart ? 'cell-appt cell-appt-start' : 'cell-appt cell-appt-body'
@@ -143,12 +172,15 @@ export default class AASalonMatrixAdmin extends LightningElement {
                 } else {
                     cells.push({
                         id: `${emp.id}_${timeLabel}`,
-                        isTimeLabel: false, isOccupied: false,
-                        time: timeLabel, empId: emp.id,
+                        isTimeLabel: false,
+                        isOccupied: false,
+                        time: timeLabel,
+                        empId: emp.id,
                         cssClass: 'cell-free'
                     });
                 }
             });
+
             return { id: `ROW_${timeLabel}`, cells: cells };
         });
     }
@@ -156,7 +188,9 @@ export default class AASalonMatrixAdmin extends LightningElement {
     handleEmptySlotClick(event) {
         const time = event.currentTarget.dataset.time;
         const empId = event.currentTarget.dataset.empid;
-        const empName = this.mockEmployees.find(e => e.id === empId).name;
-        alert(`Abrir modal de nueva cita para ${empName} el ${this.selectedDate} a las ${time} hs.`);
+        const empName = this.activeEmployees.find(e => e.id === empId).name;
+        
+        // El alert ahora mostrará la fecha real seleccionada del calendario en formato YYYY-MM-DD
+        alert(`Abrir modal de nueva cita para ${empName} el día ${this.selectedDate} a las ${time} hs.`);
     }
 }

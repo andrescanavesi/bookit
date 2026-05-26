@@ -46,11 +46,11 @@ public class AA_Scripts {
      * AA_Scripts.generateBulkAppointments(6);
      */
     public static void generateBulkAppointments(Integer slotsPorDia) {
-        System.debug('Iniciando generación masiva de citas...');
+        System.debug('Iniciando generación masiva de citas aleatorias...');
 
         Id businessId = BUSINESS_ID; 
 
-        // 1. Obtenemos hasta 3 registros de forma dinámica, eliminando los IDs quemados
+        // 1. Obtenemos registros dinámicos
         List<AA_Customer__c> customers = [SELECT Id FROM AA_Customer__c 
             WHERE Business__c = :businessId ORDER BY CreatedDate DESC LIMIT 30];
         
@@ -61,18 +61,18 @@ public class AA_Scripts {
             ORDER BY CreatedDate DESC
             LIMIT 5];
        
-        List<AA_Service__c> services = [SELECT Id FROM AA_Service__c  WHERE Business_Branch__r.Business__c = :businessId 
+        List<AA_Service__c> services = [SELECT Id FROM AA_Service__c  
+            WHERE Business_Branch__r.Business__c = :businessId 
             ORDER BY CreatedDate DESC LIMIT 5];
 
         if (customers.isEmpty() || employees.isEmpty() || services.isEmpty()) {
-            System.debug('Error: Debes tener al menos 1 cliente, 1 empleado y 1 servicio creados en la base de datos. '+customers.isEmpty()+' '+employees.isEmpty()+' '+services.isEmpty());
+            System.debug('Error: Debes tener al menos 1 cliente, 1 empleado y 1 servicio creados en la BD.');
             return;
         }
 
         List<AA_Appointment__c> appointmentsToInsert = new List<AA_Appointment__c>();
         Date todayDate = Date.today();
 
-        // Almacenamos los tamaños reales de las listas para evitar índices fuera de rango (ListException)
         Integer cSize = customers.size();
         Integer eSize = employees.size();
         Integer sSize = services.size();
@@ -89,31 +89,58 @@ public class AA_Scripts {
                 continue; 
             }
 
-            // 3. Comenzamos el día a las 09:00 AM
-            Time startTime = Time.newInstance(9, 0, 0, 0);
+            // Memoria diaria para evitar que el mismo empleado tenga dos citas a la misma hora exacta
+            Set<String> scheduledBlocks = new Set<String>();
 
+            // 3. Generamos citas aleatorias para este día
             for (Integer slotIndex = 0; slotIndex < slotsPorDia; slotIndex++) {
-                Time appointmentTime = startTime.addMinutes(slotIndex * 30);
-                
-                AA_Appointment__c app = new AA_Appointment__c();
-                
-                // Uso de Math.mod() para iterar de forma circular (Round-Robin) sobre los registros.
-                // Esto garantiza variedad en la UI y evita solapamientos directos del mismo empleado.
-                app.Customer__c = customers[Math.mod(slotIndex, cSize)].Id;
-                app.Employee__c = employees[Math.mod(slotIndex, eSize)].Id;
-                app.Service__c = services[Math.mod(slotIndex, sSize)].Id;
-                
-                app.Start_Date_Time__c = Datetime.newInstance(targetDate, appointmentTime);
-                app.Status__c = 'Pending';
-                
-                appointmentsToInsert.add(app);
+                Boolean slotFound = false;
+                Integer attempts = 0; // Salvaguarda para evitar loops infinitos
+
+                while (!slotFound && attempts < 50) {
+                    
+                    // A. Seleccionamos un empleado al azar
+                    Integer randomEmpIdx = Math.mod(Math.abs(Crypto.getRandomInteger()), eSize);
+                    Id empId = employees[randomEmpIdx].Id;
+
+                    // B. Generamos una hora aleatoria entre las 9:00 y las 17:00
+                    Integer randomHour = 9 + Math.mod(Math.abs(Crypto.getRandomInteger()), 9); 
+                    
+                    // C. Generamos minutos aleatorios: o 0 o 30
+                    Integer randomMin = Math.mod(Math.abs(Crypto.getRandomInteger()), 2) * 30;
+
+                    // Clave de control: ej. "a05g...-14-30"
+                    String blockKey = empId + '-' + randomHour + '-' + randomMin;
+
+                    // D. Verificamos si este bloque ya fue ocupado hoy
+                    if (!scheduledBlocks.contains(blockKey)) {
+                        scheduledBlocks.add(blockKey);
+                        slotFound = true; // Salimos del while
+
+                        // Cliente y Servicio al azar
+                        Integer randomCustIdx = Math.mod(Math.abs(Crypto.getRandomInteger()), cSize);
+                        Integer randomServIdx = Math.mod(Math.abs(Crypto.getRandomInteger()), sSize);
+
+                        Time appointmentTime = Time.newInstance(randomHour, randomMin, 0, 0);
+
+                        AA_Appointment__c app = new AA_Appointment__c();
+                        app.Customer__c = customers[randomCustIdx].Id;
+                        app.Employee__c = empId;
+                        app.Service__c = services[randomServIdx].Id;
+                        app.Start_Date_Time__c = Datetime.newInstance(targetDate, appointmentTime);
+                        app.Status__c = 'Pending';
+                        
+                        appointmentsToInsert.add(app);
+                    }
+                    attempts++;
+                }
             }
         }
 
         // 4. Inserción masiva de registros
         if (!appointmentsToInsert.isEmpty()) {
             insert appointmentsToInsert;
-            System.debug('Se crearon exitosamente ' + appointmentsToInsert.size() + ' citas de prueba distribuidas.');
+            System.debug('Se crearon exitosamente ' + appointmentsToInsert.size() + ' citas de prueba aleatorias.');
         }
     }
 
