@@ -1,19 +1,18 @@
 <template>
     <div class="admin-container">
-        
         <div class="header">
             <span class="header__eyebrow">PANEL DEL EQUIPO</span>
-            <h1 class="header__title">Matriz de Disponibilidad</h1>
-            <p class="header__subtitle">Selecciona un hueco vacío para agendar un turno manualmente.</p>
+            <h1 class="header__title">Agenda</h1>
+            <p class="header__subtitle">Matriz de Ocupación Dinámica</p>
         </div>
 
         <div class="date-selector-wrapper">
             <template for:each={weekDays} for:item="day">
-                <button key={day.dateKey} class={day.cssClass} data-date={day.dateKey} onclick={handleDateSelect}>
+                <div key={day.dateKey} class={day.cssClass} data-date={day.dateKey} onclick={handleDateSelect}>
                     <span class="ds-dow">{day.dayOfWeek}</span>
                     <span class="ds-number">{day.dayNumber}</span>
                     <span class="ds-month">{day.month}</span>
-                </button>
+                </div>
             </template>
         </div>
 
@@ -21,12 +20,12 @@
             <table class="matrix-table">
                 <thead>
                     <tr>
-                        <template for:each={gridHeaders} for:item="header">
-                            <th key={header.id} class={header.cssClass}>
-                                <template if:false={header.isTime}>
-                                    <span class="prof-dot" style={header.dotStyle}></span>
+                        <template for:each={gridHeaders} for:item="th">
+                            <th key={th.id} class={th.cssClass}>
+                                <template if:true={th.dotStyle}>
+                                    <span class="prof-dot" style={th.dotStyle}></span>
                                 </template>
-                                {header.label}
+                                {th.label}
                             </th>
                         </template>
                     </tr>
@@ -36,33 +35,47 @@
                         <tr key={row.id}>
                             <template for:each={row.cells} for:item="cell">
                                 <template if:true={cell.isTimeLabel}>
-                                    <td key={cell.id} class="time-label-cell">{cell.label}</td>
-                                </template>
-                                <template if:true={cell.isOccupied}>
-                                    <td key={cell.id} class="appt-cell">
-                                        <div class={cell.cssClass} style={cell.style}>
-                                            <template if:true={cell.isStartBlock}>
-                                            <div class="appt-content-wrapper">
-                                                <div class="appt-meta">
-                                                    <span class="appt-time-range">🕒 {cell.data.timeRange}</span>
-                                                    <span class="appt-price">{cell.data.priceText}</span>
-                                                </div>
-                                                
-                                                <div class="appt-main-info">
-                                                    <span class="appt-customer">{cell.data.customer}</span>
-                                                    <span class="appt-service">{cell.data.service}</span>
-                                                </div>
-                                            </div>
-                                        </template>
-                                        </div>
+                                    <td key={cell.id} class="time-label-cell">
+                                        <span class="time-text">{cell.label}</span>
                                     </td>
                                 </template>
+                                
                                 <template if:false={cell.isTimeLabel}>
-                                    <template if:false={cell.isOccupied}>
-                                        <td key={cell.id} class="free-cell" data-time={cell.time} data-empid={cell.empId} onclick={handleEmptySlotClick}>
-                                            <div class={cell.cssClass}><span class="add-icon">+</span></div>
-                                        </td>
-                                    </template>
+                                    <td key={cell.id} class="appt-cell" style={cell.tdStyle}>
+                                        
+                                        <template if:true={cell.isOccupied}>
+                                            <div class={cell.cssClass} style={cell.style} data-id={cell.data.id} onclick={handleApptClick}>
+                                                <template if:true={cell.isStartBlock}>
+                                                    <div class="appt-content-wrapper">
+                                                        <div class="appt-meta">
+                                                            <span class="appt-time-range">{cell.data.timeRange}</span>
+                                                            <span class="appt-price">{cell.data.priceText}</span>
+                                                        </div>
+                                                        <div class="appt-main-info">
+                                                            <span class="appt-customer">{cell.data.customer}</span>
+                                                            <span class="appt-service">{cell.data.service}</span>
+                                                        </div>
+                                                    </div>
+                                                </template>
+                                            </div>
+                                        </template>
+
+                                        <template if:false={cell.isOccupied}>
+                                            <template if:true={cell.isBlocked}>
+                                                <div class={cell.cssClass}>
+                                                    <template if:true={cell.blockLabel}>
+                                                        <span class="absence-label">✕ {cell.blockLabel}</span>
+                                                    </template>
+                                                </div>
+                                            </template>
+                                            <template if:false={cell.isBlocked}>
+                                                <div class={cell.cssClass} data-time={cell.time} data-empid={cell.empId} onclick={handleEmptySlotClick}>
+                                                    <span class="add-icon">+</span>
+                                                </div>
+                                            </template>
+                                        </template>
+
+                                    </td>
                                 </template>
                             </template>
                         </tr>
@@ -70,5 +83,96 @@
                 </tbody>
             </table>
         </div>
+
+        <template if:true={isCreateModalOpen}>
+            <div class="modal-backdrop">
+                <div class="modal-container">
+                    <div class="modal-header">
+                        <h2>Nueva Cita</h2>
+                        <button class="modal-close-x" onclick={closeModals}>✕</button>
+                    </div>
+                    <div class="modal-body">
+                        <p class="modal-summary-text">Asignando turno para <strong>{formEmpName}</strong> a las <strong>{formTimeLabel} hs</strong>.</p>
+                        
+                        <div class="form-group">
+                            <label>Seleccionar Clienta</label>
+                            <select name="customer" class="modal-select" onchange={handleFormChange}>
+                                <option value="">-- Buscar Clienta --</option>
+                                <template for:each={customerOptions} for:item="opt">
+                                    <option key={opt.value} value={opt.value}>{opt.value} - {opt.label}</option>
+                                </template>
+                            </select>
+                        </div>
+
+                        <div class="form-group">
+                            <label>Seleccionar Servicio</label>
+                            <select name="service" class="modal-select" onchange={handleFormChange}>
+                                <option value="">-- Tipo de Servicio --</option>
+                                <template for:each={serviceOptions} for:item="opt">
+                                    <option key={opt.value} value={opt.value}>{opt.label}</option>
+                                </template>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button class="modal-btn modal-btn--secondary" onclick={closeModals}>Cancelar</button>
+                        <button class="modal-btn modal-btn--primary" onclick={handleSaveAppointment} disabled={isSaving}>
+                            <template if:true={isSaving}>Guardando...</template>
+                            <template if:false={isSaving}>Confirmar Reserva</template>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </template>
+
+        <template if:true={isDetailModalOpen}>
+            <div class="modal-backdrop">
+                <div class="modal-container modal-container--detail">
+                    <div class="modal-header">
+                        <h2>Detalle del Turno</h2>
+                        <button class="modal-close-x" onclick={closeModals}>✕</button>
+                    </div>
+                    <div class="modal-body">
+                        <div class="detail-card-header">
+                            <span class="detail-status-badge">{selectedAppt.status}</span>
+                            <h3>{selectedAppt.customer}</h3>
+                            <p>{selectedAppt.service} · {selectedAppt.priceText}</p>
+                        </div>
+                        <div class="detail-info-grid">
+                            <p><strong>Profesional:</strong> {selectedAppt.employeeName}</p>
+                            <p><strong>Horario:</strong> {selectedAppt.timeRange} hs</p>
+                        </div>
+                    </div>
+                    <div class="modal-footer modal-footer--split">
+                        <button class="modal-btn modal-btn--danger" onclick={handleCancelAction} disabled={isCancelling}>
+                            <template if:true={isCancelling}>Cancelando...</template>
+                            <template if:false={isCancelling}>✕ Cancelar Cita</template>
+                        </button>
+
+                        <div class="modal-footer-right">
+                            <template if:true={selectedAppt.waLink}>
+                                <a href={selectedAppt.waLink} target="_blank" class={selectedAppt.waButtonClass} onclick={handleWaAction}>
+                                    Recordatorio
+                                </a>
+                            </template>
+                            
+                            <template if:true={selectedAppt.isPending}>
+                                <button class="modal-btn modal-btn--primary" onclick={handleConfirmAction} disabled={isConfirming}>
+                                    <template if:true={isConfirming}>Cargando...</template>
+                                    <template if:false={isConfirming}>✓ Confirmar</template>
+                                </button>
+                            </template>
+
+                            <template if:false={selectedAppt.isPending}>
+                                <button class="modal-btn modal-btn--success" onclick={handleDoneAction} disabled={isCompleting}>
+                                    <template if:true={isCompleting}>Cargando...</template>
+                                    <template if:false={isCompleting}>✓ Atendido</template>
+                                </button>
+                            </template>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </template>
     </div>
 </template>

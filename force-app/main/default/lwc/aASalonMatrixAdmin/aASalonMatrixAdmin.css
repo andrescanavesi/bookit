@@ -1,5 +1,8 @@
+/* =========================================
+   1. ESTRUCTURA GENERAL Y ENCABEZADO
+========================================= */
 .admin-container {
-    background-color: #F1ECE3; /* Fondo crema de tu diseño */
+    background-color: #F1ECE3; 
     min-height: 100vh;
     padding: 24px;
     font-family: 'DM Sans', sans-serif;
@@ -9,156 +12,39 @@
 .header {
     margin-bottom: 32px;
 }
+
 .header__eyebrow {
     font-size: 11px;
     font-weight: 700;
     letter-spacing: 2px;
-    color: #8C2417; /* Rojo óxido */
+    color: #8C2417; 
     text-transform: uppercase;
     display: block;
     margin-bottom: 8px;
 }
+
 .header__title {
     font-size: 36px;
     font-weight: 400;
     margin: 0 0 8px 0;
     color: #1A1A1A;
 }
+
 .header__subtitle {
     color: #8A8175;
     font-size: 16px;
     margin: 0;
 }
 
-/* CONTENEDOR DE LA TABLA */
-.table-scroll-wrapper {
-    overflow-x: auto;
-    background: #F8F5EF; /* Blanco levemente crema para resaltar sobre el fondo */
-    border: 1px solid #D9D2C5;
-    border-radius: 8px;
-    padding: 16px 24px 24px 24px;
-}
-
-.matrix-table {
-    width: 100%;
-    border-collapse: collapse;
-    min-width: 600px;
-}
-
-/* ENCABEZADOS */
-.matrix-table th {
-    color: #8A8175;
-    padding: 16px 12px;
-    font-size: 16px;
-    font-weight: 400;
-    border-bottom: 1px solid #D9D2C5;
-    text-align: center;
-}
-.th-time {
-    text-align: left !important;
-    width: 80px;
-}
-.prof-dot {
-    width: 10px;
-    height: 10px;
-    border-radius: 50%;
-    margin-right: 8px;
-    display: inline-block;
-}
-
-/* CELDAS BASE */
-.matrix-table td {
-    border: 1px dashed #E5DFD5; /* Bordes punteados suaves */
-    height: 56px;
-    padding: 0;
-    vertical-align: top;
-}
-.matrix-table tr:last-child td {
-    border-bottom: none;
-}
-
-/* COLUMNA DE HORAS */
-.time-label-cell {
-    text-align: left !important;
-    vertical-align: middle !important;
-    color: #8A8175;
-    font-size: 14px;
-    font-weight: 400;
-    border: none !important; /* Quitamos bordes laterales a la hora */
-    border-bottom: 1px solid transparent !important;
-}
-
-/* HUECOS LIBRES */
-.free-cell {
-    cursor: pointer;
-    transition: background-color 0.2s;
-}
-.free-cell:hover {
-    background-color: rgba(140, 36, 23, 0.04); /* Un tinte rojo ultra sutil al pasar el mouse */
-}
-.cell-free {
-    height: 100%;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-}
-.add-icon {
-    opacity: 0;
-    color: #8C2417;
-    font-size: 24px;
-    font-weight: 300;
-    transition: opacity 0.2s;
-}
-.free-cell:hover .add-icon {
-    opacity: 1; /* Muestra el símbolo + al hacer hover */
-}
-
-/* CITAS OCUPADAS */
-.appt-cell {
-    padding: 4px !important;
-    border: 1px dashed transparent !important;
-}
-.cell-appt {
-    width: 100%;
-    height: 100%;
-    display: flex;
-    flex-direction: column;
-    justify-content: center;
-    padding: 8px;
-    box-sizing: border-box;
-    color: #ffffff;
-    border-radius: 6px;
-    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-}
-.cell-appt-start {
-    border-bottom-left-radius: 0;
-    border-bottom-right-radius: 0;
-}
-.cell-appt-body {
-    border-radius: 0;
-}
-.appt-customer {
-    font-size: 14px;
-    font-weight: 700;
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
-}
-.appt-service {
-    font-size: 12px;
-    opacity: 0.9;
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
-}
-
-/* --- SELECTOR DE FECHAS --- */
+/* =========================================
+   2. SELECTOR DE FECHAS (TARJETAS)
+========================================= */
 .date-selector-wrapper {
     display: flex;
     gap: 12px;
     margin-bottom: 32px;
     overflow-x: auto;
-    padding-bottom: 8px; /* Espacio para la barra de scroll si la pantalla es chica */
+    padding-bottom: 8px; 
 }
 
 .date-card {
@@ -173,7 +59,6 @@
     cursor: pointer;
     transition: all 0.2s ease;
     color: #1A1A1A;
-    /* Sin border-radius para mantener el diseño recto de la imagen */
 }
 
 .date-card:hover {
@@ -181,70 +66,184 @@
 }
 
 .date-card--active {
-    background-color: #121212; /* Negro casi puro */
+    background-color: #121212; 
     border-color: #121212;
     color: #FFFFFF;
 }
 
-.ds-dow {
+.ds-dow, .ds-month {
     font-size: 11px;
     letter-spacing: 2px;
     font-weight: 500;
-    margin-bottom: 8px;
 }
+.ds-dow { margin-bottom: 8px; }
 
 .ds-number {
-    font-family: 'Playfair Display', Georgia, serif; /* Tipografía Serif elegante */
+    font-family: 'Playfair Display', Georgia, serif; 
     font-size: 34px;
     font-weight: 400;
     line-height: 1;
     margin-bottom: 8px;
 }
 
-.ds-month {
-    font-size: 11px;
-    letter-spacing: 2px;
-    font-weight: 500;
+/* =========================================
+   3. ESTRUCTURA DE LA GRILLA (MATRIZ)
+========================================= */
+.table-scroll-wrapper {
+    overflow-x: auto;
+    background: #F8F5EF; 
+    border: 1px solid #D9D2C5;
+    border-radius: 8px;
+    padding: 16px 24px 24px 24px;
 }
 
-/* CITAS OCUPADAS */
-.appt-cell {
-    padding: 0 4px !important; /* Quitamos el padding vertical para que los bloques se toquen */
-    border: none !important; /* Quitamos los bordes punteados de la grilla de fondo */
-}
-
-.cell-appt {
+.matrix-table {
     width: 100%;
+    border-collapse: collapse;
+    min-width: 600px;
+}
+
+/* ENCABEZADOS (NOMBRES DE EMPLEADOS) */
+.matrix-table th {
+    color: #8A8175;
+    padding: 16px 12px;
+    font-size: 16px;
+    font-weight: 400;
+    border-bottom: 1px solid #D9D2C5;
+    text-align: center;
+}
+
+.prof-dot {
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    margin-right: 8px;
+    display: inline-block;
+}
+
+/* CELDAS BASE DE LA GRILLA (LÍNEAS PUNTEADAS) */
+.matrix-table td {
+    border-bottom: 1px dashed #E5DFD5; 
+    height: 56px;
+    padding: 0;
+    vertical-align: top;
+}
+
+.matrix-table tr:last-child td {
+    border-bottom: none;
+}
+
+/* =========================================
+   4. COLUMNA DE LA HORA (ESTILO GOOGLE CALENDAR)
+========================================= */
+.th-time {
+    text-align: left !important;
+    width: 80px;
+}
+
+.time-label-cell {
+    position: relative;
+    vertical-align: top !important; 
+    border: none !important; 
+    width: 80px; 
+}
+
+.time-text {
+    position: absolute;
+    top: -11px; 
+    right: 16px; 
+    font-size: 14px; 
+    font-weight: 400; 
+    color: #8A8175;
+    background-color: #F8F5EF; 
+    padding: 0 6px; 
+}
+
+/* =========================================
+   5. CELDAS VACÍAS (HUECOS LIBRES)
+========================================= */
+.free-cell {
+    cursor: pointer;
+    transition: background-color 0.2s;
+}
+
+.free-cell:hover {
+    background-color: rgba(140, 36, 23, 0.04); 
+}
+
+.cell-free {
     height: 100%;
     display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.add-icon {
+    opacity: 0;
+    color: #8C2417;
+    font-size: 24px;
+    font-weight: 300;
+    transition: opacity 0.2s;
+}
+
+.free-cell:hover .add-icon {
+    opacity: 1; 
+}
+
+/* =========================================
+   6. TARJETAS DE CITAS OCUPADAS (FUSIONES)
+========================================= */
+.appt-cell {
+    padding: 0 4px !important; 
+    vertical-align: top;
+}
+
+/* Clase base compartida para todos los bloques de la tarjeta */
+.cell-appt {
+    width: 100%;
+    display: flex;
     flex-direction: column;
-    justify-content: flex-start; /* Alinea el texto arriba */
-    padding: 8px;
+    justify-content: flex-start;
+    padding: 6px 8px; 
     box-sizing: border-box;
     color: #ffffff;
     border-radius: 6px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
 }
 
-/* BLOQUE SUPERIOR (Donde va el texto) */
+/* Tipos de bloques para unir la tarjeta visualmente */
+.cell-appt-single {
+    height: calc(100% - 6px); 
+    margin-bottom: 6px;
+}
+
 .cell-appt-start {
+    height: 100%;
     border-bottom-left-radius: 0;
     border-bottom-right-radius: 0;
-    padding-bottom: 0; /* Acerca el texto al siguiente bloque */
+    padding-bottom: 4px; 
+    margin-bottom: 0;
 }
 
-/* BLOQUES DE CONTINUACIÓN (Los que están vacíos) */
 .cell-appt-body {
+    height: 100%;
     border-radius: 0;
     padding-top: 0;
+    padding-bottom: 4px;
+    margin-bottom: 0;
 }
 
-/* Para que la última celda del cuerpo vuelva a tener esquinas redondeadas abajo, 
-podemos usar un truco en el CSS o simplemente dejar que se funda con la grilla */
-.matrix-table td {
-    border-bottom: 1px dashed #E5DFD5;
+.cell-appt-end {
+    height: calc(100% - 6px); 
+    border-top-left-radius: 0;
+    border-top-right-radius: 0;
+    padding-top: 0;
+    margin-bottom: 6px;
 }
 
-/* ESTRUCTURA INTERNA DE LA CITA */
+/* =========================================
+   7. CONTENIDO INTERNO DE LAS CITAS
+========================================= */
 .appt-content-wrapper {
     display: flex;
     flex-direction: column;
@@ -253,7 +252,7 @@ podemos usar un truco en el CSS o simplemente dejar que se funda con la grilla *
     overflow: hidden;
 }
 
-/* METADATOS: HORA Y PRECIO */
+/* Metadatos: Hora y Precio */
 .appt-meta {
     display: flex;
     justify-content: space-between;
@@ -261,13 +260,13 @@ podemos usar un truco en el CSS o simplemente dejar que se funda con la grilla *
     font-size: 10px;
     font-weight: 600;
     letter-spacing: 0.5px;
-    opacity: 0.85; /* Ligera transparencia para no competir visualmente */
+    opacity: 0.85; 
     border-bottom: 1px solid rgba(255,255,255,0.2);
     padding-bottom: 4px;
     margin-bottom: 2px;
 }
 
-.appt-time-range {
+.appt-time-range, .appt-price {
     white-space: nowrap;
 }
 
@@ -275,10 +274,9 @@ podemos usar un truco en el CSS o simplemente dejar que se funda con la grilla *
     background-color: rgba(255, 255, 255, 0.2);
     padding: 2px 6px;
     border-radius: 4px;
-    white-space: nowrap;
 }
 
-/* INFO PRINCIPAL: CLIENTE Y SERVICIO */
+/* Info Principal: Cliente y Servicio */
 .appt-main-info {
     display: flex;
     flex-direction: column;
@@ -290,7 +288,7 @@ podemos usar un truco en el CSS o simplemente dejar que se funda con la grilla *
     font-weight: 700;
     white-space: nowrap;
     overflow: hidden;
-    text-overflow: ellipsis; /* Corta textos muy largos con "..." */
+    text-overflow: ellipsis; 
 }
 
 .appt-service {
@@ -300,3 +298,192 @@ podemos usar un truco en el CSS o simplemente dejar que se funda con la grilla *
     overflow: hidden;
     text-overflow: ellipsis;
 }
+
+/* =========================================
+   8. AUSENCIAS Y HORARIOS NO LABORABLES
+========================================= */
+
+/* Horario fuera de turno (Gris sólido muy apagado) */
+.cell-outside-hours {
+    width: 100%;
+    height: 100%;
+    background-color: #E6E1D8; /* Gris beige oscuro */
+    opacity: 0.6;
+    pointer-events: none; /* Deshabilita clics completamente */
+}
+
+/* Descansos y Licencias (Patrón de rayas diagonales) */
+.cell-blocked-absence {
+    width: 100%;
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: repeating-linear-gradient(
+        45deg,
+        #F1ECE3,
+        #F1ECE3 10px,
+        #EAE4D9 10px,
+        #EAE4D9 20px
+    );
+    pointer-events: none; 
+}
+
+.absence-label {
+    background-color: #FFFFFF;
+    color: #8A8175;
+    font-size: 11px;
+    font-weight: 600;
+    text-transform: uppercase;
+    padding: 2px 8px;
+    border-radius: 4px;
+    border: 1px solid #D9D2C5;
+    letter-spacing: 0.5px;
+}
+
+/* =========================================
+   9. SISTEMA DE MODALES PREMIUM
+========================================= */
+.modal-backdrop {
+    position: fixed;
+    top: 0; left: 0; right: 0; bottom: 0;
+    background-color: rgba(18, 18, 18, 0.6); /* Fondo oscuro con sutil transparencia */
+    backdrop-filter: blur(4px); /* Difumina suavemente el fondo */
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 9999;
+    animation: fadeIn 0.2s ease-out;
+}
+
+.modal-container {
+    background-color: #F8F5EF; /* Blanco crema corporativo */
+    border: 1px solid #D9D2C5;
+    width: 100%;
+    max-width: 460px;
+    border-radius: 12px;
+    box-shadow: 0 12px 32px rgba(0,0,0,0.15);
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+}
+
+.modal-header {
+    padding: 16px 24px;
+    border-bottom: 1px solid #E5DFD5;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+.modal-header h2 {
+    font-size: 20px;
+    font-weight: 500;
+    margin: 0;
+    color: #1A1A1A;
+}
+.modal-close-x {
+    background: none; border: none;
+    font-size: 18px; color: #8A8175;
+    cursor: pointer;
+}
+
+.modal-body {
+    padding: 24px;
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+}
+
+.modal-summary-text {
+    font-size: 14px;
+    color: #8A8175;
+    margin: 0 0 8px 0;
+}
+
+/* INPUTS DEL FORMULARIO */
+.form-group {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+.form-group label {
+    font-size: 12px;
+    font-weight: 600;
+    color: #1A1A1A;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+.modal-select {
+    width: 100%;
+    padding: 10px 12px;
+    border: 1px solid #D9D2C5;
+    background-color: #FFFFFF;
+    border-radius: 6px;
+    font-size: 14px;
+    color: #333;
+    font-family: inherit;
+}
+
+/* PIE DE PÁGINA DEL MODAL */
+.modal-footer {
+    padding: 16px 24px;
+    background-color: #FAFAFA;
+    border-top: 1px solid #E5DFD5;
+    display: flex;
+    justify-content: flex-end;
+    gap: 12px;
+}
+.modal-footer--split {
+    justify-content: space-between;
+    align-items: center;
+}
+.modal-footer-right {
+    display: flex;
+    gap: 12px;
+    align-items: center;
+}
+
+/* BOTONERÍA DEL MODAL */
+.modal-btn {
+    padding: 10px 20px;
+    border-radius: 6px;
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+    border: none;
+    font-family: inherit;
+    text-decoration: none;
+    display: inline-block;
+    transition: all 0.2s ease;
+}
+
+.modal-btn--primary { background-color: #121212; color: #FFFFFF; }
+.modal-btn--primary:hover { background-color: #333333; }
+
+.modal-btn--secondary { background-color: transparent; color: #8A8175; border: 1px solid #D9D2C5; }
+.modal-btn--secondary:hover { background-color: rgba(0,0,0,0.02); }
+
+.modal-btn--danger { background-color: transparent; color: #8C2417; border: 1px solid #E5DFD5; }
+.modal-btn--danger:hover { background-color: rgba(140,36,23,0.04); border-color: #8C2417; }
+
+.modal-btn--success { background-color: #2D6A4F; color: #FFFFFF; }
+.modal-btn--success:hover { background-color: #1B4332; }
+
+.modal-btn--wa { background-color: #25D366; color: #FFFFFF; }
+.modal-btn--wa:hover { background-color: #128C7E; }
+
+.modal-btn--sent { background-color: #EAEAEA; color: #666; border: 1px solid #D9D2C5; }
+
+.modal-btn:disabled { opacity: 0.6; cursor: not-allowed; }
+
+/* SECCIÓN DETALLE */
+.detail-card-header {
+    border-bottom: 1px dashed #D9D2C5;
+    padding-bottom: 16px;
+}
+.detail-card-header h3 { font-size: 24px; margin: 0 0 4px 0; font-weight: 500; }
+.detail-card-header p { color: #8A8175; margin: 0; font-size: 14px; }
+.detail-status-badge { font-size: 11px; font-weight: 700; color: #8C2417; text-transform: uppercase; letter-spacing: 1px; display: block; margin-bottom: 6px; }
+.detail-info-grid { font-size: 14px; color: #333; }
+
+@keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
