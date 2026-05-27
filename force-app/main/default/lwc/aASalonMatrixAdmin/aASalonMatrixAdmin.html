@@ -142,34 +142,51 @@
                             <p><strong>Profesional:</strong> {selectedAppt.employeeName}</p>
                             <p><strong>Horario:</strong> {selectedAppt.timeRange} hs</p>
                         </div>
-                    </div>
-                    <div class="modal-footer modal-footer--split">
-                        <button class="modal-btn modal-btn--danger" onclick={handleCancelAction} disabled={isCancelling}>
-                            <template if:true={isCancelling}>Cancelando...</template>
-                            <template if:false={isCancelling}>✕ Cancelar Cita</template>
-                        </button>
 
-                        <div class="modal-footer-right">
-                            <template if:true={selectedAppt.waLink}>
-                                <a href={selectedAppt.waLink} target="_blank" class={selectedAppt.waButtonClass} onclick={handleWaAction}>
-                                    Recordatorio
-                                </a>
-                            </template>
-                            
-                            <template if:true={selectedAppt.isPending}>
-                                <button class="modal-btn modal-btn--primary" onclick={handleConfirmAction} disabled={isConfirming}>
-                                    <template if:true={isConfirming}>Cargando...</template>
-                                    <template if:false={isConfirming}>✓ Confirmar</template>
-                                </button>
-                            </template>
-
-                            <template if:false={selectedAppt.isPending}>
-                                <button class="modal-btn modal-btn--success" onclick={handleDoneAction} disabled={isCompleting}>
-                                    <template if:true={isCompleting}>Cargando...</template>
-                                    <template if:false={isCompleting}>✓ Atendido</template>
-                                </button>
-                            </template>
+                        <div class="form-group modal-comments-section">
+                            <label>Comentarios Internos / Notas del Servicio</label>
+                            <textarea name="internalComments"
+                                    class="modal-textarea"
+                                    rows="3"
+                                    placeholder="Ej. Diseño Nail Art minimalista, prefiere tonos nude, cutículas sensibles..."
+                                    value={tempInternalComments}
+                                    oninput={handleCommentChange}
+                                    disabled={selectedAppt.isDone}></textarea>
                         </div>
+                    </div>
+
+                   <div class="modal-footer modal-footer--split">
+    
+                        <template if:true={selectedAppt.isDone}>
+                            <div>
+                                <span class="badge-completed-status">✓ Cita Realizada</span>
+                            </div>
+                            <div class="modal-footer-right">
+                                <button class="modal-btn modal-btn--secondary" onclick={closeModals}>Cerrar</button>
+                            </div>
+                        </template>
+
+                        <template if:false={selectedAppt.isDone}>
+                            <button class="modal-btn modal-btn--danger" onclick={handleCancelAction} disabled={isCancelling}>
+                                <template if:true={isCancelling}>Cancelando...</template>
+                                <template if:false={isCancelling}>✕ Cancelar Cita</template>
+                            </button>
+
+                            <div class="modal-footer-right">
+                                <template if:true={selectedAppt.isPending}>
+                                    <button class="modal-btn modal-btn--primary" onclick={handleConfirmAction} disabled={isConfirming}>
+                                        <template if:true={isConfirming}>Cargando...</template>
+                                        <template if:false={isConfirming}>✓ Confirmar</template>
+                                    </button>
+                                </template>
+                                <template if:false={selectedAppt.isPending}>
+                                    <button class="modal-btn modal-btn--success" onclick={handleDoneAction} disabled={isCompleting}>
+                                        <template if:true={isCompleting}>Cargando...</template>
+                                        <template if:false={isCompleting}>✓ Atendido</template>
+                                    </button>
+                                </template>
+                            </div>
+                        </template>
                     </div>
                 </div>
             </div>

@@ -1,5 +1,11 @@
 import { LightningElement, track, wire } from 'lwc';
+import { refreshApex } from '@salesforce/apex';
 import getMatrixData from '@salesforce/apex/AA_SalonAppointmentsController.getMatrixData';
+import createNewAppointment from '@salesforce/apex/AA_SalonAppointmentsController.createNewAppointment';
+import confirmAppointment from '@salesforce/apex/AA_SalonAppointmentsController.confirmAppointment';
+import completeAppointment from '@salesforce/apex/AA_SalonAppointmentsController.completeAppointment';
+import cancelAppointment from '@salesforce/apex/AA_SalonAppointmentsController.cancelAppointment';
+import markReminderAsSent from '@salesforce/apex/AA_SalonAppointmentsController.markReminderAsSent';
 
 export default class AASalonMatrixAdmin extends LightningElement {
     
@@ -10,16 +16,37 @@ export default class AASalonMatrixAdmin extends LightningElement {
 
     @track activeEmployees = [];
     @track activeAppointments = [];
-    @track activeAbsences = []; // NUEVO
-    @track activeWorkingHours = []; // NUEVO
+    @track activeAbsences = []; 
+    @track activeWorkingHours = []; 
 
     // Opciones para los comboboxes del formulario
     @track customerOptions = [];
     @track serviceOptions = [];
 
-    // NUEVO: Almacenamiento crudo para filtrado dinámico
+    // Almacenamiento crudo para filtrado dinámico
     rawAllServices = [];
     rawEmployeeServices = [];
+
+    // --- NUEVO: Modales y variables de control ---
+    @track isCreateModalOpen = false;
+    @track isDetailModalOpen = false;
+    @track selectedAppt = {}; 
+
+    // Datos temporales del formulario de creación
+    selectedCustomerId = '';
+    selectedServiceId = '';
+    formTimeLabel = '';
+    formEmpId = '';
+    formEmpName = '';
+    @track tempInternalComments = ''; // NUEVO: Rastrea el texto del textarea
+
+    // Estados de carga de botones en modales
+    @track isSaving = false;
+    @track isConfirming = false;
+    @track isCompleting = false;
+    @track isCancelling = false;
+
+    wiredMatrixResult; // Almacena el resultado crudo para refreshApex
 
     employeeColors = ['#B23A3A', '#D4A017', '#3A70A1', '#5A8A4F', '#6B4F8E', '#A15C3A'];
 
@@ -51,14 +78,16 @@ export default class AASalonMatrixAdmin extends LightningElement {
         this.weekDays = days;
     }
 
-    // Helper: Convierte milisegundos de Salesforce Time a minutos del día
     sfTimeToMins(sfTimeMs) {
         if (!sfTimeMs) return null;
         return Math.floor(sfTimeMs / 60000);
     }
 
     @wire(getMatrixData, { selectedDate: '$selectedDate' })
-    wiredMatrixData({ error, data }) {
+    wiredMatrixData(result) {
+        this.wiredMatrixResult = result; // Guardamos la referencia para el refreshApex
+        const { error, data } = result;
+        
         if (data) {
             let colorIndex = 0;
             this.activeEmployees = data.employees.map(emp => {
@@ -85,13 +114,19 @@ export default class AASalonMatrixAdmin extends LightningElement {
                     startTime: startTimeStr,
                     duration: durationMins,
                     customer: `${firstName} ${lastName}`.trim() || 'Sin Nombre',
+                    phone: appt.Customer__r?.Phone_Number__c || '', // NUEVO
                     service: appt.Service__r?.Name || 'Servicio',
                     timeRange: `${startTimeStr} - ${endTimeStr}`,
-                    priceText: rawPrice ? `$${rawPrice}` : 'Sin costo'
+                    priceText: rawPrice ? `$${rawPrice}` : 'Sin costo',
+                    status: appt.Status__c,
+                    isPending: appt.Status__c === 'Pending',
+                    isConfirmed: appt.Status__c === 'Confirmed',
+                    isDone: appt.Status__c === 'Done',
+                    isReminderSent: !!appt.Reminder_Sent_Date__c,
+                    internalComments: appt.Internal_Comments__c || ''
                 };
             });
 
-            // NUEVO: Procesar Horarios Base
             this.activeWorkingHours = data.workingHours.map(wh => {
                 return {
                     employeeId: wh.Employee__c,
@@ -102,19 +137,16 @@ export default class AASalonMatrixAdmin extends LightningElement {
                 };
             });
 
-            // NUEVO: Procesar Ausencias
             const selectedDateObj = new Date(this.selectedDate + 'T00:00:00');
             this.activeAbsences = data.absences.map(abs => {
                 const startDt = new Date(abs.Start_Date_Time__c);
                 const endDt = new Date(abs.End_Date_Time__c);
                 
-                // Si la ausencia empezó días atrás, bloquea desde el minuto 0 de hoy.
                 let startMins = 0;
                 if (startDt.getDate() === selectedDateObj.getDate() && startDt.getMonth() === selectedDateObj.getMonth()) {
                     startMins = (startDt.getHours() * 60) + startDt.getMinutes();
                 }
 
-                // Si la ausencia termina en días futuros, bloquea hasta el final del día (1440 mins).
                 let endMins = 1440;
                 if (endDt.getDate() === selectedDateObj.getDate() && endDt.getMonth() === selectedDateObj.getMonth()) {
                     endMins = (endDt.getHours() * 60) + endDt.getMinutes();
@@ -128,10 +160,8 @@ export default class AASalonMatrixAdmin extends LightningElement {
                 };
             });
 
-            // Llenamos las opciones de las clientas (esto sigue siendo global)
             this.customerOptions = data.allCustomers.map(c => ({ label: c.Name, value: c.Id }));
             
-            // NUEVO: Guardamos los servicios y la tabla de unión cruda en memoria
             this.rawAllServices = data.allServices;
             this.rawEmployeeServices = data.employeeServices;
 
@@ -180,7 +210,6 @@ export default class AASalonMatrixAdmin extends LightningElement {
 
             this.activeEmployees.forEach(emp => {
                 
-                // 1. Verificar Citas
                 const activeAppt = this.activeAppointments.find(appt => {
                     if (appt.employeeId !== emp.id) return false;
                     const apptStartMins = this.timeToMins(appt.startTime);
@@ -189,7 +218,7 @@ export default class AASalonMatrixAdmin extends LightningElement {
                 });
 
                 if (activeAppt) {
-                    const isStart = this.timeToMins(activeAppt.startTime) === slotMins;
+                   const isStart = this.timeToMins(activeAppt.startTime) === slotMins;
                     const isEnd = (this.timeToMins(activeAppt.startTime) + activeAppt.duration - 30) === slotMins; 
                     
                     let cardClass = 'cell-appt';
@@ -198,41 +227,42 @@ export default class AASalonMatrixAdmin extends LightningElement {
                     else if (isEnd) cardClass += ' cell-appt-end'; 
                     else cardClass += ' cell-appt-body'; 
 
+                    // ACTUALIZADO: Si la cita está terminada, le anexamos la clase de atenuación suave
+                    if (activeAppt.isDone) {
+                        cardClass += ' cell-appt-done';
+                    }
+
                     cells.push({
                         id: `${emp.id}_${timeLabel}`,
                         isTimeLabel: false,
                         isOccupied: true,
                         isStartBlock: isStart,
-                        data: isStart ? activeAppt : null,
-                        style: `background-color: ${emp.color};`,
+                        // SOLUCIÓN: Pasamos la cita entera a todos los bloques, no solo al primero.
+                        data: activeAppt, 
+                        style: `background-color: ${emp.color}; cursor: pointer;`, // Agregamos cursor pointer para que se note que es clickeable
                         cssClass: cardClass, 
                         tdStyle: isEnd ? '' : 'border-bottom: none !important;'
                     });
-                    return; // Si hay cita, dejamos de evaluar (tiene prioridad en la UI)
+                    return;
                 }
 
-                // 2. Verificar Ausencias y Horarios Base
                 let isBlocked = false;
                 let isOutsideHours = false;
                 let blockLabel = '';
                 let hasOverrideBreak = false;
 
-                // Evaluamos Ausencias creadas manualmente
                 const activeAbs = this.activeAbsences.find(abs => abs.employeeId === emp.id && slotMins >= abs.startMins && slotMins < abs.endMins);
                 
                 if (activeAbs) {
                     isBlocked = true;
-                    //blockLabel = activeAbs.category === 'Break' ? 'Descanso' : activeAbs.category;
                     blockLabel = 'No disponible';
                     if (activeAbs.category === 'Break') hasOverrideBreak = true;
                 }
 
-                // Evaluamos el Horario Base (Working Hours)
                 const wh = this.activeWorkingHours.find(w => w.employeeId === emp.id);
                 if (!wh || slotMins < wh.startMins || slotMins >= wh.endMins) {
                     isOutsideHours = true;
                 } else if (!hasOverrideBreak && wh.startBreakMins && wh.endBreakMins) {
-                    // Si NO hay un descanso manual sobreescrito, aplicamos el descanso por defecto
                     if (slotMins >= wh.startBreakMins && slotMins < wh.endBreakMins) {
                         isBlocked = true;
                         blockLabel = 'No disponible';
@@ -245,7 +275,7 @@ export default class AASalonMatrixAdmin extends LightningElement {
                         isTimeLabel: false,
                         isOccupied: false,
                         isBlocked: true,
-                        cssClass: 'cell-outside-hours' // Gris sólido oscuro
+                        cssClass: 'cell-outside-hours' 
                     });
                 } else if (isBlocked) {
                     cells.push({
@@ -254,7 +284,7 @@ export default class AASalonMatrixAdmin extends LightningElement {
                         isOccupied: false,
                         isBlocked: true,
                         blockLabel: blockLabel,
-                        cssClass: 'cell-blocked-absence' // Patrón de rayas
+                        cssClass: 'cell-blocked-absence' 
                     });
                 } else {
                     cells.push({
@@ -272,18 +302,16 @@ export default class AASalonMatrixAdmin extends LightningElement {
         });
     }
 
-    // --- ACCIÓN 1: CLICK EN ESPACIO LIBRE (ABRE MODAL DE CREACIÓN) ---
+    // --- ACCIÓN: CLICK EN ESPACIO LIBRE (CREACIÓN) ---
     handleEmptySlotClick(event) {
         this.formTimeLabel = event.currentTarget.dataset.time;
         this.formEmpId = event.currentTarget.dataset.empid;
         this.formEmpName = this.activeEmployees.find(e => e.id === this.formEmpId).name;
         
-        // 1. Buscamos qué IDs de servicio tiene habilitados este empleado específico
         const allowedServiceIds = this.rawEmployeeServices
             .filter(es => es.Employee__c === this.formEmpId)
             .map(es => es.Service__c);
 
-        // 2. Filtramos la lista global de servicios para mostrar solo los habilitados
         this.serviceOptions = this.rawAllServices
             .filter(service => allowedServiceIds.includes(service.Id))
             .map(s => ({ 
@@ -291,9 +319,109 @@ export default class AASalonMatrixAdmin extends LightningElement {
                 value: s.Id 
             }));
 
-        // 3. Limpiamos las selecciones anteriores y abrimos el modal
         this.selectedCustomerId = '';
         this.selectedServiceId = '';
         this.isCreateModalOpen = true;
+    }
+
+   handleApptClick(event) {
+        const apptId = event.currentTarget.dataset.id;
+        const appt = this.activeAppointments.find(a => a.id === apptId);
+        
+        if (appt) {
+            const emp = this.activeEmployees.find(e => e.id === appt.employeeId);
+            this.selectedAppt = {
+                ...appt,
+                employeeName: emp ? emp.name : 'Equipo',
+                waButtonLabel: appt.isReminderSent ? 'Reenviar' : 'Recordatorio',
+                waButtonClass: appt.isReminderSent ? 'modal-btn modal-btn--sent' : 'modal-btn modal-btn--wa',
+                waLink: this.generateWhatsAppLink(appt.phone, appt.customer, appt.service, appt.startTime),
+                // ASEGÚRATE DE PASAR ESTAS BANDERAS:
+                isDone: appt.isDone,
+                isPending: appt.isPending
+            };
+
+            this.tempInternalComments = appt.internalComments || '';
+            this.isDetailModalOpen = true;
+        }
+    }
+
+    // --- NUEVO: MANEJADORES DE TRANSACCIONES (MODAL DETALLE) ---
+    handleConfirmAction() {
+        this.isConfirming = true;
+        confirmAppointment({ appointmentId: this.selectedAppt.id, internalComments: this.tempInternalComments })
+            .then(() => this.closeAndRefresh())
+            .catch(err => { console.error(err); this.isConfirming = false; });
+    }
+
+    // NUEVO: Captura la escritura de la profesional
+    handleCommentChange(event) {
+        this.tempInternalComments = event.target.value;
+    }
+
+    // ACTUALIZADO: Envía los comentarios al marcar como realizado
+    handleDoneAction() {
+        this.isCompleting = true;
+        completeAppointment({ appointmentId: this.selectedAppt.id, internalComments: this.tempInternalComments })
+            .then(() => this.closeAndRefresh())
+            .catch(err => { console.error(err); this.isCompleting = false; });
+    }
+
+    handleCancelAction() {
+        this.isCancelling = true;
+        cancelAppointment({ appointmentId: this.selectedAppt.id, internalComments: this.tempInternalComments })
+            .then(() => this.closeAndRefresh())
+            .catch(err => { console.error(err); this.isCancelling = false; });
+    }
+
+    handleWaAction() {
+        markReminderAsSent({ appointmentId: this.selectedAppt.id })
+            .then(() => refreshApex(this.wiredMatrixResult))
+            .catch(err => console.error(err));
+    }
+
+    // --- NUEVO: GUARDAR NUEVA CITA (MODAL CREACIÓN) ---
+    handleFormChange(event) {
+        if (event.target.name === 'customer') this.selectedCustomerId = event.target.value;
+        if (event.target.name === 'service') this.selectedServiceId = event.target.value;
+    }
+
+    handleSaveAppointment() {
+        if (!this.selectedCustomerId || !this.selectedServiceId) return;
+        this.isSaving = true;
+
+        const [hours, minutes] = this.formTimeLabel.split(':').map(Number);
+        const startDateTime = new Date(this.selectedDate + 'T00:00:00');
+        startDateTime.setHours(hours, minutes, 0, 0);
+
+        createNewAppointment({ 
+            customerId: this.selectedCustomerId, 
+            employeeId: this.formEmpId, 
+            serviceId: this.selectedServiceId, 
+            startDateTime: startDateTime 
+        })
+        .then(() => this.closeAndRefresh())
+        .catch(err => { console.error(err); this.isSaving = false; });
+    }
+
+    // --- NUEVO: FUNCIONES AUXILIARES DE MODALES ---
+    closeModals() {
+        this.isCreateModalOpen = false;
+        this.isDetailModalOpen = false;
+        this.isSaving = false; 
+        this.isConfirming = false; 
+        this.isCompleting = false; 
+        this.isCancelling = false;
+    }
+
+    closeAndRefresh() {
+        this.closeModals();
+        return refreshApex(this.wiredMatrixResult);
+    }
+
+    generateWhatsAppLink(phone, name, service, time) {
+        if (!phone) return null;
+        const text = `Hola ${name}, te escribimos del salón para recordarte tu turno de ${service} mañana a las ${time} hs. ¿Nos confirmas tu asistencia?`;
+        return `https://wa.me/${phone.replace(/\D/g, '')}?text=${encodeURIComponent(text)}`;
     }
 }

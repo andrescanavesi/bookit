@@ -249,6 +249,11 @@
         <readable>true</readable>
     </fieldPermissions>
     <fieldPermissions>
+        <editable>true</editable>
+        <field>AA_Appointment__c.Internal_Comments__c</field>
+        <readable>true</readable>
+    </fieldPermissions>
+    <fieldPermissions>
         <editable>false</editable>
         <field>AA_Appointment__c.Is_Customer_Confirmed__c</field>
         <readable>true</readable>

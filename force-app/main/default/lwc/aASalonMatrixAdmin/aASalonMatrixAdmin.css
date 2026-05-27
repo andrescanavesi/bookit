@@ -487,3 +487,84 @@
 .detail-info-grid { font-size: 14px; color: #333; }
 
 @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+
+/* Agrega estas clases al final de tu archivo CSS actual */
+
+/* =========================================
+   10. MEJORAS DE ESTADO REALIZADO ("DONE")
+========================================= */
+
+/* Suavizado dinámico de tarjetas concluidas en la grilla */
+.cell-appt-done {
+    opacity: 0.55; /* Atenúa el brillo del color corporativo */
+    box-shadow: none !important;
+    filter: saturate(75%); /* Desatura sutilmente la celda */
+    border: 1px dashed rgba(255, 255, 255, 0.5) !important; /* Añade contorno de cierre */
+}
+
+/* El área de texto interactiva para las notas de manicura */
+.modal-textarea {
+    width: 100%;
+    padding: 10px 12px;
+    border: 1px solid #D9D2C5;
+    background-color: #FFFFFF;
+    border-radius: 6px;
+    font-size: 14px;
+    color: #333;
+    font-family: inherit;
+    resize: vertical;
+    transition: border-color 0.2s;
+}
+
+.modal-textarea:focus {
+    border-color: #121212;
+    outline: none;
+}
+
+/* Diseño de solo lectura cuando la cita ya fue atendida */
+.modal-textarea:disabled {
+    background-color: #EAE4D9; /* Fondo gris beige suave */
+    color: #555555;
+    cursor: not-allowed;
+    border-style: dashed;
+}
+
+/* Badge Premium para el Footer del Modal */
+.badge-completed-status {
+    background-color: #D8F3DC; /* Verde oliva claro */
+    color: #1B4332; /* Verde bosque profundo */
+    font-size: 12px;
+    font-weight: 700;
+    text-transform: uppercase;
+    padding: 6px 14px;
+    border-radius: 20px;
+    letter-spacing: 0.5px;
+    display: inline-block;
+    border: 1px solid #74C69D;
+}
+
+/* =========================================
+   EFECTOS DE CITA FINALIZADA ("DONE")
+========================================= */
+
+/* 1. Atenuación dinámica de la tarjeta en el calendario */
+.cell-appt-done {
+    opacity: 0.55 !important; 
+    box-shadow: none !important;
+    filter: saturate(70%); /* Apaga un poco los colores vivos */
+    border: 1px dashed rgba(255, 255, 255, 0.6) !important; /* Añade un contorno sutil de cierre */
+}
+
+/* 2. Etiqueta (Badge) de éxito dentro del modal */
+.badge-completed-status {
+    background-color: #D8F3DC; /* Verde pastel suave */
+    color: #1B4332; /* Verde bosque profundo para contraste */
+    font-size: 12px;
+    font-weight: 700;
+    text-transform: uppercase;
+    padding: 6px 14px;
+    border-radius: 20px;
+    letter-spacing: 0.5px;
+    display: inline-block;
+    border: 1px solid #74C69D;
+}

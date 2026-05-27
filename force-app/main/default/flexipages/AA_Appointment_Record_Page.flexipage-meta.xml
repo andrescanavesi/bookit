@@ -235,6 +235,12 @@
                 <identifier>RecordDone_Date__cField</identifier>
             </fieldInstance>
         </itemInstances>
+        <itemInstances>
+            <fieldInstance>
+                <fieldItem>Record.Internal_Comments__c</fieldItem>
+                <identifier>RecordComments__cField</identifier>
+            </fieldInstance>
+        </itemInstances>
         <name>Facet-adced6cf-3125-4996-b02a-8adf1ba0d393</name>
         <type>Facet</type>
     </flexiPageRegions>

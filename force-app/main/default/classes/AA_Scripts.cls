@@ -219,4 +219,77 @@ public class AA_Scripts {
         }
     }
 
+    /**
+     * Método 1: Genera la lista de horarios de trabajo para un empleado específico (Martes a Sábado).
+     * @param empId El ID del empleado.
+     * @return Lista de registros AA_Employee_Working_Hour__c listos para insertar.
+     */
+    public static List<AA_Employee_Working_Hour__c> createWorkingHoursForEmployee(Id empId) {
+        List<AA_Employee_Working_Hour__c> whList = new List<AA_Employee_Working_Hour__c>();
+        
+        // Días laborables del salón
+        List<String> workDays = new List<String>{'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'};
+        
+        // Definición de horarios (Usamos formato 24hs en Apex)
+        Time startHour = Time.newInstance(9, 0, 0, 0);   // 09:00 AM
+        Time endHour = Time.newInstance(18, 0, 0, 0);    // 06:00 PM
+        Time breakStart = Time.newInstance(12, 0, 0, 0); // 12:00 PM (Mediodía)
+        Time breakEnd = Time.newInstance(13, 0, 0, 0);   // 01:00 PM (13:00 hs)
+        
+        for (String day : workDays) {
+            AA_Employee_Working_Hour__c wh = new AA_Employee_Working_Hour__c();
+            wh.Employee__c = empId;
+            wh.Day_Of_Week__c = day;
+            
+            // Asignación con los API Names confirmados en tu imagen
+            wh.Start_Hour__c = startHour;
+            wh.End_Hour__c = endHour;
+            wh.Start_Default_Break_Hour__c = breakStart;
+            wh.End_Default_Break_Hour__c = breakEnd;
+            wh.Name = day;
+            
+            whList.add(wh);
+        }
+        
+        return whList;
+    }
+
+    /**
+     * Método 2: Obtiene todos los empleados, genera sus horarios usando el Método 1 
+     * y realiza una inserción masiva (Bulk DML).
+     * * Para ejecutar: AA_Scripts.generateWorkingHoursForAllEmployees();
+     */
+    public static void generateWorkingHoursForAllEmployees() {
+        System.debug('Iniciando configuración masiva de horarios laborales...');
+        
+        // 1. Obtenemos todos los empleados que NO sean administradores
+        List<AA_Employee__c> allEmployees = [SELECT Id, Name 
+            FROM AA_Employee__c
+            WHERE Business_Branch__r.Business__c = :BUSINESS_ID ];
+        
+        if (allEmployees.isEmpty()) {
+            System.debug('No se encontraron empleados para configurar.');
+            return;
+        }
+
+        // 2. Lista maestra para acumular todos los registros a insertar
+        List<AA_Employee_Working_Hour__c> allWorkingHoursToInsert = new List<AA_Employee_Working_Hour__c>();
+        
+        // 3. Iteramos y acumulamos (sin hacer DML dentro del loop)
+        for (AA_Employee__c emp : allEmployees) {
+            List<AA_Employee_Working_Hour__c> empHours = createWorkingHoursForEmployee(emp.Id);
+            allWorkingHoursToInsert.addAll(empHours);
+        }
+        
+        // 4. Inserción masiva
+        if (!allWorkingHoursToInsert.isEmpty()) {
+            try {
+                insert allWorkingHoursToInsert;
+                System.debug('Éxito: Se crearon ' + allWorkingHoursToInsert.size() + ' registros de horarios para ' + allEmployees.size() + ' empleados.');
+            } catch (Exception e) {
+                System.debug('Error al insertar los horarios: ' + e.getMessage());
+            }
+        }
+    }
+
 }

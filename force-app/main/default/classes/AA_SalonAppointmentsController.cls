@@ -8,6 +8,11 @@ public with sharing class AA_SalonAppointmentsController {
     public class MatrixDataWrapper {
         @AuraEnabled public List<AA_Employee__c> employees {get;set;}
         @AuraEnabled public List<AA_Appointment__c> appointments {get;set;}
+        @AuraEnabled public List<AA_Employee_Absence__c> absences {get;set;}
+        @AuraEnabled public List<AA_Employee_Working_Hour__c> workingHours {get;set;}
+        @AuraEnabled public List<AA_Employee_Service__c> employeeServices {get;set;}
+        @AuraEnabled public List<AA_Customer__c> allCustomers {get;set;}
+        @AuraEnabled public List<AA_Service__c> allServices {get;set;}
     }
 
     private static Id getBusinessId(){
@@ -90,12 +95,13 @@ public with sharing class AA_SalonAppointmentsController {
     }
 
     @AuraEnabled
-    public static void confirmAppointment(Id appointmentId) {
+    public static void confirmAppointment(Id appointmentId, String internalComments) {
         try {
             AA_Appointment__c appt = new AA_Appointment__c(
                 Id = appointmentId,
                 Customer_Confirmation_Date__c = System.now(),
-                Status__c = 'Confirmed' // Cambiamos el estado de la cita automáticamente
+                Status__c = 'Confirmed', // Cambiamos el estado de la cita automáticamente
+                Internal_Comments__c = internalComments
             );
             update appt;
         } catch (Exception e) {
@@ -104,12 +110,13 @@ public with sharing class AA_SalonAppointmentsController {
     }
 
     @AuraEnabled
-    public static void cancelAppointment(Id appointmentId) {
+    public static void cancelAppointment(Id appointmentId, String internalComments) {
         try {
             AA_Appointment__c appt = new AA_Appointment__c(
                 Id = appointmentId,
                 Status__c = 'Cancelled',
-                Cancelled_Date__c = System.now() // Sellamos la fecha para las métricas del salón
+                Cancelled_Date__c = System.now(), 
+                Internal_Comments__c = internalComments
             );
             update appt;
         } catch (Exception e) {
@@ -117,29 +124,31 @@ public with sharing class AA_SalonAppointmentsController {
         }
     }
 
+    // ACTUALIZADO: El método ahora procesa y guarda las observaciones internas del salón
     @AuraEnabled
-    public static void completeAppointment(Id appointmentId) {
+    public static void completeAppointment(Id appointmentId, String internalComments) {
         try {
             AA_Appointment__c appt = new AA_Appointment__c(
                 Id = appointmentId,
                 Status__c = 'Done',
-                Done_Date__c = System.now() // Estampamos el momento exacto del cierre de caja
+                Internal_Comments__c = internalComments,
+                Done_Date__c = System.now() 
             );
             update appt;
         } catch (Exception e) {
-            throw new AuraHandledException('Error al finalizar la cita: ' + e.getMessage());
+            throw new AuraHandledException('Error al registrar la finalización: ' + e.getMessage());
         }
     }
 
     @AuraEnabled(cacheable=true)
     public static MatrixDataWrapper getMatrixData(Date selectedDate) {
+         AA_Logger logger = new AA_Logger(true);
         try {
             MatrixDataWrapper wrapper = new MatrixDataWrapper();
-
-            Id businessId = getBusinessId();
+            
+             Id businessId = getBusinessId();
             
             // 1. Recuperamos todos los profesionales del salón
-            // WHERE User_Id__c = :UserInfo.getUserId()
             wrapper.employees = [
                 SELECT Id, Name 
                 FROM AA_Employee__c 
@@ -148,23 +157,72 @@ public with sharing class AA_SalonAppointmentsController {
                 ORDER BY Name ASC
             ];
             
-             AA_Logger logger = new AA_Logger(true);
-            
-
-            // 2. Recuperamos las citas exclusivas de la fecha seleccionada (excluyendo canceladas)
             wrapper.appointments = [
                 SELECT Id, Start_Date_Time__c, Status__c, Employee__c,
                        Customer__r.First_Name__c, Customer__r.Last_Name__c, 
-                       Service__r.Name, Service__r.Duration_Minutes__c, Amount__c
+                       Service__r.Name, Service__r.Duration_Minutes__c, Service__r.Price__c,
+                       Internal_Comments__c
                 FROM AA_Appointment__c 
                 WHERE DAY_ONLY(Start_Date_Time__c) = :selectedDate 
                 AND Status__c != 'Cancelled'
+                AND Service__r.Business_Branch__r.Business__c = :businessId
             ];
-            logger.info('getMatrixData, selectedDate '+selectedDate+' employees: '+wrapper.employees.size()+' appointments: '+wrapper.appointments.size());
 
+            // 3. Obtenemos las Ausencias (Licencias o Descansos ad-hoc) que toquen esta fecha
+            wrapper.absences = [
+                SELECT Id, Employee__c, Start_Date_Time__c, End_Date_Time__c, Category__c
+                FROM AA_Employee_Absence__c
+                WHERE DAY_ONLY(Start_Date_Time__c) <= :selectedDate 
+                AND DAY_ONLY(End_Date_Time__c) >= :selectedDate
+                AND Employee__r.Business_Branch__r.Business__c  = :businessId
+            ];
+
+            // 4. Obtenemos el Horario Laboral del día de la semana correspondiente
+            Datetime dt = Datetime.newInstance(selectedDate, Time.newInstance(0,0,0,0));
+            String dayOfWeek = dt.format('EEEE'); // Ej: 'Wednesday'
+            
+            wrapper.workingHours = [
+                SELECT Employee__c, Start_Hour__c, End_Hour__c, Start_Default_Break_Hour__c, End_Default_Break_Hour__c, Day_Of_Week__c
+                FROM AA_Employee_Working_Hour__c
+                WHERE Day_Of_Week__c = :dayOfWeek
+                AND Employee__r.Business_Branch__r.Business__c  = :businessId
+            ];
+
+            wrapper.allServices = [SELECT Id, Name, Duration_Minutes__c, Price__c 
+                FROM AA_Service__c 
+                WHERE Business_Branch__r.Business__c  = :businessId
+                ORDER BY Name ASC];
+            
+            wrapper.employeeServices = [SELECT Employee__c, Service__c 
+                FROM AA_Employee_Service__c
+                WHERE Employee__r.Business_Branch__r.Business__c  = :businessId];
+
+            wrapper.allCustomers = [SELECT Id, Name FROM AA_Customer__c 
+                WHERE Business__c = :businessId ORDER BY Name ASC];
+
+            logger.info('getMatrixData, selectedDate '+selectedDate+' employees: '+wrapper.employees.size()+' appointments: '+wrapper.appointments.size());
             return wrapper;
         } catch (Exception e) {
-            throw new AuraHandledException('Error al obtener datos de la matriz: ' + e.getMessage());
+            String message = 'error getMatrixData: ' + e.getMessage();
+            logger.error(message + ' ' + e.getStackTraceString());
+            throw new AuraHandledException(message);
+        }
+    }
+
+    // NUEVO: Método imperativo para guardar la cita desde el modal
+    @AuraEnabled
+    public static void createNewAppointment(Id customerId, Id employeeId, Id serviceId, Datetime startDateTime) {
+        try {
+            AA_Appointment__c appt = new AA_Appointment__c(
+                Customer__c = customerId,
+                Employee__c = employeeId,
+                Service__c = serviceId,
+                Start_Date_Time__c = startDateTime,
+                Status__c = 'Pending'
+            );
+            insert appt;
+        } catch (Exception e) {
+            throw new AuraHandledException('Error al agendar la cita: ' + e.getMessage());
         }
     }
 
