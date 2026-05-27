@@ -299,6 +299,11 @@
         <readable>true</readable>
     </fieldPermissions>
     <fieldPermissions>
+        <editable>true</editable>
+        <field>AA_Employee_Absence__c.Day_Of_Week__c</field>
+        <readable>true</readable>
+    </fieldPermissions>
+    <fieldPermissions>
         <editable>false</editable>
         <field>AA_Employee_Working_Hour__c.End_Default_Break_Hour__c</field>
         <readable>false</readable>

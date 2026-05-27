@@ -6,6 +6,7 @@ import confirmAppointment from '@salesforce/apex/AA_SalonAppointmentsController.
 import completeAppointment from '@salesforce/apex/AA_SalonAppointmentsController.completeAppointment';
 import cancelAppointment from '@salesforce/apex/AA_SalonAppointmentsController.cancelAppointment';
 import markReminderAsSent from '@salesforce/apex/AA_SalonAppointmentsController.markReminderAsSent';
+import createAbsence from '@salesforce/apex/AA_SalonAppointmentsController.createAbsence';
 
 export default class AASalonMatrixAdmin extends LightningElement {
     
@@ -49,6 +50,13 @@ export default class AASalonMatrixAdmin extends LightningElement {
     wiredMatrixResult; // Almacena el resultado crudo para refreshApex
 
     employeeColors = ['#B23A3A', '#D4A017', '#3A70A1', '#5A8A4F', '#6B4F8E', '#A15C3A'];
+
+    // --- VARIABLES DEL MODAL UNIFICADO ---
+    @track isAppointmentTabActive = true; // Controla la pestaña activa
+    
+    // Variables para el bloqueo de horario
+    selectedAbsenceCategory = '';
+    selectedAbsenceDuration = '';
 
     connectedCallback() {
         this.initWeekDays();
@@ -307,6 +315,7 @@ export default class AASalonMatrixAdmin extends LightningElement {
         this.formTimeLabel = event.currentTarget.dataset.time;
         this.formEmpId = event.currentTarget.dataset.empid;
         this.formEmpName = this.activeEmployees.find(e => e.id === this.formEmpId).name;
+        this.isAppointmentTabActive = true;
         
         const allowedServiceIds = this.rawEmployeeServices
             .filter(es => es.Employee__c === this.formEmpId)
@@ -386,22 +395,28 @@ export default class AASalonMatrixAdmin extends LightningElement {
         if (event.target.name === 'service') this.selectedServiceId = event.target.value;
     }
 
-    handleSaveAppointment() {
-        if (!this.selectedCustomerId || !this.selectedServiceId) return;
+    handleSaveAction() {
         this.isSaving = true;
 
         const [hours, minutes] = this.formTimeLabel.split(':').map(Number);
         const startDateTime = new Date(this.selectedDate + 'T00:00:00');
         startDateTime.setHours(hours, minutes, 0, 0);
 
-        createNewAppointment({ 
-            customerId: this.selectedCustomerId, 
-            employeeId: this.formEmpId, 
-            serviceId: this.selectedServiceId, 
-            startDateTime: startDateTime 
-        })
-        .then(() => this.closeAndRefresh())
-        .catch(err => { console.error(err); this.isSaving = false; });
+        if (this.isAppointmentTabActive) {
+            // FLUJO: NUEVA CITA
+            if (!this.selectedCustomerId || !this.selectedServiceId) { this.isSaving = false; return; }
+            
+            createNewAppointment({ customerId: this.selectedCustomerId, employeeId: this.formEmpId, serviceId: this.selectedServiceId, startDateTime: startDateTime })
+                .then(() => this.closeAndRefresh())
+                .catch(err => { console.error(err); this.isSaving = false; });
+        } else {
+            // FLUJO: BLOQUEO DE HORARIO
+            if (!this.selectedAbsenceCategory || !this.selectedAbsenceDuration) { this.isSaving = false; return; }
+            
+            createAbsence({ employeeId: this.formEmpId, startDateTime: startDateTime, durationMinutes: parseInt(this.selectedAbsenceDuration, 10), category: this.selectedAbsenceCategory })
+                .then(() => this.closeAndRefresh())
+                .catch(err => { console.error(err); this.isSaving = false; });
+        }
     }
 
     // --- NUEVO: FUNCIONES AUXILIARES DE MODALES ---
@@ -424,4 +439,40 @@ export default class AASalonMatrixAdmin extends LightningElement {
         const text = `Hola ${name}, te escribimos del salón para recordarte tu turno de ${service} mañana a las ${time} hs. ¿Nos confirmas tu asistencia?`;
         return `https://wa.me/${phone.replace(/\D/g, '')}?text=${encodeURIComponent(text)}`;
     }
+
+    get absenceCategoryOptions() {
+        return [
+            { label: '☕ Descanso / Break', value: 'Break' },
+            { label: '🍽️ Almuerzo', value: 'Lunch' },
+            { label: '🎓 Reunión o Capacitación', value: 'Meeting' },
+            { label: '⛔ Ausencia Personal', value: 'Personal' }
+        ];
+    }
+
+    get absenceDurationOptions() {
+        return [
+            { label: '30 minutos', value: '30' },
+            { label: '1 hora', value: '60' },
+            { label: '1 hora y 30 minutos', value: '90' },
+            { label: '2 horas', value: '120' }
+        ];
+    }
+
+    get appointmentTabClass() { return this.isAppointmentTabActive ? 'modal-tab active' : 'modal-tab'; }
+    get absenceTabClass() { return !this.isAppointmentTabActive ? 'modal-tab active' : 'modal-tab'; }
+
+    handleTabClick(event) {
+        this.isAppointmentTabActive = event.currentTarget.dataset.tab === 'appointment';
+    }
+
+    // ACTUALIZA tu handleFormChange actual para incluir los nuevos selects:
+    handleFormChange(event) {
+        const field = event.target.name;
+        if (field === 'customer') this.selectedCustomerId = event.target.value;
+        if (field === 'service') this.selectedServiceId = event.target.value;
+        if (field === 'absenceCategory') this.selectedAbsenceCategory = event.target.value;
+        if (field === 'absenceDuration') this.selectedAbsenceDuration = event.target.value;
+    }
+
+
 }

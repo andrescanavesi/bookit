@@ -3,7 +3,7 @@
     <fullName>Day_Of_Week__c</fullName>
     <externalId>false</externalId>
     <label>Day Of Week</label>
-    <required>true</required>
+    <required>false</required>
     <trackTrending>false</trackTrending>
     <type>Picklist</type>
     <valueSet>

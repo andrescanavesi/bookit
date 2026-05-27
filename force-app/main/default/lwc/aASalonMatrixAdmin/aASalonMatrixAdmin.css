@@ -363,3 +363,38 @@
 }
 
 @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+
+/* =========================================
+   11. PESTAÑAS (TABS) DEL MODAL
+========================================= */
+.modal-tabs {
+    display: flex;
+    background-color: #EAE4D9; /* Un crema más oscuro para el fondo */
+    border-radius: 8px;
+    padding: 4px;
+    margin-bottom: 12px;
+}
+
+.modal-tab {
+    flex: 1;
+    padding: 10px 12px;
+    border: none;
+    background: transparent;
+    border-radius: 6px;
+    font-size: 13px;
+    font-weight: 700;
+    color: var(--text-muted);
+    cursor: pointer;
+    transition: all 0.2s ease;
+    font-family: inherit;
+}
+
+.modal-tab:hover {
+    color: var(--brand-dark);
+}
+
+.modal-tab.active {
+    background-color: #FFFFFF;
+    color: var(--brand-dark);
+    box-shadow: 0 2px 4px rgba(0,0,0,0.05); /* Efecto de relieve suave */
+}

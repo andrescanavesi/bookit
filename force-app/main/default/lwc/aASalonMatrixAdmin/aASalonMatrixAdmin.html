@@ -84,46 +84,84 @@
             </table>
         </div>
 
+        <!-- MODAL A: CREACIÓN UNIFICADA (CITAS / BLOQUEOS) -->
         <template if:true={isCreateModalOpen}>
             <div class="modal-backdrop">
                 <div class="modal-container">
                     <div class="modal-header">
-                        <h2>Nueva Cita</h2>
+                        <h2>Agendar Turno</h2>
                         <button class="modal-close-x" onclick={closeModals}>✕</button>
                     </div>
+                    
                     <div class="modal-body">
-                        <p class="modal-summary-text">Asignando turno para <strong>{formEmpName}</strong> a las <strong>{formTimeLabel} hs</strong>.</p>
-                        
-                        <div class="form-group">
-                            <label>Seleccionar Clienta</label>
-                            <select name="customer" class="modal-select" onchange={handleFormChange}>
-                                <option value="">-- Buscar Clienta --</option>
-                                <template for:each={customerOptions} for:item="opt">
-                                    <option key={opt.value} value={opt.value}>{opt.value} - {opt.label}</option>
-                                </template>
-                            </select>
+                        <!-- PÍLDORAS DE NAVEGACIÓN -->
+                        <div class="modal-tabs">
+                            <button class={appointmentTabClass} data-tab="appointment" onclick={handleTabClick}>📅 Nueva Cita</button>
+                            <button class={absenceTabClass} data-tab="absence" onclick={handleTabClick}>☕ Bloquear Horario</button>
                         </div>
 
-                        <div class="form-group">
-                            <label>Seleccionar Servicio</label>
-                            <select name="service" class="modal-select" onchange={handleFormChange}>
-                                <option value="">-- Tipo de Servicio --</option>
-                                <template for:each={serviceOptions} for:item="opt">
-                                    <option key={opt.value} value={opt.value}>{opt.label}</option>
-                                </template>
-                            </select>
-                        </div>
+                        <p class="modal-summary-text">Para <strong>{formEmpName}</strong> a las <strong>{formTimeLabel} hs</strong>.</p>
+                        
+                        <!-- VISTA 1: FORMULARIO DE CITA -->
+                        <template if:true={isAppointmentTabActive}>
+                            <div class="form-group">
+                                <label>Clienta</label>
+                                <select name="customer" class="modal-select" onchange={handleFormChange}>
+                                    <option value="">-- Buscar Clienta --</option>
+                                    <template for:each={customerOptions} for:item="opt">
+                                        <option key={opt.value} value={opt.value}>{opt.label}</option>
+                                    </template>
+                                </select>
+                            </div>
+
+                            <div class="form-group">
+                                <label>Servicio</label>
+                                <select name="service" class="modal-select" onchange={handleFormChange}>
+                                    <option value="">-- Seleccionar Servicio --</option>
+                                    <template for:each={serviceOptions} for:item="opt">
+                                        <option key={opt.value} value={opt.value}>{opt.label}</option>
+                                    </template>
+                                </select>
+                            </div>
+                        </template>
+
+                        <!-- VISTA 2: FORMULARIO DE BLOQUEO -->
+                        <template if:false={isAppointmentTabActive}>
+                            <div class="form-group">
+                                <label>Motivo del Bloqueo</label>
+                                <select name="absenceCategory" class="modal-select" onchange={handleFormChange}>
+                                    <option value="">-- Indicar Motivo --</option>
+                                    <template for:each={absenceCategoryOptions} for:item="opt">
+                                        <option key={opt.value} value={opt.value}>{opt.label}</option>
+                                    </template>
+                                </select>
+                            </div>
+
+                            <div class="form-group">
+                                <label>Duración</label>
+                                <select name="absenceDuration" class="modal-select" onchange={handleFormChange}>
+                                    <option value="">-- Seleccionar Tiempo --</option>
+                                    <template for:each={absenceDurationOptions} for:item="opt">
+                                        <option key={opt.value} value={opt.value}>{opt.label}</option>
+                                    </template>
+                                </select>
+                            </div>
+                        </template>
                     </div>
+
                     <div class="modal-footer">
                         <button class="modal-btn modal-btn--secondary" onclick={closeModals}>Cancelar</button>
-                        <button class="modal-btn modal-btn--primary" onclick={handleSaveAppointment} disabled={isSaving}>
-                            <template if:true={isSaving}>Guardando...</template>
-                            <template if:false={isSaving}>Confirmar Reserva</template>
+                        <button class="modal-btn modal-btn--primary" onclick={handleSaveAction} disabled={isSaving}>
+                            <template if:true={isSaving}>Procesando...</template>
+                            <template if:false={isSaving}>
+                                <template if:true={isAppointmentTabActive}>Confirmar Reserva</template>
+                                <template if:false={isAppointmentTabActive}>Aplicar Bloqueo</template>
+                            </template>
                         </button>
                     </div>
                 </div>
             </div>
-        </template>
+        </template> 
 
         <template if:true={isDetailModalOpen}>
             <div class="modal-backdrop">

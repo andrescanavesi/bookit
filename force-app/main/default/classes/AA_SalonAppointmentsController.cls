@@ -226,4 +226,26 @@ public with sharing class AA_SalonAppointmentsController {
         }
     }
 
+    // NUEVO: Método para crear bloqueos de horario (Ausencias/Descansos)
+    @AuraEnabled
+    public static void createAbsence(Id employeeId, Datetime startDateTime, Integer durationMinutes, String category) {
+         AA_Logger logger = new AA_Logger(true);
+        try {
+            Datetime endDateTime = startDateTime.addMinutes(durationMinutes);
+            String categoryDb = 'Break';
+            logger.info('createAbsence, employee: '+employeeId+' startDateTime: '+startDateTime+' durationMinutes: '+durationMinutes+' categoryDb: '+categoryDb);
+            AA_Employee_Absence__c abs = new AA_Employee_Absence__c(
+                Employee__c = employeeId,
+                Start_Date_Time__c = startDateTime,
+                End_Date_Time__c = endDateTime,
+                Category__c = categoryDb
+            );
+            insert abs;
+        } catch (Exception e) {
+            String message = 'Error on createAbsence for business: ' + e.getMessage();
+            logger.error(message + ' ' + e.getStackTraceString());
+            throw new AuraHandledException(message);
+        }
+    }
+
 }
