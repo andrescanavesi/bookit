@@ -1,73 +1,83 @@
 /* =========================================
-   1. ESTRUCTURA GENERAL Y ENCABEZADO
+   1. VARIABLES DE MARCA Y TIPOGRAFÍA
 ========================================= */
-.admin-container {
-    background-color: #F1ECE3; 
-    min-height: 100vh;
-    padding: 24px;
-    font-family: 'DM Sans', sans-serif;
-    color: #333;
+:host {
+    --brand-red: #9A0102; /* Rojo Óxido */
+    --brand-dark: #121212;
+    --brand-cream: #F8F5EF;
+    --brand-bg: #F1ECE3;
+    --text-main: #1A1A1A;
+    --text-muted: #8A8175;
+    --border-color: #D9D2C5;
+    --font-heading: 'Raleway', sans-serif;
+    --font-body: 'DM Sans', sans-serif;
 }
 
-.header {
-    margin-bottom: 32px;
+/* =========================================
+   2. ESTRUCTURA GLOBAL
+========================================= */
+.admin-container {
+    background-color: var(--brand-bg);
+    min-height: 100vh;
+    padding: 24px;
+    font-family: var(--font-body);
+    color: var(--text-main);
 }
 
 .header__eyebrow {
     font-size: 11px;
     font-weight: 700;
     letter-spacing: 2px;
-    color: #8C2417; 
+    color: var(--brand-red);
     text-transform: uppercase;
     display: block;
     margin-bottom: 8px;
 }
 
 .header__title {
+    font-family: var(--font-heading);
     font-size: 36px;
-    font-weight: 400;
+    font-weight: 600;
     margin: 0 0 8px 0;
-    color: #1A1A1A;
+    color: var(--brand-dark);
 }
 
 .header__subtitle {
-    color: #8A8175;
+    color: var(--text-muted);
     font-size: 16px;
     margin: 0;
 }
 
 /* =========================================
-   2. SELECTOR DE FECHAS (TARJETAS)
+   3. SELECTOR DE FECHAS (TARJETAS)
 ========================================= */
 .date-selector-wrapper {
     display: flex;
     gap: 12px;
     margin-bottom: 32px;
     overflow-x: auto;
-    padding-bottom: 8px; 
+    padding-bottom: 8px;
 }
 
 .date-card {
     background-color: transparent;
-    border: 1px solid #D9D2C5;
+    border: 1px solid var(--border-color);
     padding: 16px 24px;
     min-width: 90px;
     display: flex;
     flex-direction: column;
     align-items: center;
-    justify-content: center;
     cursor: pointer;
     transition: all 0.2s ease;
-    color: #1A1A1A;
 }
 
 .date-card:hover {
-    border-color: #1A1A1A;
+    border-color: var(--brand-dark);
 }
 
 .date-card--active {
-    background-color: #121212; 
-    border-color: #121212;
+    background-color: var(--brand-dark);
+    border-color: var(--brand-dark);
     color: #FFFFFF;
 }
 
@@ -76,65 +86,55 @@
     letter-spacing: 2px;
     font-weight: 500;
 }
-.ds-dow { margin-bottom: 8px; }
 
 .ds-number {
-    font-family: 'Playfair Display', Georgia, serif; 
+    font-family: 'Playfair Display', Georgia, serif;
     font-size: 34px;
-    font-weight: 400;
-    line-height: 1;
-    margin-bottom: 8px;
+    margin: 8px 0;
 }
 
 /* =========================================
-   3. ESTRUCTURA DE LA GRILLA (MATRIZ)
+   4. GRILLA Y CELDAS BASE
 ========================================= */
 .table-scroll-wrapper {
-    overflow-x: auto;
-    background: #F8F5EF; 
-    border: 1px solid #D9D2C5;
+    background: var(--brand-cream);
+    border: 1px solid var(--border-color);
     border-radius: 8px;
     padding: 16px 24px 24px 24px;
+    overflow-x: auto;
 }
 
-.matrix-table {
-    width: 100%;
-    border-collapse: collapse;
-    min-width: 600px;
+.matrix-table { 
+    width: 100%; 
+    border-collapse: collapse; 
+    min-width: 600px; 
 }
 
-/* ENCABEZADOS (NOMBRES DE EMPLEADOS) */
 .matrix-table th {
-    color: #8A8175;
+    color: var(--text-muted);
     padding: 16px 12px;
-    font-size: 16px;
-    font-weight: 400;
-    border-bottom: 1px solid #D9D2C5;
-    text-align: center;
+    font-size: 15px;
+    font-weight: 600;
+    border-bottom: 1px solid var(--border-color);
+    font-family: var(--font-heading);
 }
 
 .prof-dot {
-    width: 10px;
-    height: 10px;
+    width: 10px; height: 10px;
     border-radius: 50%;
     margin-right: 8px;
     display: inline-block;
 }
 
-/* CELDAS BASE DE LA GRILLA (LÍNEAS PUNTEADAS) */
 .matrix-table td {
-    border-bottom: 1px dashed #E5DFD5; 
-    height: 56px;
+    border-bottom: 1px dashed #E5DFD5;
+    height: 56px; /* Altura clave para que el contenido encaje */
     padding: 0;
     vertical-align: top;
 }
 
-.matrix-table tr:last-child td {
-    border-bottom: none;
-}
-
 /* =========================================
-   4. COLUMNA DE LA HORA (ESTILO GOOGLE CALENDAR)
+   5. COLUMNA DE LA HORA
 ========================================= */
 .th-time {
     text-align: left !important;
@@ -143,24 +143,22 @@
 
 .time-label-cell {
     position: relative;
-    vertical-align: top !important; 
-    border: none !important; 
-    width: 80px; 
+    width: 80px;
+    border: none !important;
 }
 
 .time-text {
     position: absolute;
-    top: -11px; 
-    right: 16px; 
-    font-size: 14px; 
-    font-weight: 400; 
-    color: #8A8175;
-    background-color: #F8F5EF; 
-    padding: 0 6px; 
+    top: -11px;
+    right: 16px;
+    font-size: 14px;
+    color: var(--text-muted);
+    background-color: var(--brand-cream);
+    padding: 0 6px;
 }
 
 /* =========================================
-   5. CELDAS VACÍAS (HUECOS LIBRES)
+   6. CELDAS LIBRES (HUECOS)
 ========================================= */
 .free-cell {
     cursor: pointer;
@@ -168,7 +166,7 @@
 }
 
 .free-cell:hover {
-    background-color: rgba(140, 36, 23, 0.04); 
+    background-color: rgba(154, 1, 2, 0.04); /* Tinte ultra sutil del rojo corporativo */
 }
 
 .cell-free {
@@ -180,25 +178,63 @@
 
 .add-icon {
     opacity: 0;
-    color: #8C2417;
+    color: var(--brand-red);
     font-size: 24px;
     font-weight: 300;
     transition: opacity 0.2s;
 }
 
 .free-cell:hover .add-icon {
-    opacity: 1; 
+    opacity: 1;
 }
 
 /* =========================================
-   6. TARJETAS DE CITAS OCUPADAS (FUSIONES)
+   7. AUSENCIAS Y DESCANSOS (RESTAURADO)
+========================================= */
+.cell-outside-hours {
+    width: 100%;
+    height: 100%;
+    background-color: #E6E1D8;
+    opacity: 0.6;
+    pointer-events: none;
+}
+
+.cell-blocked-absence {
+    width: 100%;
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: repeating-linear-gradient(
+        45deg,
+        var(--brand-bg),
+        var(--brand-bg) 10px,
+        #EAE4D9 10px,
+        #EAE4D9 20px
+    );
+    pointer-events: none;
+}
+
+.absence-label {
+    background-color: #FFFFFF;
+    color: var(--text-muted);
+    font-size: 11px;
+    font-weight: 700;
+    text-transform: uppercase;
+    padding: 2px 8px;
+    border-radius: 4px;
+    border: 1px solid var(--border-color);
+    letter-spacing: 0.5px;
+}
+
+/* =========================================
+   8. TARJETAS DE CITAS OCUPADAS
 ========================================= */
 .appt-cell {
     padding: 0 4px !important; 
     vertical-align: top;
 }
 
-/* Clase base compartida para todos los bloques de la tarjeta */
 .cell-appt {
     width: 100%;
     display: flex;
@@ -209,362 +245,121 @@
     color: #ffffff;
     border-radius: 6px;
     box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-}
-
-/* Tipos de bloques para unir la tarjeta visualmente */
-.cell-appt-single {
-    height: calc(100% - 6px); 
-    margin-bottom: 6px;
-}
-
-.cell-appt-start {
-    height: 100%;
-    border-bottom-left-radius: 0;
-    border-bottom-right-radius: 0;
-    padding-bottom: 4px; 
-    margin-bottom: 0;
-}
-
-.cell-appt-body {
-    height: 100%;
-    border-radius: 0;
-    padding-top: 0;
-    padding-bottom: 4px;
-    margin-bottom: 0;
-}
-
-.cell-appt-end {
-    height: calc(100% - 6px); 
-    border-top-left-radius: 0;
-    border-top-right-radius: 0;
-    padding-top: 0;
-    margin-bottom: 6px;
-}
-
-/* =========================================
-   7. CONTENIDO INTERNO DE LAS CITAS
-========================================= */
-.appt-content-wrapper {
-    display: flex;
-    flex-direction: column;
-    gap: 4px;
-    width: 100%;
-    overflow: hidden;
-}
-
-/* Metadatos: Hora y Precio */
-.appt-meta {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    font-size: 10px;
-    font-weight: 600;
-    letter-spacing: 0.5px;
-    opacity: 0.85; 
-    border-bottom: 1px solid rgba(255,255,255,0.2);
-    padding-bottom: 4px;
-    margin-bottom: 2px;
-}
-
-.appt-time-range, .appt-price {
-    white-space: nowrap;
-}
-
-.appt-price {
-    background-color: rgba(255, 255, 255, 0.2);
-    padding: 2px 6px;
-    border-radius: 4px;
-}
-
-/* Info Principal: Cliente y Servicio */
-.appt-main-info {
-    display: flex;
-    flex-direction: column;
-    overflow: hidden;
-}
-
-.appt-customer {
-    font-size: 13px;
-    font-weight: 700;
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis; 
-}
-
-.appt-service {
-    font-size: 11.5px;
-    opacity: 0.9;
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
-}
-
-/* =========================================
-   8. AUSENCIAS Y HORARIOS NO LABORABLES
-========================================= */
-
-/* Horario fuera de turno (Gris sólido muy apagado) */
-.cell-outside-hours {
-    width: 100%;
-    height: 100%;
-    background-color: #E6E1D8; /* Gris beige oscuro */
-    opacity: 0.6;
-    pointer-events: none; /* Deshabilita clics completamente */
-}
-
-/* Descansos y Licencias (Patrón de rayas diagonales) */
-.cell-blocked-absence {
-    width: 100%;
-    height: 100%;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    background: repeating-linear-gradient(
-        45deg,
-        #F1ECE3,
-        #F1ECE3 10px,
-        #EAE4D9 10px,
-        #EAE4D9 20px
-    );
-    pointer-events: none; 
-}
-
-.absence-label {
-    background-color: #FFFFFF;
-    color: #8A8175;
-    font-size: 11px;
-    font-weight: 600;
-    text-transform: uppercase;
-    padding: 2px 8px;
-    border-radius: 4px;
-    border: 1px solid #D9D2C5;
-    letter-spacing: 0.5px;
-}
-
-/* =========================================
-   9. SISTEMA DE MODALES PREMIUM
-========================================= */
-.modal-backdrop {
-    position: fixed;
-    top: 0; left: 0; right: 0; bottom: 0;
-    background-color: rgba(18, 18, 18, 0.6); /* Fondo oscuro con sutil transparencia */
-    backdrop-filter: blur(4px); /* Difumina suavemente el fondo */
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    z-index: 9999;
-    animation: fadeIn 0.2s ease-out;
-}
-
-.modal-container {
-    background-color: #F8F5EF; /* Blanco crema corporativo */
-    border: 1px solid #D9D2C5;
-    width: 100%;
-    max-width: 460px;
-    border-radius: 12px;
-    box-shadow: 0 12px 32px rgba(0,0,0,0.15);
-    display: flex;
-    flex-direction: column;
-    overflow: hidden;
-}
-
-.modal-header {
-    padding: 16px 24px;
-    border-bottom: 1px solid #E5DFD5;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-}
-.modal-header h2 {
-    font-size: 20px;
-    font-weight: 500;
-    margin: 0;
-    color: #1A1A1A;
-}
-.modal-close-x {
-    background: none; border: none;
-    font-size: 18px; color: #8A8175;
     cursor: pointer;
 }
 
-.modal-body {
-    padding: 24px;
-    display: flex;
-    flex-direction: column;
-    gap: 16px;
-}
+.cell-appt-single { height: calc(100% - 6px); margin-bottom: 6px; }
+.cell-appt-start { height: 100%; border-bottom-left-radius: 0; border-bottom-right-radius: 0; padding-bottom: 4px; margin-bottom: 0; }
+.cell-appt-body { height: 100%; border-radius: 0; padding-top: 0; padding-bottom: 4px; margin-bottom: 0; }
+.cell-appt-end { height: calc(100% - 6px); border-top-left-radius: 0; border-top-right-radius: 0; padding-top: 0; margin-bottom: 6px; }
 
-.modal-summary-text {
-    font-size: 14px;
-    color: #8A8175;
-    margin: 0 0 8px 0;
-}
-
-/* INPUTS DEL FORMULARIO */
-.form-group {
-    display: flex;
-    flex-direction: column;
-    gap: 6px;
-}
-.form-group label {
-    font-size: 12px;
-    font-weight: 600;
-    color: #1A1A1A;
-    text-transform: uppercase;
-    letter-spacing: 0.5px;
-}
-.modal-select {
-    width: 100%;
-    padding: 10px 12px;
-    border: 1px solid #D9D2C5;
-    background-color: #FFFFFF;
-    border-radius: 6px;
-    font-size: 14px;
-    color: #333;
-    font-family: inherit;
-}
-
-/* PIE DE PÁGINA DEL MODAL */
-.modal-footer {
-    padding: 16px 24px;
-    background-color: #FAFAFA;
-    border-top: 1px solid #E5DFD5;
-    display: flex;
-    justify-content: flex-end;
-    gap: 12px;
-}
-.modal-footer--split {
-    justify-content: space-between;
-    align-items: center;
-}
-.modal-footer-right {
-    display: flex;
-    gap: 12px;
-    align-items: center;
-}
-
-/* BOTONERÍA DEL MODAL */
-.modal-btn {
-    padding: 10px 20px;
-    border-radius: 6px;
-    font-size: 14px;
-    font-weight: 600;
-    cursor: pointer;
-    border: none;
-    font-family: inherit;
-    text-decoration: none;
-    display: inline-block;
-    transition: all 0.2s ease;
-}
-
-.modal-btn--primary { background-color: #121212; color: #FFFFFF; }
-.modal-btn--primary:hover { background-color: #333333; }
-
-.modal-btn--secondary { background-color: transparent; color: #8A8175; border: 1px solid #D9D2C5; }
-.modal-btn--secondary:hover { background-color: rgba(0,0,0,0.02); }
-
-.modal-btn--danger { background-color: transparent; color: #8C2417; border: 1px solid #E5DFD5; }
-.modal-btn--danger:hover { background-color: rgba(140,36,23,0.04); border-color: #8C2417; }
-
-.modal-btn--success { background-color: #2D6A4F; color: #FFFFFF; }
-.modal-btn--success:hover { background-color: #1B4332; }
-
-.modal-btn--wa { background-color: #25D366; color: #FFFFFF; }
-.modal-btn--wa:hover { background-color: #128C7E; }
-
-.modal-btn--sent { background-color: #EAEAEA; color: #666; border: 1px solid #D9D2C5; }
-
-.modal-btn:disabled { opacity: 0.6; cursor: not-allowed; }
-
-/* SECCIÓN DETALLE */
-.detail-card-header {
-    border-bottom: 1px dashed #D9D2C5;
-    padding-bottom: 16px;
-}
-.detail-card-header h3 { font-size: 24px; margin: 0 0 4px 0; font-weight: 500; }
-.detail-card-header p { color: #8A8175; margin: 0; font-size: 14px; }
-.detail-status-badge { font-size: 11px; font-weight: 700; color: #8C2417; text-transform: uppercase; letter-spacing: 1px; display: block; margin-bottom: 6px; }
-.detail-info-grid { font-size: 14px; color: #333; }
-
-@keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
-
-/* Agrega estas clases al final de tu archivo CSS actual */
-
-/* =========================================
-   10. MEJORAS DE ESTADO REALIZADO ("DONE")
-========================================= */
-
-/* Suavizado dinámico de tarjetas concluidas en la grilla */
-.cell-appt-done {
-    opacity: 0.55; /* Atenúa el brillo del color corporativo */
-    box-shadow: none !important;
-    filter: saturate(75%); /* Desatura sutilmente la celda */
-    border: 1px dashed rgba(255, 255, 255, 0.5) !important; /* Añade contorno de cierre */
-}
-
-/* El área de texto interactiva para las notas de manicura */
-.modal-textarea {
-    width: 100%;
-    padding: 10px 12px;
-    border: 1px solid #D9D2C5;
-    background-color: #FFFFFF;
-    border-radius: 6px;
-    font-size: 14px;
-    color: #333;
-    font-family: inherit;
-    resize: vertical;
-    transition: border-color 0.2s;
-}
-
-.modal-textarea:focus {
-    border-color: #121212;
-    outline: none;
-}
-
-/* Diseño de solo lectura cuando la cita ya fue atendida */
-.modal-textarea:disabled {
-    background-color: #EAE4D9; /* Fondo gris beige suave */
-    color: #555555;
-    cursor: not-allowed;
-    border-style: dashed;
-}
-
-/* Badge Premium para el Footer del Modal */
-.badge-completed-status {
-    background-color: #D8F3DC; /* Verde oliva claro */
-    color: #1B4332; /* Verde bosque profundo */
-    font-size: 12px;
-    font-weight: 700;
-    text-transform: uppercase;
-    padding: 6px 14px;
-    border-radius: 20px;
-    letter-spacing: 0.5px;
-    display: inline-block;
-    border: 1px solid #74C69D;
-}
-
-/* =========================================
-   EFECTOS DE CITA FINALIZADA ("DONE")
-========================================= */
-
-/* 1. Atenuación dinámica de la tarjeta en el calendario */
+/* Efecto Cita Finalizada */
 .cell-appt-done {
     opacity: 0.55 !important; 
     box-shadow: none !important;
-    filter: saturate(70%); /* Apaga un poco los colores vivos */
-    border: 1px dashed rgba(255, 255, 255, 0.6) !important; /* Añade un contorno sutil de cierre */
+    filter: saturate(60%);
+    border: 1px dashed rgba(255, 255, 255, 0.6) !important;
 }
 
-/* 2. Etiqueta (Badge) de éxito dentro del modal */
-.badge-completed-status {
-    background-color: #D8F3DC; /* Verde pastel suave */
-    color: #1B4332; /* Verde bosque profundo para contraste */
-    font-size: 12px;
-    font-weight: 700;
-    text-transform: uppercase;
-    padding: 6px 14px;
-    border-radius: 20px;
-    letter-spacing: 0.5px;
-    display: inline-block;
-    border: 1px solid #74C69D;
+/* Contenido Interno de la Cita */
+.appt-content-wrapper { display: flex; flex-direction: column; gap: 4px; width: 100%; overflow: hidden; }
+
+.appt-meta {
+    display: flex; justify-content: space-between; align-items: center;
+    font-size: 10px; font-weight: 600; letter-spacing: 0.5px; opacity: 0.85;
+    border-bottom: 1px solid rgba(255,255,255,0.2); padding-bottom: 4px; margin-bottom: 2px;
 }
+.appt-time-range { white-space: nowrap; }
+.appt-price { background-color: rgba(255, 255, 255, 0.2); padding: 2px 6px; border-radius: 4px; white-space: nowrap; }
+
+.appt-main-info { display: flex; flex-direction: column; overflow: hidden; }
+.appt-customer { font-size: 13px; font-weight: 700; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.appt-service { font-size: 11.5px; opacity: 0.9; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+
+/* =========================================
+   9. MODALES Y FORMULARIOS (RESTAURADO)
+========================================= */
+.modal-backdrop {
+    position: fixed; top: 0; left: 0; right: 0; bottom: 0;
+    background-color: rgba(18, 18, 18, 0.6);
+    backdrop-filter: blur(4px);
+    display: flex; align-items: center; justify-content: center;
+    z-index: 9999; animation: fadeIn 0.2s ease-out;
+}
+
+.modal-container {
+    background-color: var(--brand-cream);
+    border: 1px solid var(--border-color);
+    width: 100%; max-width: 460px;
+    border-radius: 12px;
+    box-shadow: 0 12px 32px rgba(0,0,0,0.15);
+    display: flex; flex-direction: column; overflow: hidden;
+}
+
+.modal-header {
+    padding: 16px 24px; border-bottom: 1px solid #E5DFD5;
+    display: flex; justify-content: space-between; align-items: center;
+}
+
+.modal-header h2 { font-size: 20px; font-weight: 600; margin: 0; font-family: var(--font-heading); color: var(--brand-dark); }
+.modal-close-x { background: none; border: none; font-size: 18px; color: var(--text-muted); cursor: pointer; }
+
+.modal-body { padding: 24px; display: flex; flex-direction: column; gap: 16px; }
+.modal-summary-text { font-size: 14px; color: var(--text-muted); margin: 0 0 8px 0; }
+
+/* Inputs restaurados */
+.form-group { display: flex; flex-direction: column; gap: 6px; }
+.form-group label { font-size: 12px; font-weight: 700; color: var(--text-main); text-transform: uppercase; letter-spacing: 0.5px; }
+
+.modal-select, .modal-textarea {
+    width: 100%; padding: 10px 12px;
+    border: 1px solid var(--border-color); background-color: #FFFFFF;
+    border-radius: 6px; font-size: 14px; color: #333; font-family: inherit;
+    box-sizing: border-box;
+}
+
+.modal-textarea { resize: vertical; transition: border-color 0.2s; }
+.modal-textarea:focus { border-color: var(--brand-dark); outline: none; }
+.modal-textarea:disabled { background-color: #EAE4D9; color: #555555; cursor: not-allowed; border-style: dashed; }
+
+/* Footer y Botones */
+.modal-footer {
+    padding: 16px 24px; background-color: #FAFAFA;
+    border-top: 1px solid #E5DFD5; display: flex; justify-content: flex-end; gap: 12px;
+}
+.modal-footer--split { justify-content: space-between; align-items: center; }
+.modal-footer-right { display: flex; gap: 12px; align-items: center; }
+
+.modal-btn {
+    padding: 10px 20px; border-radius: 6px; font-size: 14px; font-weight: 600;
+    cursor: pointer; border: none; font-family: inherit; transition: all 0.2s ease;
+}
+
+.modal-btn--primary { background-color: var(--brand-dark); color: #FFFFFF; }
+.modal-btn--primary:hover { background-color: #333333; }
+.modal-btn--secondary { background-color: transparent; color: var(--text-muted); border: 1px solid var(--border-color); }
+.modal-btn--secondary:hover { background-color: rgba(0,0,0,0.02); }
+.modal-btn--danger { background-color: transparent; color: var(--brand-red); border: 1px solid var(--border-color); }
+.modal-btn--danger:hover { background-color: rgba(154,1,2,0.04); border-color: var(--brand-red); }
+.modal-btn--success { background-color: #2D6A4F; color: #FFFFFF; }
+.modal-btn--success:hover { background-color: #1B4332; }
+.modal-btn--wa { background-color: #25D366; color: #FFFFFF; }
+.modal-btn--wa:hover { background-color: #128C7E; }
+.modal-btn--sent { background-color: #EAEAEA; color: #666; border: 1px solid var(--border-color); }
+.modal-btn:disabled { opacity: 0.6; cursor: not-allowed; }
+
+/* Detalles dentro del modal */
+.detail-card-header { border-bottom: 1px dashed var(--border-color); padding-bottom: 16px; }
+.detail-card-header h3 { font-size: 24px; margin: 0 0 4px 0; font-weight: 600; font-family: var(--font-heading); }
+.detail-card-header p { color: var(--text-muted); margin: 0; font-size: 14px; }
+.detail-status-badge { font-size: 11px; font-weight: 700; color: var(--brand-red); text-transform: uppercase; letter-spacing: 1px; display: block; margin-bottom: 6px; }
+.detail-info-grid { font-size: 14px; color: var(--text-main); }
+
+.badge-completed-status {
+    background-color: #D8F3DC; color: #1B4332;
+    font-size: 12px; font-weight: 700; text-transform: uppercase;
+    padding: 6px 14px; border-radius: 20px; letter-spacing: 0.5px;
+    display: inline-block; border: 1px solid #74C69D;
+}
+
+@keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
