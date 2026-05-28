@@ -8,6 +8,7 @@ import cancelAppointment from '@salesforce/apex/AA_SalonAppointmentsController.c
 import markReminderAsSent from '@salesforce/apex/AA_SalonAppointmentsController.markReminderAsSent';
 import createAbsence from '@salesforce/apex/AA_SalonAppointmentsController.createAbsence';
 import deleteAbsence from '@salesforce/apex/AA_SalonAppointmentsController.deleteAbsence';
+import setNoShowAppointment from '@salesforce/apex/AA_SalonAppointmentsController.setNoShowAppointment';
 
 export default class AASalonMatrixAdmin extends LightningElement {
     
@@ -55,6 +56,7 @@ export default class AASalonMatrixAdmin extends LightningElement {
     @track isConfirming = false;
     @track isCompleting = false;
     @track isCancelling = false;
+    @track isNoShowing = false;
 
     wiredMatrixResult; // Almacena el resultado crudo para refreshApex
 
@@ -126,6 +128,7 @@ export default class AASalonMatrixAdmin extends LightningElement {
                 
                 return {
                     id: appt.Id,
+                    name: appt.Name, // AP-1120
                     employeeId: appt.Employee__c,
                     startTime: startTimeStr,
                     duration: durationMins,
@@ -136,10 +139,11 @@ export default class AASalonMatrixAdmin extends LightningElement {
                     priceText: rawPrice ? `$${rawPrice}` : 'Sin costo',
                     status: appt.Status__c,
                     isPending: appt.Status__c === 'Pending',
-                    isConfirmed: appt.Status__c === 'Confirmed',
+                    isConfirmed: appt.Status__c === 'Confirmed' || appt.Is_Customer_Confirmed__c,
                     isDone: appt.Status__c === 'Done',
-                    isReminderSent: !!appt.Reminder_Sent_Date__c,
-                    internalComments: appt.Internal_Comments__c || ''
+                    isReminderSent: appt.Is_Reminder_Sent__c || !!appt.Reminder_Sent_Date__c,
+                    internalComments: appt.Internal_Comments__c || '',
+                    isPast: dt < new Date()
                 };
             });
 
@@ -379,7 +383,8 @@ export default class AASalonMatrixAdmin extends LightningElement {
                 waLink: this.generateWhatsAppLink(appt.phone, appt.customer, appt.service, appt.startTime),
                 // ASEGÚRATE DE PASAR ESTAS BANDERAS:
                 isDone: appt.isDone,
-                isPending: appt.isPending
+                isPending: appt.isPending,
+                isPast: appt.isPast
             };
 
             this.tempInternalComments = appt.internalComments || '';
@@ -421,6 +426,13 @@ export default class AASalonMatrixAdmin extends LightningElement {
             .catch(err => console.error(err));
     }
 
+    handleNoShowAction() {
+        this.isNoShowing = true;
+        setNoShowAppointment({ appointmentId: this.selectedAppt.id })
+            .then(() => this.closeAndRefresh())
+            .catch(err => { console.error(err); this.isNoShowing = false; });
+    }
+
     // --- NUEVO: GUARDAR NUEVA CITA (MODAL CREACIÓN) ---
     handleFormChange(event) {
         if (event.target.name === 'customer') this.selectedCustomerId = event.target.value;
@@ -459,6 +471,7 @@ export default class AASalonMatrixAdmin extends LightningElement {
         this.isConfirming = false; 
         this.isCompleting = false; 
         this.isCancelling = false;
+        this.isNoShowing = false;
         this.isAbsenceModalOpen = false;
     }
 

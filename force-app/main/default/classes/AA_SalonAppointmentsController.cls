@@ -124,6 +124,19 @@ public with sharing class AA_SalonAppointmentsController {
         }
     }
 
+    @AuraEnabled
+    public static void setNoShowAppointment(Id appointmentId) {
+        try {
+            AA_Appointment__c appt = new AA_Appointment__c(
+                Id = appointmentId,
+                Status__c = 'No Show'
+            );
+            update appt;
+        } catch (Exception e) {
+            throw new AuraHandledException('Error al marcar la cita como No Show: ' + e.getMessage());
+        }
+    }
+
     // ACTUALIZADO: El método ahora procesa y guarda las observaciones internas del salón
     @AuraEnabled
     public static void completeAppointment(Id appointmentId, String internalComments) {
@@ -158,10 +171,10 @@ public with sharing class AA_SalonAppointmentsController {
             ];
             
             wrapper.appointments = [
-                SELECT Id, Start_Date_Time__c, Status__c, Employee__c,
-                       Customer__r.First_Name__c, Customer__r.Last_Name__c, 
+                SELECT Id, Name, Start_Date_Time__c, Status__c, Employee__c,
+                       Customer__r.First_Name__c, Customer__r.Last_Name__c, Customer__r.Phone_Number__c,
                        Service__r.Name, Service__r.Duration_Minutes__c, Service__r.Price__c,
-                       Internal_Comments__c
+                       Internal_Comments__c, Is_Reminder_Sent__c, Is_Customer_Confirmed__c, Reminder_Sent_Date__c
                 FROM AA_Appointment__c 
                 WHERE DAY_ONLY(Start_Date_Time__c) = :selectedDate 
                 AND Status__c != 'Cancelled'

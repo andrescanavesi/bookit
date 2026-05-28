@@ -63,6 +63,17 @@
                                                             <span class="appt-customer">{cell.data.customer}</span>
                                                             <span class="appt-service">{cell.data.service}</span>
                                                         </div>
+                                                        <div class="appt-footer">
+                                                            <span class="appt-name">{cell.data.name}</span>
+                                                            <div class="appt-icons">
+                                                                <template if:true={cell.data.isReminderSent}>
+                                                                    <lightning-icon icon-name="utility:chat" size="xx-small" class="icon-reminder" variant="inverse"></lightning-icon>
+                                                                </template>
+                                                                <template if:true={cell.data.isConfirmed}>
+                                                                    <lightning-icon icon-name="utility:check" size="xx-small" class="icon-confirmed" variant="inverse"></lightning-icon>
+                                                                </template>
+                                                            </div>
+                                                        </div>
                                                     </div>
                                                 </template>
                                             </div>
@@ -192,13 +203,13 @@
 
                         <div class="form-group modal-comments-section">
                             <label>Comentarios Internos / Notas del Servicio</label>
-                            <textarea name="internalComments"
-                                    class="modal-textarea"
-                                    rows="3"
+                            <lightning-textarea name="internalComments"
+                                    variant="label-hidden"
+                                    class="custom-lightning-textarea"
                                     placeholder="Ej. Diseño Nail Art minimalista, prefiere tonos nude, cutículas sensibles..."
                                     value={tempInternalComments}
-                                    oninput={handleCommentChange}
-                                    disabled={selectedAppt.isDone}></textarea>
+                                    onchange={handleCommentChange}
+                                    disabled={selectedAppt.isDone}></lightning-textarea>
                         </div>
                     </div>
 
@@ -214,12 +225,24 @@
                         </template>
 
                         <template if:false={selectedAppt.isDone}>
-                            <button class="modal-btn modal-btn--danger" onclick={handleCancelAction} disabled={isCancelling}>
-                                <template if:true={isCancelling}>Cancelando...</template>
-                                <template if:false={isCancelling}>✕ Cancelar Cita</template>
-                            </button>
+                            <div class="modal-footer-left">
+                                <button class="modal-btn modal-btn--danger" onclick={handleCancelAction} disabled={isCancelling}>
+                                    <template if:true={isCancelling}>Cancelando...</template>
+                                    <template if:false={isCancelling}>✕ Cancelar</template>
+                                </button>
+                                <template if:true={selectedAppt.isPast}>
+                                    <button class="modal-btn modal-btn--noshow" onclick={handleNoShowAction} disabled={isNoShowing} style="margin-left: 8px;">
+                                        <template if:true={isNoShowing}>Cargando...</template>
+                                        <template if:false={isNoShowing}>No Show</template>
+                                    </button>
+                                </template>
+                            </div>
 
                             <div class="modal-footer-right">
+                                <a if:true={selectedAppt.waLink} href={selectedAppt.waLink} target="_blank" class={selectedAppt.waButtonClass} onclick={handleWaAction} style="text-decoration: none;">
+                                    💬 {selectedAppt.waButtonLabel}
+                                </a>
+
                                 <template if:true={selectedAppt.isPending}>
                                     <button class="modal-btn modal-btn--primary" onclick={handleConfirmAction} disabled={isConfirming}>
                                         <template if:true={isConfirming}>Cargando...</template>
