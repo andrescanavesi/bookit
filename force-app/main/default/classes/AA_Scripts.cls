@@ -6,7 +6,7 @@ public class AA_Scripts {
 	/**
      * Elimina todos los registros de Log__c creados antes del día de hoy.
      * Utiliza un LIMIT para evitar exceder los límites de gobierno si el volumen es extremadamente alto.
-	 * AA_Scripts.deleteOldLogs()
+	 * AA_Scripts.deleteOldLogs();
      */
     public static void deleteOldLogs() {
         System.debug('Iniciando borrado de logs viejos...');

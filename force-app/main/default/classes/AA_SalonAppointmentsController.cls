@@ -200,7 +200,7 @@ public with sharing class AA_SalonAppointmentsController {
             wrapper.allCustomers = [SELECT Id, Name FROM AA_Customer__c 
                 WHERE Business__c = :businessId ORDER BY Name ASC];
 
-            logger.info('getMatrixData, selectedDate '+selectedDate+' employees: '+wrapper.employees.size()+' appointments: '+wrapper.appointments.size());
+            //logger.info('getMatrixData, selectedDate '+selectedDate+' employees: '+wrapper.employees.size()+' appointments: '+wrapper.appointments.size());
             return wrapper;
         } catch (Exception e) {
             String message = 'error getMatrixData: ' + e.getMessage();
@@ -229,7 +229,7 @@ public with sharing class AA_SalonAppointmentsController {
     // NUEVO: Método para crear bloqueos de horario (Ausencias/Descansos)
     @AuraEnabled
     public static void createAbsence(Id employeeId, Datetime startDateTime, Integer durationMinutes, String category) {
-         AA_Logger logger = new AA_Logger(true);
+        AA_Logger logger = new AA_Logger(true);
         try {
             Datetime endDateTime = startDateTime.addMinutes(durationMinutes);
             String categoryDb = 'Break';
@@ -242,7 +242,22 @@ public with sharing class AA_SalonAppointmentsController {
             );
             insert abs;
         } catch (Exception e) {
-            String message = 'Error on createAbsence for business: ' + e.getMessage();
+            String message = 'Error on createAbsence: ' + e.getMessage();
+            logger.error(message + ' ' + e.getStackTraceString());
+            throw new AuraHandledException(message);
+        }
+    }
+
+    // NUEVO: Método para eliminar un bloqueo manual
+    @AuraEnabled
+    public static void deleteAbsence(Id absenceId) {
+        AA_Logger logger = new AA_Logger(true);
+        
+        try {
+            logger.info('deleteAbsence, id: '+absenceId);
+            delete new AA_Employee_Absence__c(Id = absenceId);
+        } catch (Exception e) {
+            String message = 'Error on deleteAbsence: ' + e.getMessage();
             logger.error(message + ' ' + e.getStackTraceString());
             throw new AuraHandledException(message);
         }

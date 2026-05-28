@@ -49,6 +49,58 @@
 }
 
 /* =========================================
+   2.5 NAVEGACION DE FECHAS
+========================================= */
+.date-navigation {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    margin-bottom: 24px;
+}
+
+.nav-btn {
+    background-color: var(--brand-cream);
+    border: 1px solid var(--border-color);
+    color: var(--text-main);
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    font-size: 16px;
+    font-weight: bold;
+    transition: all 0.2s ease;
+}
+
+.nav-btn:hover {
+    background-color: var(--brand-dark);
+    color: #FFFFFF;
+    border-color: var(--brand-dark);
+}
+
+.date-picker-wrapper {
+    position: relative;
+}
+
+.date-input {
+    padding: 8px 12px;
+    border: 1px solid var(--border-color);
+    border-radius: 6px;
+    font-family: inherit;
+    font-size: 14px;
+    color: var(--text-main);
+    background-color: #FFFFFF;
+    cursor: pointer;
+}
+
+.date-input:focus {
+    outline: none;
+    border-color: var(--brand-dark);
+}
+
+/* =========================================
    3. SELECTOR DE FECHAS (TARJETAS)
 ========================================= */
 .date-selector-wrapper {
@@ -212,7 +264,7 @@
         #EAE4D9 10px,
         #EAE4D9 20px
     );
-    pointer-events: none;
+    
 }
 
 .absence-label {

@@ -7,13 +7,22 @@ import completeAppointment from '@salesforce/apex/AA_SalonAppointmentsController
 import cancelAppointment from '@salesforce/apex/AA_SalonAppointmentsController.cancelAppointment';
 import markReminderAsSent from '@salesforce/apex/AA_SalonAppointmentsController.markReminderAsSent';
 import createAbsence from '@salesforce/apex/AA_SalonAppointmentsController.createAbsence';
+import deleteAbsence from '@salesforce/apex/AA_SalonAppointmentsController.deleteAbsence';
 
 export default class AASalonMatrixAdmin extends LightningElement {
     
     @track weekDays = [];
     @track selectedDate = ''; 
+    @track baseDate = new Date();
     @track gridHeaders = [];
+
+    get baseDateString() {
+        return this.baseDate.toISOString().split('T')[0];
+    }
     @track gridRows = [];
+
+    @track isAbsenceModalOpen = false;
+    @track selectedBlock = {};
 
     @track activeEmployees = [];
     @track activeAppointments = [];
@@ -63,14 +72,13 @@ export default class AASalonMatrixAdmin extends LightningElement {
     }
 
     initWeekDays() {
-        const today = new Date();
         const days = [];
         const DOW = ['DOM', 'LUN', 'MAR', 'MIÉ', 'JUE', 'VIE', 'SÁB'];
         const MONTHS = ['ENE', 'FEB', 'MAR', 'ABR', 'MAY', 'JUN', 'JUL', 'AGO', 'SET', 'OCT', 'NOV', 'DIC'];
 
         for (let i = 0; i < 7; i++) {
-            const d = new Date(today);
-            d.setDate(today.getDate() + i);
+            const d = new Date(this.baseDate);
+            d.setDate(this.baseDate.getDate() + i);
             const isoDate = d.toISOString().split('T')[0];
 
             if (i === 0) this.selectedDate = isoDate; 
@@ -161,10 +169,11 @@ export default class AASalonMatrixAdmin extends LightningElement {
                 }
 
                 return {
+                    id: abs.Id,
                     employeeId: abs.Employee__c,
                     startMins: startMins,
                     endMins: endMins,
-                    category: abs.Category__c || 'Ausente'
+                    category: abs.Category__c || 'Break'
                 };
             });
 
@@ -176,6 +185,26 @@ export default class AASalonMatrixAdmin extends LightningElement {
             this.generateMatrix();
         } else if (error) {
             console.error('Error al recuperar información:', error);
+        }
+    }
+
+    handlePrevWeek() {
+        this.baseDate.setDate(this.baseDate.getDate() - 7);
+        this.baseDate = new Date(this.baseDate); // forzar reactividad
+        this.initWeekDays();
+    }
+
+    handleNextWeek() {
+        this.baseDate.setDate(this.baseDate.getDate() + 7);
+        this.baseDate = new Date(this.baseDate); // forzar reactividad
+        this.initWeekDays();
+    }
+
+    handleDatePicker(event) {
+        if (event.target.value) {
+            const [year, month, day] = event.target.value.split('-');
+            this.baseDate = new Date(year, month - 1, day, 12, 0, 0);
+            this.initWeekDays();
         }
     }
 
@@ -254,45 +283,48 @@ export default class AASalonMatrixAdmin extends LightningElement {
                     return;
                 }
 
+                const hasDailyBreakOverride = this.activeAbsences.some(abs => abs.employeeId === emp.id && abs.category === 'Break');
+
                 let isBlocked = false;
                 let isOutsideHours = false;
                 let blockLabel = '';
-                let hasOverrideBreak = false;
+                let blockType = '';
+                let absenceId = null;
+                
 
                 const activeAbs = this.activeAbsences.find(abs => abs.employeeId === emp.id && slotMins >= abs.startMins && slotMins < abs.endMins);
                 
                 if (activeAbs) {
                     isBlocked = true;
+                    blockType = 'Break';
                     blockLabel = 'No disponible';
-                    if (activeAbs.category === 'Break') hasOverrideBreak = true;
+                    absenceId = activeAbs.id;
+                    
                 }
 
+                // Evaluamos el Horario Base (Working Hours)
                 const wh = this.activeWorkingHours.find(w => w.employeeId === emp.id);
                 if (!wh || slotMins < wh.startMins || slotMins >= wh.endMins) {
                     isOutsideHours = true;
-                } else if (!hasOverrideBreak && wh.startBreakMins && wh.endBreakMins) {
+                } else if (!isBlocked && !hasDailyBreakOverride && wh.startBreakMins && wh.endBreakMins) {
+                    // Solo aplica el descanso por defecto si NO hay un Break manual ese día
                     if (slotMins >= wh.startBreakMins && slotMins < wh.endBreakMins) {
                         isBlocked = true;
                         blockLabel = 'No disponible';
+                        blockType = 'DefaultBreak';
                     }
                 }
 
                 if (isOutsideHours) {
-                    cells.push({
-                        id: `${emp.id}_${timeLabel}`,
-                        isTimeLabel: false,
-                        isOccupied: false,
-                        isBlocked: true,
-                        cssClass: 'cell-outside-hours' 
+                   cells.push({
+                        id: `${emp.id}_${timeLabel}`, isTimeLabel: false, isOccupied: false, isBlocked: true,
+                        cssClass: 'cell-outside-hours', blockCursor: 'cursor: not-allowed;'
                     });
                 } else if (isBlocked) {
-                    cells.push({
-                        id: `${emp.id}_${timeLabel}`,
-                        isTimeLabel: false,
-                        isOccupied: false,
-                        isBlocked: true,
-                        blockLabel: blockLabel,
-                        cssClass: 'cell-blocked-absence' 
+                   cells.push({
+                        id: `${emp.id}_${timeLabel}`, isTimeLabel: false, isOccupied: false, isBlocked: true,
+                        blockLabel: blockLabel, blockType: blockType, absenceId: absenceId,
+                        time: timeLabel, empId: emp.id, cssClass: 'cell-blocked-absence', blockCursor: 'cursor: pointer;'
                     });
                 } else {
                     cells.push({
@@ -427,6 +459,7 @@ export default class AASalonMatrixAdmin extends LightningElement {
         this.isConfirming = false; 
         this.isCompleting = false; 
         this.isCancelling = false;
+        this.isAbsenceModalOpen = false;
     }
 
     closeAndRefresh() {
@@ -474,5 +507,41 @@ export default class AASalonMatrixAdmin extends LightningElement {
         if (field === 'absenceDuration') this.selectedAbsenceDuration = event.target.value;
     }
 
+// --- ACCIÓN: CLICK EN SLOT BLOQUEADO ---
+    handleBlockedClick(event) {
+        const type = event.currentTarget.dataset.type;
+        console.info('handleBlockedClick: '+type);
+        if (!type) return; // Si es un click fuera de hora, se ignora
+
+        this.selectedBlock = {
+            type: type,
+            absenceId: event.currentTarget.dataset.absid,
+            time: event.currentTarget.dataset.time,
+            empId: event.currentTarget.dataset.empid,
+            empName: this.activeEmployees.find(e => e.id === event.currentTarget.dataset.empid).name
+        };
+        this.isAbsenceModalOpen = true;
+    }
+
+    // --- ACCIÓN: LIBERAR HORARIO ---
+    handleFreeSlot() {
+        this.isSaving = true;
+
+        console.info('deleteAbsence: '+this.selectedBlock.type);
+
+        if (this.selectedBlock.type === 'DefaultBreak') {
+            // Crea un Break fantasma de 0 minutos para anular el descanso por defecto del día
+            const startDateTime = new Date(this.selectedDate + 'T00:00:00');
+            createAbsence({ employeeId: this.selectedBlock.empId, startDateTime: startDateTime, durationMinutes: 0, category: 'Break' })
+                .then(() => this.closeAndRefresh())
+                .catch(err => { console.error(err); this.isSaving = false; });
+        } else if (this.selectedBlock.type === 'Break') {
+            console.info('deleteAbsence: '+this.selectedBlock.absenceId);
+            // Elimina el bloqueo manual existente
+            deleteAbsence({ absenceId: this.selectedBlock.absenceId })
+                .then(() => this.closeAndRefresh())
+                .catch(err => { console.error(err); this.isSaving = false; });
+        }
+    }
 
 }
