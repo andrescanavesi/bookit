@@ -163,7 +163,7 @@
     <nameField>
         <displayFormat>AP-{0000}</displayFormat>
         <label>AA Appointment Name</label>
-        <trackHistory>false</trackHistory>
+        <trackHistory>true</trackHistory>
         <type>AutoNumber</type>
     </nameField>
     <pluralLabel>AA Appointment</pluralLabel>

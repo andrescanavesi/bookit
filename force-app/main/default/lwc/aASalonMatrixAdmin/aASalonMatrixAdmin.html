@@ -81,15 +81,19 @@
 
                                         <template if:false={cell.isOccupied}>
                                             <template if:true={cell.isBlocked}>
-                                            <!-- NUEVO: Dataset y OnClick dinámicos -->
-                                            <div class={cell.cssClass} style={cell.blockCursor} data-type={cell.blockType} data-absid={cell.absenceId} data-time={cell.time} data-empid={cell.empId} onclick={handleBlockedClick}>
-                                                <template if:true={cell.blockLabel}>
-                                                    <span class="absence-label">✕ {cell.blockLabel}</span>
-                                                </template>
-                                            </div>
-                                        </template>
+                                                <!-- NUEVO: Dataset y OnClick dinámicos -->
+                                                <div class={cell.cssClass} style={cell.blockCursor} data-type={cell.blockType} data-absid={cell.absenceId} data-time={cell.time} data-empid={cell.empId} onclick={handleBlockedClick}>
+                                                    <template if:true={cell.blockLabel}>
+                                                        <span class="absence-label">✕ {cell.blockLabel}</span>
+                                                    </template>
+                                                </div>
+                                            </template>
+                                            
                                             <template if:false={cell.isBlocked}>
                                                 <div class={cell.cssClass} data-time={cell.time} data-empid={cell.empId} onclick={handleEmptySlotClick}>
+                                                    <template if:true={cell.outsideLabel}>
+                                                        <span class="outside-label">{cell.outsideLabel}</span>
+                                                    </template>
                                                     <span class="add-icon">+</span>
                                                 </div>
                                             </template>

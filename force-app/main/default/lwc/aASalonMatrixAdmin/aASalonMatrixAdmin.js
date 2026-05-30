@@ -186,6 +186,14 @@ export default class AASalonMatrixAdmin extends LightningElement {
             this.rawAllServices = data.allServices;
             this.rawEmployeeServices = data.employeeServices;
 
+            if (data.branchWorkingHour) {
+                this.branchStartMins = this.sfTimeToMins(data.branchWorkingHour.Open_Time__c);
+                this.branchEndMins = this.sfTimeToMins(data.branchWorkingHour.Close_Time__c);
+            } else {
+                this.branchStartMins = 9 * 60;
+                this.branchEndMins = 18 * 60;
+            }
+
             this.generateMatrix();
         } else if (error) {
             console.error('Error al recuperar información:', error);
@@ -239,10 +247,15 @@ export default class AASalonMatrixAdmin extends LightningElement {
         ];
 
         const timeSlots = [];
-        for (let h = 9; h <= 18; h++) {
+        const startMins = this.branchStartMins || (9 * 60);
+        const endMins = this.branchEndMins || (18 * 60);
+
+        for (let mins = startMins; mins <= endMins; mins += 30) {
+            const h = Math.floor(mins / 60);
+            const m = mins % 60;
             const hourStr = String(h).padStart(2, '0');
-            timeSlots.push(`${hourStr}:00`);
-            if (h !== 18) timeSlots.push(`${hourStr}:30`);
+            const minStr = String(m).padStart(2, '0');
+            timeSlots.push(`${hourStr}:${minStr}`);
         }
 
         this.gridRows = timeSlots.map(timeLabel => {
@@ -321,8 +334,10 @@ export default class AASalonMatrixAdmin extends LightningElement {
 
                 if (isOutsideHours) {
                    cells.push({
-                        id: `${emp.id}_${timeLabel}`, isTimeLabel: false, isOccupied: false, isBlocked: true,
-                        cssClass: 'cell-outside-hours', blockCursor: 'cursor: not-allowed;'
+                        id: `${emp.id}_${timeLabel}`, isTimeLabel: false, isOccupied: false, isBlocked: false,
+                        time: timeLabel, empId: emp.id,
+                        cssClass: 'cell-outside-hours free-cell',
+                        outsideLabel: 'Fuera de horario'
                     });
                 } else if (isBlocked) {
                    cells.push({

@@ -6,7 +6,7 @@
     <inlineHelpText>Comments made by the internal team about this customer</inlineHelpText>
     <label>Internal Comments</label>
     <required>false</required>
-    <trackHistory>false</trackHistory>
+    <trackHistory>true</trackHistory>
     <trackTrending>false</trackTrending>
     <type>TextArea</type>
 </CustomField>

@@ -162,7 +162,7 @@
     <label>AA Customer</label>
     <nameField>
         <label>Customer Name</label>
-        <trackHistory>false</trackHistory>
+        <trackHistory>true</trackHistory>
         <type>Text</type>
     </nameField>
     <pluralLabel>AA Customer</pluralLabel>

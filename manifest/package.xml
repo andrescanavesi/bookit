@@ -20,6 +20,8 @@
 		<members>AA_Appointment__c</members>
 		<members>AA_Business_Branch__c</members>
 		<members>AA_Business__c</members>
+		<members>AA_Branch_Holiday__c</members>
+		<members>AA_Branch_Working_Hour__c</members>
 		<members>AA_Customer__c</members>
 		<members>AA_Employee_Absence__c</members>
 		<members>AA_Employee_Service__c</members>

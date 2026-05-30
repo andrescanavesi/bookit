@@ -9,7 +9,7 @@
     <referenceTo>User</referenceTo>
     <relationshipName>AA_Employees</relationshipName>
     <required>false</required>
-    <trackHistory>false</trackHistory>
+    <trackHistory>true</trackHistory>
     <trackTrending>false</trackTrending>
     <type>Lookup</type>
 </CustomField>

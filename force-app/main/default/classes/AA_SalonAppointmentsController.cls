@@ -13,6 +13,7 @@ public with sharing class AA_SalonAppointmentsController {
         @AuraEnabled public List<AA_Employee_Service__c> employeeServices {get;set;}
         @AuraEnabled public List<AA_Customer__c> allCustomers {get;set;}
         @AuraEnabled public List<AA_Service__c> allServices {get;set;}
+        @AuraEnabled public AA_Branch_Working_Hour__c branchWorkingHour {get;set;}
     }
 
     private static Id getBusinessId(){
@@ -200,6 +201,17 @@ public with sharing class AA_SalonAppointmentsController {
                 WHERE Day_Of_Week__c = :dayOfWeek
                 AND Employee__r.Business_Branch__r.Business__c  = :businessId
             ];
+
+            List<AA_Branch_Working_Hour__c> bwhList = [
+                SELECT Open_Time__c, Close_Time__c
+                FROM AA_Branch_Working_Hour__c
+                WHERE Business_Branch__r.Business__c = :businessId
+                AND Day_Of_Week__c = :dayOfWeek
+                LIMIT 1
+            ];
+            if (!bwhList.isEmpty()) {
+                wrapper.branchWorkingHour = bwhList[0];
+            }
 
             wrapper.allServices = [SELECT Id, Name, Duration_Minutes__c, Price__c 
                 FROM AA_Service__c 

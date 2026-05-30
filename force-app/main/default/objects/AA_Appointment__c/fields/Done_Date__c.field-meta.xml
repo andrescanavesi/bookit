@@ -6,7 +6,7 @@
     <inlineHelpText>Date when the appointment is completed and the work is done</inlineHelpText>
     <label>Done Date</label>
     <required>false</required>
-    <trackHistory>false</trackHistory>
+    <trackHistory>true</trackHistory>
     <trackTrending>false</trackTrending>
     <type>DateTime</type>
 </CustomField>
