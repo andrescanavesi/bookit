@@ -3,6 +3,7 @@ import { refreshApex } from '@salesforce/apex';
 import getMatrixData from '@salesforce/apex/AA_SalonAppointmentsController.getMatrixData';
 import createNewAppointment from '@salesforce/apex/AA_SalonAppointmentsController.createNewAppointment';
 import confirmAppointment from '@salesforce/apex/AA_SalonAppointmentsController.confirmAppointment';
+import getWeekHolidays from '@salesforce/apex/AA_SalonAppointmentsController.getWeekHolidays';
 import completeAppointment from '@salesforce/apex/AA_SalonAppointmentsController.completeAppointment';
 import cancelAppointment from '@salesforce/apex/AA_SalonAppointmentsController.cancelAppointment';
 import markReminderAsSent from '@salesforce/apex/AA_SalonAppointmentsController.markReminderAsSent';
@@ -16,6 +17,7 @@ export default class AASalonMatrixAdmin extends LightningElement {
     @track selectedDate = ''; 
     @track baseDate = new Date();
     @track gridHeaders = [];
+    @track weekHolidays = [];
 
     get baseDateString() {
         return this.baseDate.toISOString().split('T')[0];
@@ -74,26 +76,29 @@ export default class AASalonMatrixAdmin extends LightningElement {
     }
 
     initWeekDays() {
-        const days = [];
-        const DOW = ['DOM', 'LUN', 'MAR', 'MIÉ', 'JUE', 'VIE', 'SÁB'];
-        const MONTHS = ['ENE', 'FEB', 'MAR', 'ABR', 'MAY', 'JUN', 'JUL', 'AGO', 'SET', 'OCT', 'NOV', 'DIC'];
-
+        this.weekDays = [];
         for (let i = 0; i < 7; i++) {
-            const d = new Date(this.baseDate);
-            d.setDate(this.baseDate.getDate() + i);
-            const isoDate = d.toISOString().split('T')[0];
+            const current = new Date(this.baseDate);
+            current.setDate(this.baseDate.getDate() + i);
+            
+            const dStr = current.getFullYear() + '-' + 
+                         String(current.getMonth() + 1).padStart(2, '0') + '-' + 
+                         String(current.getDate()).padStart(2, '0');
 
-            if (i === 0) this.selectedDate = isoDate; 
+            if (i === 0 && !this.selectedDate) this.selectedDate = dStr;
 
-            days.push({
-                dateKey: isoDate,
-                dayOfWeek: DOW[d.getDay()],
-                dayNumber: d.getDate(),
-                month: MONTHS[d.getMonth()],
-                cssClass: i === 0 ? 'date-card date-card--active' : 'date-card'
+            const holiday = this.weekHolidays.find(h => h.Date__c === dStr);
+
+            this.weekDays.push({
+                dateKey: dStr,
+                dayOfWeek: current.toLocaleDateString('es-UY', { weekday: 'short' }),
+                dayNumber: current.getDate(),
+                month: current.toLocaleDateString('es-UY', { month: 'short' }),
+                cssClass: dStr === this.selectedDate ? 'date-card date-card--active' : 'date-card',
+                isHoliday: !!holiday,
+                holidayName: holiday ? holiday.Name : ''
             });
         }
-        this.weekDays = days;
     }
 
     sfTimeToMins(sfTimeMs) {
@@ -101,9 +106,22 @@ export default class AASalonMatrixAdmin extends LightningElement {
         return Math.floor(sfTimeMs / 60000);
     }
 
+    @wire(getWeekHolidays, { baseDate: '$baseDateString' })
+    wiredHolidays({ error, data }) {
+        if (data) {
+            this.weekHolidays = data;
+            this.initWeekDays();
+            if (this.rawAllServices) {
+                this.generateMatrix();
+            }
+        } else if (error) {
+            console.error('Error fetching holidays', error);
+        }
+    }
+
     @wire(getMatrixData, { selectedDate: '$selectedDate' })
     wiredMatrixData(result) {
-        this.wiredMatrixResult = result; // Guardamos la referencia para el refreshApex
+        this.wiredMatrixResult = result; 
         const { error, data } = result;
         
         if (data) {
@@ -128,12 +146,12 @@ export default class AASalonMatrixAdmin extends LightningElement {
                 
                 return {
                     id: appt.Id,
-                    name: appt.Name, // AP-1120
+                    name: appt.Name, 
                     employeeId: appt.Employee__c,
                     startTime: startTimeStr,
                     duration: durationMins,
                     customer: `${firstName} ${lastName}`.trim() || 'Sin Nombre',
-                    phone: appt.Customer__r?.Phone_Number__c || '', // NUEVO
+                    phone: appt.Customer__r?.Phone_Number__c || '', 
                     service: appt.Service__r?.Name || 'Servicio',
                     timeRange: `${startTimeStr} - ${endTimeStr}`,
                     priceText: rawPrice ? `$${rawPrice}` : 'Sin costo',
@@ -202,13 +220,13 @@ export default class AASalonMatrixAdmin extends LightningElement {
 
     handlePrevWeek() {
         this.baseDate.setDate(this.baseDate.getDate() - 7);
-        this.baseDate = new Date(this.baseDate); // forzar reactividad
+        this.baseDate = new Date(this.baseDate);
         this.initWeekDays();
     }
 
     handleNextWeek() {
         this.baseDate.setDate(this.baseDate.getDate() + 7);
-        this.baseDate = new Date(this.baseDate); // forzar reactividad
+        this.baseDate = new Date(this.baseDate);
         this.initWeekDays();
     }
 
@@ -258,6 +276,10 @@ export default class AASalonMatrixAdmin extends LightningElement {
             timeSlots.push(`${hourStr}:${minStr}`);
         }
 
+        const currentHoliday = this.weekHolidays.find(h => h.Date__c === this.selectedDate);
+        const isHoliday = !!currentHoliday;
+        const holidayName = currentHoliday ? currentHoliday.Name : '';
+
         this.gridRows = timeSlots.map(timeLabel => {
             const slotMins = this.timeToMins(timeLabel);
             let cells = [{ id: `TIME_${timeLabel}`, isTimeLabel: true, label: timeLabel }];
@@ -281,7 +303,6 @@ export default class AASalonMatrixAdmin extends LightningElement {
                     else if (isEnd) cardClass += ' cell-appt-end'; 
                     else cardClass += ' cell-appt-body'; 
 
-                    // ACTUALIZADO: Si la cita está terminada, le anexamos la clase de atenuación suave
                     if (activeAppt.isDone) {
                         cardClass += ' cell-appt-done';
                     }
@@ -291,11 +312,19 @@ export default class AASalonMatrixAdmin extends LightningElement {
                         isTimeLabel: false,
                         isOccupied: true,
                         isStartBlock: isStart,
-                        // SOLUCIÓN: Pasamos la cita entera a todos los bloques, no solo al primero.
                         data: activeAppt, 
-                        style: `background-color: ${emp.color}; cursor: pointer;`, // Agregamos cursor pointer para que se note que es clickeable
+                        style: `background-color: ${emp.color}; cursor: pointer;`, 
                         cssClass: cardClass, 
                         tdStyle: isEnd ? '' : 'border-bottom: none !important;'
+                    });
+                    return;
+                }
+
+                if (isHoliday) {
+                    cells.push({
+                        id: `${emp.id}_${timeLabel}`, isTimeLabel: false, isOccupied: false, isBlocked: true,
+                        blockLabel: holidayName, blockType: 'Holiday',
+                        time: timeLabel, empId: emp.id, cssClass: 'cell-holiday', blockCursor: 'cursor: not-allowed;'
                     });
                     return;
                 }
@@ -308,7 +337,6 @@ export default class AASalonMatrixAdmin extends LightningElement {
                 let blockType = '';
                 let absenceId = null;
                 
-
                 const activeAbs = this.activeAbsences.find(abs => abs.employeeId === emp.id && slotMins >= abs.startMins && slotMins < abs.endMins);
                 
                 if (activeAbs) {
@@ -316,15 +344,12 @@ export default class AASalonMatrixAdmin extends LightningElement {
                     blockType = 'Break';
                     blockLabel = 'No disponible';
                     absenceId = activeAbs.id;
-                    
                 }
 
-                // Evaluamos el Horario Base (Working Hours)
                 const wh = this.activeWorkingHours.find(w => w.employeeId === emp.id);
                 if (!wh || slotMins < wh.startMins || slotMins >= wh.endMins) {
                     isOutsideHours = true;
                 } else if (!isBlocked && !hasDailyBreakOverride && wh.startBreakMins && wh.endBreakMins) {
-                    // Solo aplica el descanso por defecto si NO hay un Break manual ese día
                     if (slotMins >= wh.startBreakMins && slotMins < wh.endBreakMins) {
                         isBlocked = true;
                         blockLabel = 'No disponible';
@@ -361,7 +386,6 @@ export default class AASalonMatrixAdmin extends LightningElement {
         });
     }
 
-    // --- ACCIÓN: CLICK EN ESPACIO LIBRE (CREACIÓN) ---
     handleEmptySlotClick(event) {
         this.formTimeLabel = event.currentTarget.dataset.time;
         this.formEmpId = event.currentTarget.dataset.empid;
@@ -396,7 +420,6 @@ export default class AASalonMatrixAdmin extends LightningElement {
                 waButtonLabel: appt.isReminderSent ? 'Reenviar' : 'Recordatorio',
                 waButtonClass: appt.isReminderSent ? 'modal-btn modal-btn--sent' : 'modal-btn modal-btn--wa',
                 waLink: this.generateWhatsAppLink(appt.phone, appt.customer, appt.service, appt.startTime),
-                // ASEGÚRATE DE PASAR ESTAS BANDERAS:
                 isDone: appt.isDone,
                 isPending: appt.isPending,
                 isPast: appt.isPast
@@ -407,7 +430,6 @@ export default class AASalonMatrixAdmin extends LightningElement {
         }
     }
 
-    // --- NUEVO: MANEJADORES DE TRANSACCIONES (MODAL DETALLE) ---
     handleConfirmAction() {
         this.isConfirming = true;
         confirmAppointment({ appointmentId: this.selectedAppt.id, internalComments: this.tempInternalComments })
@@ -415,12 +437,10 @@ export default class AASalonMatrixAdmin extends LightningElement {
             .catch(err => { console.error(err); this.isConfirming = false; });
     }
 
-    // NUEVO: Captura la escritura de la profesional
     handleCommentChange(event) {
         this.tempInternalComments = event.target.value;
     }
 
-    // ACTUALIZADO: Envía los comentarios al marcar como realizado
     handleDoneAction() {
         this.isCompleting = true;
         completeAppointment({ appointmentId: this.selectedAppt.id, internalComments: this.tempInternalComments })
@@ -448,10 +468,12 @@ export default class AASalonMatrixAdmin extends LightningElement {
             .catch(err => { console.error(err); this.isNoShowing = false; });
     }
 
-    // --- NUEVO: GUARDAR NUEVA CITA (MODAL CREACIÓN) ---
     handleFormChange(event) {
-        if (event.target.name === 'customer') this.selectedCustomerId = event.target.value;
-        if (event.target.name === 'service') this.selectedServiceId = event.target.value;
+        const field = event.target.name;
+        if (field === 'customer') this.selectedCustomerId = event.target.value;
+        if (field === 'service') this.selectedServiceId = event.target.value;
+        if (field === 'absenceCategory') this.selectedAbsenceCategory = event.target.value;
+        if (field === 'absenceDuration') this.selectedAbsenceDuration = event.target.value;
     }
 
     handleSaveAction() {
@@ -462,14 +484,12 @@ export default class AASalonMatrixAdmin extends LightningElement {
         startDateTime.setHours(hours, minutes, 0, 0);
 
         if (this.isAppointmentTabActive) {
-            // FLUJO: NUEVA CITA
             if (!this.selectedCustomerId || !this.selectedServiceId) { this.isSaving = false; return; }
             
             createNewAppointment({ customerId: this.selectedCustomerId, employeeId: this.formEmpId, serviceId: this.selectedServiceId, startDateTime: startDateTime })
                 .then(() => this.closeAndRefresh())
                 .catch(err => { console.error(err); this.isSaving = false; });
         } else {
-            // FLUJO: BLOQUEO DE HORARIO
             if (!this.selectedAbsenceCategory || !this.selectedAbsenceDuration) { this.isSaving = false; return; }
             
             createAbsence({ employeeId: this.formEmpId, startDateTime: startDateTime, durationMinutes: parseInt(this.selectedAbsenceDuration, 10), category: this.selectedAbsenceCategory })
@@ -478,7 +498,6 @@ export default class AASalonMatrixAdmin extends LightningElement {
         }
     }
 
-    // --- NUEVO: FUNCIONES AUXILIARES DE MODALES ---
     closeModals() {
         this.isCreateModalOpen = false;
         this.isDetailModalOpen = false;

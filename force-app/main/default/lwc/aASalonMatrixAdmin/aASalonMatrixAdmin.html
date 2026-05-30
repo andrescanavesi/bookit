@@ -17,6 +17,9 @@
         <div class="date-selector-wrapper">
             <template for:each={weekDays} for:item="day">
                 <div key={day.dateKey} class={day.cssClass} data-date={day.dateKey} onclick={handleDateSelect}>
+                    <template if:true={day.isHoliday}>
+                        <div class="holiday-badge">{day.holidayName}</div>
+                    </template>
                     <span class="ds-dow">{day.dayOfWeek}</span>
                     <span class="ds-number">{day.dayNumber}</span>
                     <span class="ds-month">{day.month}</span>

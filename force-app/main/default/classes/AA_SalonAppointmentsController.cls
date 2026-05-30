@@ -288,4 +288,26 @@ public with sharing class AA_SalonAppointmentsController {
         }
     }
 
+    // NUEVO: Método para obtener los feriados de la semana visible
+    @AuraEnabled(cacheable=true)
+    public static List<AA_Branch_Holiday__c> getWeekHolidays(Date baseDate) {
+        AA_Logger logger = new AA_Logger(true);
+        try {
+             logger.info('getWeekHolidays, date: '  + baseDate);
+            Id businessId = getBusinessId();
+            Date endDate = baseDate.addDays(6);
+            return [
+                SELECT Id, Name, Date__c 
+                FROM AA_Branch_Holiday__c 
+                WHERE Business_Branch__r.Business__c = :businessId 
+                AND Date__c >= :baseDate 
+                AND Date__c <= :endDate
+            ];
+        } catch (Exception e) {
+            String message = 'Error getting week holidays: ' + e.getMessage();
+            logger.error(message + ' ' + e.getStackTraceString());
+            throw new AuraHandledException(message);
+        }
+    }
+
 }
