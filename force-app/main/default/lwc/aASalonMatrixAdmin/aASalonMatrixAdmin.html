@@ -41,6 +41,9 @@
                                     <span class="prof-dot" style={th.dotStyle}></span>
                                 </template>
                                 {th.label}
+                                <template if:true={th.statsLabel}>
+                                    <br/><small style="font-weight:500; font-size:10px; color:var(--text-color); opacity:0.7;">{th.statsLabel}</small>
+                                </template>
                             </th>
                         </template>
                     </tr>
@@ -208,7 +211,21 @@
                             <p>{selectedAppt.service} · {selectedAppt.priceText}</p>
                         </div>
                         <div class="detail-info-grid">
-                            <p><strong>Profesional:</strong> {selectedAppt.employeeName}</p>
+                            <template if:false={selectedAppt.isDone}>
+                                <div>
+                                    <strong>Profesional:</strong>
+                                    <lightning-combobox
+                                        variant="label-hidden"
+                                        value={selectedAppt.employeeId}
+                                        options={eligibleEmployeesOptions}
+                                        onchange={handleReassignChange}
+                                        class="slds-m-top_xxx-small">
+                                    </lightning-combobox>
+                                </div>
+                            </template>
+                            <template if:true={selectedAppt.isDone}>
+                                <p><strong>Profesional:</strong> {selectedAppt.employeeName}</p>
+                            </template>
                             <p><strong>Horario:</strong> {selectedAppt.timeRange} hs</p>
                         </div>
 

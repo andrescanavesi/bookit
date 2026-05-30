@@ -310,4 +310,21 @@ public with sharing class AA_SalonAppointmentsController {
         }
     }
 
+    // NUEVO: Método para reasignar una cita
+    @AuraEnabled
+    public static void reassignAppointment(Id appointmentId, Id newEmployeeId) {
+        AA_Logger logger = new AA_Logger(true);
+        try {
+            AA_Appointment__c appt = new AA_Appointment__c(
+                Id = appointmentId,
+                Employee__c = newEmployeeId
+            );
+            update appt;
+        } catch (Exception e) {
+            String message = 'Error al reasignar cita: ' + e.getMessage();
+            logger.error(message + ' ' + e.getStackTraceString());
+            throw new AuraHandledException(message);
+        }
+    }
+
 }

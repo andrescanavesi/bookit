@@ -6,6 +6,7 @@ import confirmAppointment from '@salesforce/apex/AA_SalonAppointmentsController.
 import getWeekHolidays from '@salesforce/apex/AA_SalonAppointmentsController.getWeekHolidays';
 import completeAppointment from '@salesforce/apex/AA_SalonAppointmentsController.completeAppointment';
 import cancelAppointment from '@salesforce/apex/AA_SalonAppointmentsController.cancelAppointment';
+import reassignAppointment from '@salesforce/apex/AA_SalonAppointmentsController.reassignAppointment';
 import markReminderAsSent from '@salesforce/apex/AA_SalonAppointmentsController.markReminderAsSent';
 import createAbsence from '@salesforce/apex/AA_SalonAppointmentsController.createAbsence';
 import deleteAbsence from '@salesforce/apex/AA_SalonAppointmentsController.deleteAbsence';
@@ -37,13 +38,16 @@ export default class AASalonMatrixAdmin extends LightningElement {
     @track customerOptions = [];
     @track serviceOptions = [];
 
-    // Almacenamiento crudo para filtrado dinámico
+    // Datos crudos para selectores
     rawAllServices = [];
+    rawAllCustomers = [];
     rawEmployeeServices = [];
 
-    // --- NUEVO: Modales y variables de control ---
+    // Modales y formularios y variables de control ---
     @track isCreateModalOpen = false;
     @track isDetailModalOpen = false;
+    @track isAbsenceModalOpen = false;
+    @track eligibleEmployeesOptions = [];
     @track selectedAppt = {}; 
 
     // Datos temporales del formulario de creación
@@ -152,6 +156,7 @@ export default class AASalonMatrixAdmin extends LightningElement {
                     id: appt.Id,
                     name: appt.Name, 
                     employeeId: appt.Employee__c,
+                    serviceId: appt.Service__c,
                     startTime: startTimeStr,
                     duration: durationMins,
                     customer: `${firstName} ${lastName}`.trim() || 'Sin Nombre',
@@ -205,9 +210,6 @@ export default class AASalonMatrixAdmin extends LightningElement {
 
             this.customerOptions = data.allCustomers.map(c => ({ label: c.Name, value: c.Id }));
             
-            this.rawAllServices = data.allServices;
-            this.rawEmployeeServices = data.employeeServices;
-
             if (data.branchWorkingHour) {
                 this.branchStartMins = this.sfTimeToMins(data.branchWorkingHour.Open_Time__c);
                 this.branchEndMins = this.sfTimeToMins(data.branchWorkingHour.Close_Time__c);
@@ -215,6 +217,9 @@ export default class AASalonMatrixAdmin extends LightningElement {
                 this.branchStartMins = 9 * 60;
                 this.branchEndMins = 18 * 60;
             }
+            this.rawAllServices = data.allServices;
+            this.rawAllCustomers = data.allCustomers;
+            this.rawEmployeeServices = data.employeeServices;
 
             this.generateMatrix();
         } else if (error) {
@@ -259,13 +264,20 @@ export default class AASalonMatrixAdmin extends LightningElement {
     generateMatrix() {
         this.gridHeaders = [
             { id: 'TIME_COL', label: 'Hora', isTime: true, cssClass: 'th-time' },
-            ...this.activeEmployees.map(emp => ({
-                id: emp.id,
-                label: emp.name,
-                isTime: false,
-                dotStyle: `background-color: ${emp.color};`,
-                cssClass: 'th-emp'
-            }))
+            ...this.activeEmployees.map(emp => {
+                const empAppts = this.activeAppointments.filter(a => a.employeeId === emp.id);
+                const count = empAppts.length;
+                const totalMins = empAppts.reduce((acc, a) => acc + a.duration, 0);
+                
+                return {
+                    id: emp.id,
+                    label: emp.name,
+                    statsLabel: `(${count} citas, ${totalMins} min)`,
+                    isTime: false,
+                    dotStyle: `background-color: ${emp.color};`,
+                    cssClass: 'th-emp'
+                };
+            })
         ];
 
         const timeSlots = [];
@@ -429,9 +441,46 @@ export default class AASalonMatrixAdmin extends LightningElement {
                 isPast: appt.isPast
             };
 
+            // Calcular opciones de reasignación
+            if (!appt.isDone) {
+                const options = [];
+                this.activeEmployees.forEach(employee => {
+                    // Verificar si el empleado ofrece el servicio
+                    const offersService = this.rawEmployeeServices.some(es => 
+                        es.Employee__c === employee.id && es.Service__c === appt.serviceId
+                    );
+                    
+                    if (offersService) {
+                        // Verificar si el empleado está disponible (o es el asignado actualmente)
+                        const isAvailable = employee.id === appt.employeeId || 
+                            this.isEmployeeAvailable(employee.id, appt.startTime, appt.duration, appt.id);
+                        
+                        if (isAvailable) {
+                            options.push({ label: employee.name, value: employee.id });
+                        }
+                    }
+                });
+                this.eligibleEmployeesOptions = options;
+            } else {
+                this.eligibleEmployeesOptions = [];
+            }
+
             this.tempInternalComments = appt.internalComments || '';
             this.isDetailModalOpen = true;
         }
+    }
+
+    handleReassignChange(event) {
+        const newEmployeeId = event.detail.value;
+        if (newEmployeeId === this.selectedAppt.employeeId) return;
+
+        this.isSaving = true;
+        reassignAppointment({ appointmentId: this.selectedAppt.id, newEmployeeId: newEmployeeId })
+            .then(() => this.closeAndRefresh())
+            .catch(error => {
+                console.error('Error reasignando cita:', error);
+                this.isSaving = false;
+            });
     }
 
     handleConfirmAction() {
@@ -559,7 +608,40 @@ export default class AASalonMatrixAdmin extends LightningElement {
     }
 
 // --- ACCIÓN: CLICK EN SLOT BLOQUEADO ---
-    handleBlockedClick(event) {
+    isEmployeeAvailable(empId, startTimeStr, durationMins, excludeApptId) {
+        const startMins = this.timeToMins(startTimeStr);
+        const endMins = startMins + durationMins;
+
+        // 1. Check working hours
+        const wh = this.activeWorkingHours.find(w => w.employeeId === empId);
+        if (!wh || startMins < wh.startMins || endMins > wh.endMins) return false;
+
+        // 2. Check breaks
+        const hasDailyBreakOverride = this.activeAbsences.some(abs => abs.employeeId === empId && abs.category === 'Break');
+        if (!hasDailyBreakOverride && wh.startBreakMins && wh.endBreakMins) {
+            if (startMins < wh.endBreakMins && endMins > wh.startBreakMins) return false;
+        }
+
+        // 3. Check absences
+        const overlapsAbsence = this.activeAbsences.some(abs => {
+            if (abs.employeeId !== empId) return false;
+            return startMins < abs.endMins && endMins > abs.startMins;
+        });
+        if (overlapsAbsence) return false;
+
+        // 4. Check other appointments
+        const overlapsAppt = this.activeAppointments.some(appt => {
+            if (appt.employeeId !== empId || appt.id === excludeApptId) return false;
+            const apptStart = this.timeToMins(appt.startTime);
+            const apptEnd = apptStart + appt.duration;
+            return startMins < apptEnd && endMins > apptStart;
+        });
+        if (overlapsAppt) return false;
+
+        return true;
+    }
+
+    handleFreeCellClick(event) {
         const type = event.currentTarget.dataset.type;
         console.info('handleBlockedClick: '+type);
         if (!type) return; // Si es un click fuera de hora, se ignora
