@@ -18,6 +18,7 @@ export default class AASalonMatrixAdmin extends LightningElement {
     @track baseDate = new Date();
     @track gridHeaders = [];
     @track weekHolidays = [];
+    @track selectedHolidayName = '';
 
     get baseDateString() {
         return this.baseDate.toISOString().split('T')[0];
@@ -89,14 +90,17 @@ export default class AASalonMatrixAdmin extends LightningElement {
 
             const holiday = this.weekHolidays.find(h => h.Date__c === dStr);
 
+            let css = 'date-card';
+            if (holiday) css += ' date-card--holiday';
+            if (dStr === this.selectedDate) css += ' date-card--active';
+
             this.weekDays.push({
                 dateKey: dStr,
                 dayOfWeek: current.toLocaleDateString('es-UY', { weekday: 'short' }),
                 dayNumber: current.getDate(),
                 month: current.toLocaleDateString('es-UY', { month: 'short' }),
-                cssClass: dStr === this.selectedDate ? 'date-card date-card--active' : 'date-card',
-                isHoliday: !!holiday,
-                holidayName: holiday ? holiday.Name : ''
+                cssClass: css,
+                isHoliday: !!holiday
             });
         }
     }
@@ -278,7 +282,7 @@ export default class AASalonMatrixAdmin extends LightningElement {
 
         const currentHoliday = this.weekHolidays.find(h => h.Date__c === this.selectedDate);
         const isHoliday = !!currentHoliday;
-        const holidayName = currentHoliday ? currentHoliday.Name : '';
+        this.selectedHolidayName = currentHoliday ? currentHoliday.Name : '';
 
         this.gridRows = timeSlots.map(timeLabel => {
             const slotMins = this.timeToMins(timeLabel);
@@ -323,7 +327,7 @@ export default class AASalonMatrixAdmin extends LightningElement {
                 if (isHoliday) {
                     cells.push({
                         id: `${emp.id}_${timeLabel}`, isTimeLabel: false, isOccupied: false, isBlocked: true,
-                        blockLabel: holidayName, blockType: 'Holiday',
+                        blockType: 'Holiday',
                         time: timeLabel, empId: emp.id, cssClass: 'cell-holiday', blockCursor: 'cursor: not-allowed;'
                     });
                     return;

@@ -125,24 +125,6 @@
     position: relative;
 }
 
-.holiday-badge {
-    position: absolute;
-    top: -8px;
-    right: -8px;
-    background-color: #E24C4B;
-    color: white;
-    font-size: 9px;
-    padding: 2px 6px;
-    border-radius: 10px;
-    font-weight: 700;
-    box-shadow: 0 2px 4px rgba(226, 76, 75, 0.4);
-    z-index: 2;
-    white-space: nowrap;
-    max-width: 90%;
-    overflow: hidden;
-    text-overflow: ellipsis;
-}
-
 .date-card:hover {
     border-color: var(--brand-dark);
 }
@@ -151,6 +133,33 @@
     background-color: var(--brand-dark);
     border-color: var(--brand-dark);
     color: #FFFFFF;
+}
+
+.date-card--holiday {
+    background-color: #FFF6F6;
+    border-color: #FFCDCD;
+}
+
+.date-card--holiday.date-card--active {
+    background-color: #FFCDCD;
+    border-color: #FF9999;
+    color: var(--brand-dark);
+}
+
+.holiday-banner {
+    background-color: #E24C4B;
+    color: white;
+    padding: 12px 16px;
+    border-radius: 8px;
+    margin-bottom: 16px;
+    display: flex;
+    align-items: center;
+    font-size: 14px;
+    box-shadow: 0 4px 12px rgba(226, 76, 75, 0.2);
+}
+
+.icon-holiday {
+    margin-right: 8px;
 }
 
 .ds-dow, .ds-month {
@@ -330,12 +339,6 @@
       #FFE8E8 10px,
       #FFE8E8 20px
     );
-    position: relative;
-}
-
-.cell-holiday .absence-label {
-    color: #D32F2F;
-    font-weight: 700;
 }
 
 .absence-label {
