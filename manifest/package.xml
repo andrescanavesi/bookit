@@ -52,16 +52,7 @@
         <name>NavigationMenu</name>
     </types>
 	<types>
-		<members>AA_Appointment__c</members>
-		<members>AA_Business_Branch__c</members>
-		<members>AA_Business__c</members>
-		<members>AA_Customer__c</members>
-		<members>AA_Employee_Absence__c</members>
-		<members>AA_Employee_Working_Hour__c</members>
-		<members>AA_Employee__c</members>
-		<members>AA_Service__c</members>
-		<members>AA_Service_Category__c</members>
-		<members>Log__c</members>
+		<members>*</members>
 		<name>CustomTab</name>
 	</types>
 	 <types>
