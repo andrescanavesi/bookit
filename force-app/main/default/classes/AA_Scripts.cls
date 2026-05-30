@@ -80,7 +80,7 @@ public class AA_Scripts {
         System.debug('customers: '+cSize+' employees: '+eSize+' services: '+sSize);
 
         // 2. Iteramos por los próximos 7 días 
-        for (Integer dayOffset = 0; dayOffset < 7; dayOffset++) {
+        for (Integer dayOffset = 0; dayOffset < 21; dayOffset++) {
             Date targetDate = todayDate.addDays(dayOffset);
             
             // Salteamos los domingos para simular un calendario real
