@@ -139,6 +139,12 @@
                 <identifier>RecordComments_From_Customer_cField</identifier>
             </fieldInstance>
         </itemInstances>
+        <itemInstances>
+            <fieldInstance>
+                <fieldItem>Record.Internal_Comments__c</fieldItem>
+                <identifier>RecordInternal_Comments__cField</identifier>
+            </fieldInstance>
+        </itemInstances>
         <name>Facet-28e25c88-f235-4e6b-a732-665df0957723</name>
         <type>Facet</type>
     </flexiPageRegions>
