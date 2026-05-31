@@ -1,5 +1,6 @@
 public without sharing class AA_PublicAgendaController {
     
+    private static Id BUSINESS_ID = 'a02gL00000Ix6AHQAZ'; 
     private static Id BRANCH_ID = 'a03gL00000YGsWJQA1'; 
     private static String BUSSINESS_PHONE_ID = '1036897699507386';
     
@@ -11,7 +12,7 @@ public without sharing class AA_PublicAgendaController {
         AA_Business__c  business = getBusiness();
         //String fullName = 'guest'; 
         
-        List<AA_Customer__c> customers = [SELECT Id, Name, Email__c, Phone_Number__c, Business__r.Business_Phone_Id__c  
+        List<AA_Customer__c> customers = [SELECT Id, Name, Email__c, First_Name__c, Last_Name__c, Phone_Number__c, Business__r.Business_Phone_Id__c
                                           FROM AA_Customer__c 
                                           WHERE Phone_Number__c = :phoneNumber LIMIT 1];
         if(!customers.isEmpty()){
@@ -65,8 +66,25 @@ public without sharing class AA_PublicAgendaController {
         return businesses.get(0);
     }
     
+    @AuraEnabled(cacheable=true)
+    public static AA_Business__c getBusinessInfo() {
+        AA_Logger logger = new AA_Logger(true);
+        logger.info('getBusinessInfo called');
+        List<AA_Business__c> businesses = [
+            SELECT Id, Name, Address__c, Logo_URL__c 
+            FROM AA_Business__c 
+            WHERE Id = :BUSINESS_ID
+            LIMIT 1
+        ];
+        if(businesses.isEmpty()){
+            return null;
+        }
+        return businesses.get(0);
+    }
+    
     private static AA_Business_Branch__c getBusinessBranch(Id businessId){
-        List<AA_Business_Branch__c> branches = [SELECT Id FROM AA_Business_Branch__c 
+        List<AA_Business_Branch__c> branches = [SELECT Id, Name, Address__c 
+        FROM AA_Business_Branch__c 
                                                 WHERE Business__c = :businessId
                                                 ORDER BY CreatedDate DESC
                                                 LIMIT 1];

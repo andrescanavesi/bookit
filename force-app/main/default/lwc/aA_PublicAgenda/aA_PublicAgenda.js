@@ -3,6 +3,7 @@ import { LightningElement, track, api } from 'lwc';
 import getOrCreateCustomer from '@salesforce/apex/AA_PublicAgendaController.getOrCreateCustomer';
 import getCategories from '@salesforce/apex/AA_PublicAgendaController.getCategories';
 import getServices from '@salesforce/apex/AA_PublicAgendaController.getServices';
+import getBusinessInfo from '@salesforce/apex/AA_PublicAgendaController.getBusinessInfo';
 import updateCustomer from '@salesforce/apex/AA_PublicAgendaController.updateCustomer';
 import getAvailableSlots from '@salesforce/apex/AA_PublicAgendaController.getAvailableSlots';
 import saveAppointment from '@salesforce/apex/AA_PublicAgendaController.saveAppointment';
@@ -17,6 +18,7 @@ export default class AAPublicAgenda extends LightningElement {
     reservaStep = 1;
     misTurnosStep = 1;
 
+    @track businessInfo = { logoUrl: '', address: '' };
     @track categories = [];
     @track services = [];
 
@@ -47,20 +49,12 @@ export default class AAPublicAgenda extends LightningElement {
     tieneIndicaciones = false;
     mostrarSubOpcionesRetiro = false;
 
-    // --- ESTADO DEL EQUIPO (ADMIN) ---
-    passwordIntento = '';
-    errorLogin = '';
-    adminFiltroProf = 'ALL';
-    adminTab = 'proximos';
-
     // --- GETTERS: NAVEGACIÓN ---
     get isWelcome()     { return this.currentScreen === 'welcome'; }
     get isReserva()     { return this.currentScreen === 'reserva'; }
     get isMisTurnos()   { return this.currentScreen === 'misTurnos'; }
     get isPrecios()     { return this.currentScreen === 'precios'; }
     get isConsulta()    { return this.currentScreen === 'consulta'; }
-    get isEquipoLogin() { return this.currentScreen === 'equipo_login'; }
-    get isAdmin()       { return this.currentScreen === 'admin'; }
 
     // --- GETTERS: RESERVAS Y CLIENTES ---
     get isReservaPaso1() { return this.reservaStep === 1; }
@@ -181,35 +175,6 @@ export default class AAPublicAgenda extends LightningElement {
 
     get isBotonConfirmarDeshabilitado() { return !this.reserva.formaPago; }
 
-    // --- GETTERS: ADMIN PANEL ---
-    get adminPillsProfesionales() {
-        return [
-            { id: 'ALL', label: 'Todo el equipo', cssClass: this.adminFiltroProf === 'ALL' ? 'prof-pill prof-pill--active' : 'prof-pill' },
-            { id: 'silvina', label: 'Silvina', color: '#3A70A1', cssClass: this.adminFiltroProf === 'silvina' ? 'prof-pill prof-pill--active' : 'prof-pill' },
-            { id: 'sophie', label: 'Sophie', color: '#D4A017', cssClass: this.adminFiltroProf === 'sophie' ? 'prof-pill prof-pill--active' : 'prof-pill' },
-            { id: 'dahiana', label: 'Dahiana', color: '#B23A3A', cssClass: this.adminFiltroProf === 'dahiana' ? 'prof-pill prof-pill--active' : 'prof-pill' },
-            { id: 'yamila', label: 'Yamila', color: '#5A8A4F', cssClass: this.adminFiltroProf === 'yamila' ? 'prof-pill prof-pill--active' : 'prof-pill' }
-        ];
-    }
-
-    get adminTabs() {
-        return [
-            { id: 'hoy', label: 'Hoy', cssClass: this.adminTab === 'hoy' ? 'admin-tab admin-tab--active' : 'admin-tab' },
-            { id: 'proximos', label: 'Próximos', cssClass: this.adminTab === 'proximos' ? 'admin-tab admin-tab--active' : 'admin-tab' },
-            { id: 'cancelados', label: 'Cancelados', cssClass: this.adminTab === 'cancelados' ? 'admin-tab admin-tab--active' : 'admin-tab' }
-        ];
-    }
-
-    get adminAgendaData() {
-        // Mock que replica la imagen proporcionada de "Próximos"
-        return [
-            { isHeader: true, label: 'Mar 5 De Mayo', key: 'h1' },
-            { isBooking: true, id: 'b1', time: '09:00', status: 'CONFIRMADO', client: 'Juan', service: 'Manicuría sin esmalte · 30 min', phone: '099999999', prof: 'Soledad', profColor: '#6B4F8E', payment: 'Efectivo', borderStyle: 'border-left: 3px solid #6B4F8E;' },
-            { isBooking: true, id: 'b2', time: '09:30', status: 'PENDIENTE', client: 'ddd', service: 'Estética de pies tradicional · 30 min', phone: '099776655', prof: 'Silvina', profColor: '#3A70A1', payment: 'Efectivo', borderStyle: 'border-left: 3px solid #3A70A1;' },
-            { isGap: true, timeRange: '10:00 – 12:30', label: '150 MIN LIBRES', key: 'g1' }
-        ];
-    }
-
     // --- ACCIONES GENERALES ---
 
     connectedCallback() {
@@ -228,11 +193,19 @@ export default class AAPublicAgenda extends LightningElement {
     async loadData() {
         console.info('loading data for the business: '+this.businessId);
         try {
-            // Cargamos categorías y servicios en paralelo para ganar velocidad
-            const [categoriesDB, servicesDB] = await Promise.all([
+            // Cargamos categorías, servicios e info del negocio en paralelo para ganar velocidad
+            const [categoriesDB, servicesDB, businessDB] = await Promise.all([
                 getCategories(),
-                getServices()
+                getServices(),
+                getBusinessInfo()
             ]);
+
+            if (businessDB) {
+                this.businessInfo = {
+                    logoUrl: businessDB.Logo_URL__c || '',
+                    address: businessDB.Address__c || ''
+                };
+            }
 
             console.info('categoriesDB: ');
             console.info(JSON.stringify(categoriesDB, null, 2));
@@ -422,40 +395,12 @@ export default class AAPublicAgenda extends LightningElement {
         }
     }
 
-    // --- ACCIONES ADMIN ---
-    handleLoginInput(event) {
-        this.passwordIntento = event.target.value;
-    }
-
-    intentarLogin() {
-        if (this.passwordIntento === 'silvina') { // Password MVP
-            this.errorLogin = '';
-            this.currentScreen = 'admin';
-            this.passwordIntento = ''; // Limpiar
-        } else {
-            this.errorLogin = 'Contraseña incorrecta.';
-        }
-    }
-
-    handleAdminLogout() {
-        this.currentScreen = 'welcome';
-    }
-
-    handleAdminProfFilter(event) {
-        this.adminFiltroProf = event.currentTarget.dataset.id;
-    }
-
-    handleAdminTab(event) {
-        this.adminTab = event.currentTarget.dataset.id;
-    }
-
     // --- NAVEGACIÓN ---
     navToWelcome()     { this.currentScreen = 'welcome'; }
     navToMisTurnos()   { this.currentScreen = 'misTurnos'; this.misTurnosStep = 1; }
     navToPrecios()     { this.currentScreen = 'precios'; }
     navToConsulta()    { this.currentScreen = 'consulta'; }
     navToReserva()     { this.currentScreen = 'reserva'; this.reservaStep = 1; }
-    navToEquipoLogin() { this.currentScreen = 'equipo_login'; this.errorLogin = ''; }
 
     //avanzarPaso2() { this.reservaStep = 2; }
 

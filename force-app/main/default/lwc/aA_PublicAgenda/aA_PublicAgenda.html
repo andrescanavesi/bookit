@@ -1,10 +1,20 @@
 <template>
     <div class="app-frame">
         
+        <!-- HEADER GLOBAL -->
+        <template if:true={businessInfo.logoUrl}>
+            <header class="global-header">
+                <div class="logo-container">
+                    <img src={businessInfo.logoUrl} alt="Logo de la empresa" class="logo-img" />
+                </div>
+                <div class="logo-subtitle">RESERVAS</div>
+                <h1 class="global-title">Tu turno, a un toque.</h1>
+            </header>
+        </template>
+
         <!-- PANTALLA 0: MENÚ PRINCIPAL --> 
         <template if:true={isWelcome}>
             <div class="screen welcome">
-                <h2>Silvina Uñas</h2>
                 <p class="subtitle">Selecciona una opción:</p>
 
                 <button class="card" onclick={navToReserva}>
@@ -22,11 +32,6 @@
                 <button class="card" onclick={navToConsulta}>
                     <div class="card__title">Otra consulta</div>
                 </button>
-
-                <div class="staff-link-container">
-                    <div style="font-size: 13px; color: #8A7B6E; margin-bottom: 24px;">Av. Brasil 2377 — Apto 1803 · Pocitos, Montevideo</div>
-                    <button class="staff-link" onclick={navToEquipoLogin}>🔒 ACCESO DEL EQUIPO</button>
-                </div>
             </div>
         </template>
 
@@ -36,11 +41,6 @@
                 
                 <!-- PASO 1: Identificación -->
                 <template if:true={isReservaPaso1}>
-                    <div class="logo">
-                        <span class="logo__script">Silvina</span>
-                        <span class="logo__caps">- UÑAS -</span>
-                    </div>
-
                     <div class="step-head">
                         <div class="step-head__top">
                             <button class="step-back" onclick={navToWelcome}>&larr; Volver</button>
@@ -338,11 +338,6 @@
                         <!-- Contenedor Inferior (Dirección y Botón) -->
                         <div class="success-screen__bottom">
                             <div class="notice-block notice-block--final">
-                                <p style="font-weight: 600; margin-bottom: 8px; color: var(--black);">Te esperamos en</p>
-                                <p style="margin-bottom: 24px; color: var(--black); line-height: 1.5;">
-                                    Av. Brasil 2377, apto 1803 &middot; Pocitos<br>
-                                    Edificio entre Araucho y Ponce
-                                </p>
                                 <p style="color: var(--black); line-height: 1.5; opacity: 0.8;">
                                     Recibís recordatorio 24h antes. Si necesitás cancelar, hacelo con 12h de anticipación.
                                 </p>
@@ -470,10 +465,6 @@
                 
                 <!-- Cabecera con logo y botón volver alineados -->
                 <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 32px;">
-                    <div class="logo logo--sm">
-                        <span class="logo__script">Silvina</span>
-                        <span class="logo__caps">- UÑAS -</span>
-                    </div>
                     <button class="step-back" onclick={navToWelcome} style="margin-bottom: 0;">&larr; Volver</button>
                 </div>
 
@@ -491,124 +482,16 @@
                     </a>
                 </div>
 
-                <!-- Footer / Dirección -->
-                <p style="margin-top: 32px; color: #8A7B6E; font-size: 15px; line-height: 1.5;">
-                    Estamos en Av. Brasil 2377, apto 1803 &middot; Pocitos, Montevideo. Lunes a viernes 9-19h, sábados 9-15h.
-                </p>
-
-            </div>
-        </template>
-
- <!-- PANTALLA: LOGIN EQUIPO -->
-        <template if:true={isEquipoLogin}>
-            <div class="screen" style="text-align: center; padding-top: 10vh;">
-                <div class="logo logo--lg" style="margin: 0 auto 32px;">
-                    <span class="logo__script">Silvina</span>
-                    <span class="logo__caps">- UÑAS -</span>
-                </div>
-                
-                <div class="label-caps" style="color: #8B1A1A; margin-bottom: 12px;">ACCESO DEL EQUIPO</div>
-                <h2 class="h2" style="margin-bottom: 40px; font-size: 36px;">Ingresá la contraseña</h2>
-
-                <div class="field" style="text-align: left;">
-                    <label class="field__label">CONTRASEÑA</label>
-                    <input class="field__input" type="password" placeholder="••••••••" onchange={handleLoginInput}>
-                    <template if:true={errorLogin}>
-                        <span class="field__hint" style="color: #8B1A1A;">{errorLogin}</span>
-                    </template>
-                </div>
-
-                <button class="btn btn--bordo" onclick={intentarLogin}>Continuar</button>
-                
-                <div style="margin-top: 24px;">
-                    <button class="btn-ghost" onclick={navToWelcome}>Volver al inicio</button>
-                </div>
-            </div>
-        </template>
-
-        <!-- PANTALLA: PANEL DE ADMINISTRACIÓN (DARK THEME) -->
-        <template if:true={isAdmin}>
-            <div class="admin-wrapper">
-                <!-- Header -->
-                <div class="admin-header">
-                    <div style="display: flex; flex-direction: column;">
-                        <span style="font-family: 'Allura', cursive; font-size: 24px; color: #fff; line-height: 1;">Silvina</span>
-                        <span style="font-size: 7px; letter-spacing: 0.3em; color: #fff;">- UÑAS -</span>
-                    </div>
-                    <button class="btn-outline-light" onclick={handleAdminLogout}>Salir</button>
-                </div>
-
-                <div class="label-caps" style="color: #C9A582; margin-bottom: 8px;">PANEL DEL EQUIPO</div>
-                <h2 class="h2" style="color: #fff; margin-bottom: 32px;">Agenda</h2>
-
-                <!-- Filtro Profesional -->
-                <div style="margin-bottom: 24px;">
-                    <div class="label-caps" style="color: #8A7B6E; margin-bottom: 12px;">VER AGENDA DE</div>
-                    <div class="prof-pill-container">
-                        <template for:each={adminPillsProfesionales} for:item="prof">
-                            <button key={prof.id} class={prof.cssClass} data-id={prof.id} onclick={handleAdminProfFilter}>
-                                <template if:true={prof.color}>
-                                    <span class="prof-dot" style={prof.colorStyle}></span>
-                                </template>
-                                {prof.label}
-                            </button>
-                        </template>
-                    </div>
-                </div>
-
-                <!-- Tabs -->
-                <div class="admin-tabs-container">
-                    <div style="display: flex;">
-                        <template for:each={adminTabs} for:item="tab">
-                            <button key={tab.id} class={tab.cssClass} data-id={tab.id} onclick={handleAdminTab}>{tab.label}</button>
-                        </template>
-                    </div>
-                    <button style="background: transparent; border: none; color: #8A7B6E; cursor: pointer;">&#x21bb;</button>
-                </div>
-
-                <!-- Lista de Agenda -->
-                <div class="admin-agenda-list">
-                    <template for:each={adminAgendaData} for:item="item">
-                        
-                        <template if:true={item.isHeader}>
-                            <h3 key={item.key} class="admin-date-header">{item.label}</h3>
-                        </template>
-
-                        <template if:true={item.isBooking}>
-                            <div key={item.id} class="admin-card" style={item.borderStyle}>
-                                <div class="admin-card__top">
-                                    <span class="admin-card__time">{item.time}</span>
-                                    <span class="admin-card__status">
-                                        <template if:true={item.isConfirmado}>&#10003; </template>{item.status}
-                                    </span>
-                                </div>
-                                <div class="admin-card__client">{item.client}</div>
-                                <div class="admin-card__service">{item.service}</div>
-                                
-                                <div class="admin-card__footer">
-                                    <span class="admin-card__meta">&#128222; {item.phone}</span>
-                                    <span class="admin-card__meta">
-                                        <span class="prof-dot" style={item.profColorStyle}></span> {item.prof}
-                                    </span>
-                                </div>
-                                <div class="admin-card__payment">Forma de pago: {item.payment}</div>
-                            </div>
-                        </template>
-
-                        <template if:true={item.isGap}>
-                            <div key={item.key} class="admin-gap">
-                                <span>&#9201; {item.timeRange}</span>
-                                <span class="label-caps" style="color: #C9A582;">{item.label}</span>
-                            </div>
-                        </template>
-
-                    </template>
-                </div>
             </div>
         </template>
         
+        <!-- FOOTER GLOBAL -->
+        <template if:true={businessInfo.address}>
+            <footer class="global-footer">
+                <div class="global-footer-box">
+                    {businessInfo.address}
+                </div>
+            </footer>
+        </template>
     </div>
-
-   
-
 </template>
