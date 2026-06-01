@@ -205,9 +205,16 @@ export default class AAPublicAgenda extends LightningElement {
             ]);
 
             if (businessDB) {
+                let defaultWaUrl = 'https://wa.me/message/PUX7XCBYPK4MN1';
+                if (businessDB.Phone_Number__c) {
+                    const cleanPhone = businessDB.Phone_Number__c.replace(/[^0-9]/g, '');
+                    defaultWaUrl = `https://wa.me/${cleanPhone}?text=${encodeURIComponent('Hola, tengo una consulta')}`;
+                }
+                
                 this.businessInfo = {
                     logoUrl: businessDB.Logo_URL__c || '',
-                    address: businessDB.Address__c || ''
+                    address: businessDB.Address__c || '',
+                    whatsappUrl: defaultWaUrl
                 };
             }
 

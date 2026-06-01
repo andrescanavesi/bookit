@@ -71,7 +71,7 @@ public without sharing class AA_PublicAgendaController {
         AA_Logger logger = new AA_Logger(true);
         logger.info('getBusinessInfo called');
         List<AA_Business__c> businesses = [
-            SELECT Id, Name, Address__c, Logo_URL__c 
+            SELECT Id, Name, Address__c, Logo_URL__c, Phone_Number__c 
             FROM AA_Business__c 
             WHERE Id = :BUSINESS_ID
             LIMIT 1
