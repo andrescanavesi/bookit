@@ -9,6 +9,8 @@ import getAvailableSlots from '@salesforce/apex/AA_PublicAgendaController.getAva
 import saveAppointment from '@salesforce/apex/AA_PublicAgendaController.saveAppointment';
 import getMisTurnos from '@salesforce/apex/AA_PublicAgendaController.getMisTurnos';
 import cancelarAppointment from '@salesforce/apex/AA_PublicAgendaController.cancelarAppointment';
+import confirmarAsistencia from '@salesforce/apex/AA_PublicAgendaController.confirmarAsistencia';
+import recoordinarAppointment from '@salesforce/apex/AA_PublicAgendaController.recoordinarAppointment';
 
 export default class AAPublicAgenda extends LightningElement {
     @api businessId
@@ -27,6 +29,8 @@ export default class AAPublicAgenda extends LightningElement {
     @track horasDisponiblesList = [];
     @track isLoadingHours = false;
     @track isConfirming = false; // Nueva bandera para evitar doble clic
+    isRecoordinando = false;
+    oldAppointmentId = null;
 
 
     @track persona = { id: '', firstName: '', lastName: '', celular: '099999999', email: 'a@a.com', indicaciones: '' };
@@ -308,7 +312,23 @@ export default class AAPublicAgenda extends LightningElement {
             console.info('Enviando datos de reserva a Salesforce:', JSON.stringify(params));
 
             // Llamada al backend
-            const nuevaReserva = await saveAppointment(params);
+            let nuevaReserva;
+            if (this.isRecoordinando) {
+                nuevaReserva = await recoordinarAppointment({
+                    oldAppointmentId: this.oldAppointmentId,
+                    customerId: this.persona.id,
+                    employeeId: this.reserva.slotData.employeeId,
+                    serviceId: this.reserva.servicioSel,
+                    dayString: this.reserva.fechaSel,
+                    hourString: this.reserva.horaSel
+                });
+                
+                // Limpiar estado
+                this.isRecoordinando = false;
+                this.oldAppointmentId = null;
+            } else {
+                nuevaReserva = await saveAppointment(params);
+            }
             
             console.info('¡Reserva creada exitosamente!', nuevaReserva.Id);
             
@@ -344,6 +364,13 @@ export default class AAPublicAgenda extends LightningElement {
                 // Instanciamos la fecha. Si usas fechas UTC desde Apex, asegúrate de la zona horaria.
                 const dt = new Date(t.Start_Date_Time__c);
                 
+                let isConfirmado = false;
+                if (t.Customer_Confirmation_Date__c) {
+                    isConfirmado = true;
+                } else if (t.Internal_Comments__c && t.Internal_Comments__c.includes('Confirmado por el cliente')) {
+                    isConfirmado = true;
+                }
+
                 return {
                     Id: t.Id,
                     fechaStr: `${DOW[dt.getDay()]} ${dt.getDate()} de ${MESES[dt.getMonth()]}`,
@@ -351,7 +378,15 @@ export default class AAPublicAgenda extends LightningElement {
                     horaStr: dt.toLocaleTimeString('es-UY', { hour: '2-digit', minute: '2-digit' }),
                     servicio: t.Service__r ? t.Service__r.Name : 'Servicio',
                     profesional: t.Employee__r ? t.Employee__r.Name : 'El equipo',
-                    status: t.Status__c
+                    status: t.Status__c,
+                    startDateTimeObj: dt,
+                    confirmText: isConfirmado ? 'Asistencia confirmada' : 'Confirmar asistencia',
+                    isConfirmDisabled: isConfirmado,
+                    showMessage: false,
+                    messageText: '',
+                    customerId: t.Customer__c,
+                    serviceId: t.Service__c,
+                    employeeId: t.Employee__r ? t.Employee__r.Id : t.Employee__c
                 };
             });
 
@@ -365,14 +400,93 @@ export default class AAPublicAgenda extends LightningElement {
         }
     }
    
-    handleConfirmarAsistencia(event) {}
-    handleRecoordinar(event) {}
+    async handleConfirmarAsistencia(event) {
+        const appointmentId = event.currentTarget.dataset.id;
+        if (!appointmentId) return;
+
+        const turno = this.misTurnosEncontrados.find(t => t.Id === appointmentId);
+        if (!turno) return;
+        
+        // Limpiamos mensajes previos
+        turno.showMessage = false;
+
+        const timeDiff = turno.startDateTimeObj.getTime() - new Date().getTime();
+        const hoursDiff = timeDiff / (1000 * 3600);
+
+        if (hoursDiff > 24) {
+            turno.showMessage = true;
+            turno.messageText = 'La cita puede ser confirmada dentro de las 24hs antes de la cita';
+            turno.isConfirmDisabled = true;
+            this.misTurnosEncontrados = [...this.misTurnosEncontrados];
+            return;
+        }
+
+        turno.confirmText = 'Enviando...';
+        turno.isConfirmDisabled = true;
+        this.misTurnosEncontrados = [...this.misTurnosEncontrados];
+        
+        try {
+            console.info('Confirmando asistencia en Salesforce con ID:', appointmentId);
+            await confirmarAsistencia({ appointmentId: appointmentId });
+            console.info('Asistencia confirmada con éxito.');
+            await this.handleBuscarTurnos();
+        } catch (error) {
+            console.error('Error al confirmar asistencia:', JSON.stringify(error));
+            alert('Hubo un problema al confirmar tu asistencia. Por favor, intenta nuevamente.');
+            this.isLoadingTurnos = false;
+        }
+    }
+    
+    handleRecoordinar(event) {
+        const appointmentId = event.currentTarget.dataset.id;
+        if (!appointmentId) return;
+
+        const turno = this.misTurnosEncontrados.find(t => t.Id === appointmentId);
+        if (!turno) return;
+
+        turno.showMessage = false;
+        const timeDiff = turno.startDateTimeObj.getTime() - new Date().getTime();
+        const hoursDiff = timeDiff / (1000 * 3600);
+
+        if (hoursDiff < 12) {
+            turno.showMessage = true;
+            turno.messageText = 'La cita no puede ser recoordinada con menos de 12 horas de anticipacion. Ponerse en contacto con el salon';
+            this.misTurnosEncontrados = [...this.misTurnosEncontrados];
+            return;
+        }
+
+        // Configurar estado para recoordinar
+        this.isRecoordinando = true;
+        this.oldAppointmentId = appointmentId;
+        this.reserva.customerId = turno.customerId;
+        this.reserva.servicioSel = turno.serviceId;
+        this.reserva.profesionalSel = turno.employeeId;
+        this.persona.id = turno.customerId;
+        
+        // Navegar al paso de selección de fecha/hora
+        this.currentScreen = 'reserva';
+        this.goToStep6();
+    }
     
     async handleCancelarTurno(event) {
         // Obtenemos el Id del turno desde el dataset del botón configurado en el HTML
         const appointmentId = event.currentTarget.dataset.id;
         
         if (!appointmentId) return;
+
+        const turno = this.misTurnosEncontrados.find(t => t.Id === appointmentId);
+        if (!turno) return;
+
+        turno.showMessage = false;
+        const timeDiff = turno.startDateTimeObj.getTime() - new Date().getTime();
+        const hoursDiff = timeDiff / (1000 * 3600);
+
+        if (hoursDiff < 12) {
+            turno.showMessage = true;
+            turno.messageText = 'La cita no puede ser cancelada con menos de 12 horas de anticipacion. Ponerse en contacto con el salon';
+            this.misTurnosEncontrados = [...this.misTurnosEncontrados];
+            return;
+        }
 
         this.isLoadingTurnos = true;
 

@@ -396,7 +396,14 @@
                                     <div class="turno-card__service">{turno.servicio}</div>
                                     <div class="turno-card__meta">con {turno.profesional}</div>
                                     
+                                    <template if:true={turno.showMessage}>
+                                        <div style="color: #8B1A1A; font-size: 13px; margin-bottom: 12px;">{turno.messageText}</div>
+                                    </template>
                                     <div class="turno-card__actions">
+                                        <div class="turno-card__actions-row">
+                                            <button class="btn-outline btn-outline--success" data-id={turno.Id} disabled={turno.isConfirmDisabled} onclick={handleConfirmarAsistencia}>{turno.confirmText}</button>
+                                            <button class="btn-outline btn-outline--dark" data-id={turno.Id} onclick={handleRecoordinar}>Recoordinar</button>
+                                        </div>
                                         <button class="btn-outline btn-outline--danger" data-id={turno.Id} onclick={handleCancelarTurno}>Cancelar</button>
                                     </div>
                                 </div>

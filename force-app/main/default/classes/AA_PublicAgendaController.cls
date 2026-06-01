@@ -162,7 +162,7 @@ public without sharing class AA_PublicAgendaController {
         
         return [
            SELECT Id, Name, Employee__r.Name, Start_Date_Time__c, End_Date_Time__c, Duration_Minutes__c, Service__r.Name, 
-           Status__c, Customer__r.Name, Amount__c 
+           Status__c, Customer__r.Name, Amount__c, Customer_Confirmation_Date__c, Internal_Comments__c
            FROM AA_Appointment__c 
            WHERE Customer__r.Phone_Number__c = :celular 
            AND Start_Date_Time__c >= TODAY  
@@ -189,4 +189,52 @@ public without sharing class AA_PublicAgendaController {
         }
     }
     
+    @AuraEnabled(cacheable=false)
+    public static void confirmarAsistencia(Id appointmentId) {
+        AA_Logger logger = new AA_Logger(true);
+        logger.info('confirmarAsistencia appointmentId: '+appointmentId);
+        try {
+            AA_Appointment__c appt = [SELECT Id, Internal_Comments__c FROM AA_Appointment__c WHERE Id = :appointmentId LIMIT 1];
+            String comments = appt.Internal_Comments__c != null ? appt.Internal_Comments__c + '\nConfirmado por el cliente' : 'Confirmado por el cliente';
+            
+            appt.Customer_Confirmation_Date__c = System.now();
+            appt.Internal_Comments__c = comments;
+            
+            update appt;
+        } catch (Exception e) {
+            logger.error('confirmarAsistencia error: '+e.getMessage()+' '+e.getStackTraceString());
+            throw new AuraHandledException('Error al confirmar la asistencia: ' + e.getMessage());
+        }
+    }
+
+    @AuraEnabled(cacheable=false)
+    public static AA_Appointment__c recoordinarAppointment(Id oldAppointmentId, Id customerId, Id employeeId, Id serviceId, String dayString, String hourString) {
+        AA_Logger logger = new AA_Logger(true);
+        logger.info('recoordinarAppointment oldAppointmentId: '+oldAppointmentId);
+        try {
+            AA_Appointment__c oldAppt = [SELECT Id, Name, Internal_Comments__c FROM AA_Appointment__c WHERE Id = :oldAppointmentId LIMIT 1];
+            
+            // Crear la nueva cita
+            AA_Appointment__c newApptObj = AA_AppointmentService.saveAppointment(customerId, employeeId, serviceId, dayString, hourString);
+            
+            // Consultar para tener el Name
+            AA_Appointment__c newApptQuery = [SELECT Id, Name, Internal_Comments__c FROM AA_Appointment__c WHERE Id = :newApptObj.Id LIMIT 1];
+            
+            // Actualizar la vieja
+            String oldComments = oldAppt.Internal_Comments__c != null ? oldAppt.Internal_Comments__c + '\nRecoordinado por el usuario a la cita ' + newApptQuery.Name : 'Recoordinado por el usuario a la cita ' + newApptQuery.Name;
+            oldAppt.Status__c = 'Cancelled';
+            oldAppt.Internal_Comments__c = oldComments;
+            update oldAppt;
+            
+            // Actualizar la nueva
+            String newComments = newApptQuery.Internal_Comments__c != null ? newApptQuery.Internal_Comments__c + '\nRecoordinado por el usuario desde la cita ' + oldAppt.Name : 'Recoordinado por el usuario desde la cita ' + oldAppt.Name;
+            newApptQuery.Internal_Comments__c = newComments;
+            update newApptQuery;
+            
+            return newApptQuery;
+        } catch (Exception e) {
+            logger.error('recoordinarAppointment error: '+e.getMessage()+' '+e.getStackTraceString());
+            throw new AuraHandledException('Error al recoordinar la cita: ' + e.getMessage());
+        }
+    }
 }
