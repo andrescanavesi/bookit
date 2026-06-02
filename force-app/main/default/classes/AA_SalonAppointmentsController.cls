@@ -327,4 +327,21 @@ public with sharing class AA_SalonAppointmentsController {
         }
     }
 
+    @AuraEnabled(cacheable=true)
+    public static List<AA_Employee__c> getEmployees() {
+        Id businessId = getBusinessId();
+        return [SELECT Id, Name, First_Name__c, Last_Name__c, Is_Admin__c, Business_Branch__r.Name 
+                FROM AA_Employee__c 
+                WHERE Business_Id__c = :businessId 
+                ORDER BY First_Name__c ASC];
+    }
+
+    @AuraEnabled(cacheable=true)
+    public static List<AA_Customer__c> getCustomers() {
+        Id businessId = getBusinessId();
+        return [SELECT Id, Name, First_Name__c, Last_Name__c, Email__c, Phone_Number__c, Internal_Comments__c 
+                FROM AA_Customer__c 
+                WHERE Business__c = :businessId 
+                ORDER BY First_Name__c ASC];
+    }
 }

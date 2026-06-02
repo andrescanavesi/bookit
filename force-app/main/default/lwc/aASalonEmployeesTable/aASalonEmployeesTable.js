@@ -1,4 +1,5 @@
-import { LightningElement, track } from 'lwc';
+import { LightningElement, track, wire } from 'lwc';
+import getEmployees from '@salesforce/apex/AA_SalonAppointmentsController.getEmployees';
 
 export default class AASalonEmployeesTable extends LightningElement {
     
@@ -8,36 +9,40 @@ export default class AASalonEmployeesTable extends LightningElement {
         this.initEmployees();
     }
 
-    initEmployees() {
-        // Datos simulados alineados con el equipo real y su paleta de colores
-        const team = [
-            { id: 'E1', name: 'Silvina', role: 'Estilista Principal', branch: 'Punta Carretas', isAdmin: true, status: 'Activo', color: '#B23A3A' },
-            { id: 'E2', name: 'Dahiana', role: 'Colorista Senior', branch: 'Punta Carretas', isAdmin: false, status: 'Activo', color: '#D4A017' },
-            { id: 'E3', name: 'Sophie', role: 'Especialista en Peinados', branch: 'Carrasco', isAdmin: false, status: 'En Descanso', color: '#3A70A1' },
-            { id: 'E4', name: 'Yamila', role: 'Estilista & Makeup', branch: 'Carrasco', isAdmin: false, status: 'Activo', color: '#5A8A4F' },
-            { id: 'E5', name: 'Soledad', role: 'Manicura Profesional', branch: 'Punta Carretas', isAdmin: false, status: 'Inactivo', color: '#6B4F8E' },
-            { id: 'E6', name: 'Agustina', role: 'Tratamientos Capilares', branch: 'Carrasco', isAdmin: false, status: 'Activo', color: '#A15C3A' }
-        ];
-
-        // Mapeamos los datos para inyectar elementos visuales limpios
-        this.employees = team.map(emp => {
-            // Generamos iniciales (ej: Silvina -> SI, Sophie -> SO)
-            const initials = emp.name.substring(0, 2).toUpperCase();
+    async initEmployees() {
+        try {
+            const result = await getEmployees();
             
-            // Asignamos clases de CSS para los badges según el estado
-            let statusClass = 'badge ';
-            if (emp.status === 'Activo') statusClass += 'badge--active';
-            else if (emp.status === 'En Descanso') statusClass += 'badge--away';
-            else statusClass += 'badge--inactive';
+            // Array de colores para asignar dinámicamente si es necesario
+            const colores = ['#B23A3A', '#D4A017', '#3A70A1', '#5A8A4F', '#6B4F8E', '#A15C3A'];
+            
+            this.employees = result.map((emp, index) => {
+                const fName = emp.First_Name__c || '';
+                const lName = emp.Last_Name__c || '';
+                const fullName = (fName + ' ' + lName).trim() || emp.Name;
+                const branchName = emp.Business_Branch__r ? emp.Business_Branch__r.Name : 'Sin sucursal';
+                
+                // Iniciales
+                const initials = fullName.substring(0, 2).toUpperCase();
+                
+                // Color cíclico
+                const color = colores[index % colores.length];
 
-            return {
-                ...emp,
-                initials: initials,
-                statusClass: statusClass,
-                permRole: emp.isAdmin ? 'Administrador' : 'Staff',
-                dotStyle: `background-color: ${emp.color};`,
-                avatarStyle: `background-color: ${emp.color}15; color: ${emp.color}; border: 1px solid ${emp.color}30;`
-            };
-        });
+                return {
+                    id: emp.Id,
+                    name: fullName,
+                    role: emp.Is_Admin__c ? 'Administrador' : 'Staff',
+                    branch: branchName,
+                    status: 'Activo', // Asumido por defecto
+                    initials: initials,
+                    statusClass: 'badge badge--active',
+                    permRole: emp.Is_Admin__c ? 'Administrador' : 'Staff',
+                    dotStyle: `background-color: ${color};`,
+                    avatarStyle: `background-color: ${color}15; color: ${color}; border: 1px solid ${color}30;`
+                };
+            });
+        } catch (error) {
+            console.error('Error al obtener empleados:', JSON.stringify(error));
+        }
     }
 }
