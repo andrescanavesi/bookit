@@ -6,7 +6,7 @@
     <inlineHelpText>Example: El turno reservado podrá ser cancelado hasta 12 hrs antes de la hora agendada. No creemos en las señas, y por lo tanto, en el caso de cancelar un turno sin previo aviso se cobrará el costo de dicha sesión. Gracias, equipo SILVINA UÑAS</inlineHelpText>
     <label>Cancellation Policy</label>
     <required>false</required>
-    <trackHistory>false</trackHistory>
+    <trackHistory>true</trackHistory>
     <trackTrending>false</trackTrending>
     <type>TextArea</type>
 </CustomField>

@@ -34,6 +34,10 @@
         <enabled>false</enabled>
     </classAccesses>
     <classAccesses>
+        <apexClass>AA_ServiceTriggerHandler</apexClass>
+        <enabled>false</enabled>
+    </classAccesses>
+    <classAccesses>
         <apexClass>AA_TimeBlock</apexClass>
         <enabled>false</enabled>
     </classAccesses>

@@ -6,7 +6,7 @@
     <inlineHelpText>This phone number will be used for &quot;write a text message to us for more info&quot;</inlineHelpText>
     <label>Phone Number</label>
     <required>false</required>
-    <trackHistory>false</trackHistory>
+    <trackHistory>true</trackHistory>
     <trackTrending>false</trackTrending>
     <type>Phone</type>
 </CustomField>

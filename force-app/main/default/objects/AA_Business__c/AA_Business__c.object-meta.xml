@@ -159,7 +159,7 @@
     <label>AA Business</label>
     <nameField>
         <label>AA Business Name</label>
-        <trackHistory>false</trackHistory>
+        <trackHistory>true</trackHistory>
         <type>Text</type>
     </nameField>
     <pluralLabel>AA Business</pluralLabel>

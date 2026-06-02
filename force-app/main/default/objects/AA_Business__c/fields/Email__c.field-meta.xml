@@ -6,7 +6,7 @@
     <inlineHelpText>Email to send messages from the app. Typically this email is the salon&apos;s owner</inlineHelpText>
     <label>Email</label>
     <required>false</required>
-    <trackHistory>false</trackHistory>
+    <trackHistory>true</trackHistory>
     <trackTrending>false</trackTrending>
     <type>Email</type>
     <unique>false</unique>

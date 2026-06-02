@@ -6,7 +6,7 @@
     <inlineHelpText>It can be a url or a base64, example: data:image/png;base64,iVBORw0KGgoAA...</inlineHelpText>
     <label>Favicon URL</label>
     <length>4000</length>
-    <trackHistory>false</trackHistory>
+    <trackHistory>true</trackHistory>
     <trackTrending>false</trackTrending>
     <type>LongTextArea</type>
     <visibleLines>5</visibleLines>

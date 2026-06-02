@@ -3,6 +3,7 @@
     <fullName>All</fullName>
     <columns>NAME</columns>
     <columns>AA_Service_Category__c</columns>
+    <columns>Display_Name__c</columns>
     <columns>Business_Branch__c</columns>
     <columns>Duration_Minutes__c</columns>
     <columns>Price__c</columns>
