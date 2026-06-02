@@ -89,28 +89,8 @@
                     <name>uiBehavior</name>
                     <value>required</value>
                 </fieldInstanceProperties>
-                <fieldItem>Record.Price__c</fieldItem>
-                <identifier>RecordPrice_cField</identifier>
-            </fieldInstance>
-        </itemInstances>
-        <itemInstances>
-            <fieldInstance>
-                <fieldInstanceProperties>
-                    <name>uiBehavior</name>
-                    <value>none</value>
-                </fieldInstanceProperties>
-                <fieldItem>Record.Duration_Minutes__c</fieldItem>
-                <identifier>RecordDuration_Minutes_cField</identifier>
-            </fieldInstance>
-        </itemInstances>
-        <itemInstances>
-            <fieldInstance>
-                <fieldInstanceProperties>
-                    <name>uiBehavior</name>
-                    <value>readonly</value>
-                </fieldInstanceProperties>
-                <fieldItem>Record.Count_Appointments_Done__c</fieldItem>
-                <identifier>RecordCount_Appointments_Done_cField</identifier>
+                <fieldItem>Record.Day_Of_Week__c</fieldItem>
+                <identifier>RecordDay_Of_Week_cField</identifier>
             </fieldInstance>
         </itemInstances>
         <itemInstances>
@@ -119,8 +99,8 @@
                     <name>uiBehavior</name>
                     <value>required</value>
                 </fieldInstanceProperties>
-                <fieldItem>Record.AA_Service_Category__c</fieldItem>
-                <identifier>RecordAA_Service_Category_cField</identifier>
+                <fieldItem>Record.Open_Time__c</fieldItem>
+                <identifier>RecordOpen_Time_cField</identifier>
             </fieldInstance>
         </itemInstances>
         <itemInstances>
@@ -129,8 +109,8 @@
                     <name>uiBehavior</name>
                     <value>required</value>
                 </fieldInstanceProperties>
-                <fieldItem>Record.Display_Name__c</fieldItem>
-                <identifier>RecordDisplay_Name_cField</identifier>
+                <fieldItem>Record.Close_Time__c</fieldItem>
+                <identifier>RecordClose_Time_cField</identifier>
             </fieldInstance>
         </itemInstances>
         <itemInstances>
@@ -139,15 +119,11 @@
                     <name>uiBehavior</name>
                     <value>none</value>
                 </fieldInstanceProperties>
-                <fieldItem>Record.Description__c</fieldItem>
-                <identifier>RecordDescription_cField</identifier>
+                <fieldItem>Record.OwnerId</fieldItem>
+                <identifier>RecordOwnerIdField</identifier>
             </fieldInstance>
         </itemInstances>
-        <name>Facet-5043fc47-94de-4c07-b798-796d9bad6b75</name>
-        <type>Facet</type>
-    </flexiPageRegions>
-    <flexiPageRegions>
-        <name>Facet-8b461941-2a2c-4cda-bbe0-fb79fc21543f</name>
+        <name>Facet-f365020b-14bf-4b4a-bf55-a9a823d48658</name>
         <type>Facet</type>
     </flexiPageRegions>
     <flexiPageRegions>
@@ -155,23 +131,13 @@
             <componentInstance>
                 <componentInstanceProperties>
                     <name>body</name>
-                    <value>Facet-5043fc47-94de-4c07-b798-796d9bad6b75</value>
+                    <value>Facet-f365020b-14bf-4b4a-bf55-a9a823d48658</value>
                 </componentInstanceProperties>
                 <componentName>flexipage:column</componentName>
                 <identifier>flexipage_column</identifier>
             </componentInstance>
         </itemInstances>
-        <itemInstances>
-            <componentInstance>
-                <componentInstanceProperties>
-                    <name>body</name>
-                    <value>Facet-8b461941-2a2c-4cda-bbe0-fb79fc21543f</value>
-                </componentInstanceProperties>
-                <componentName>flexipage:column</componentName>
-                <identifier>flexipage_column2</identifier>
-            </componentInstance>
-        </itemInstances>
-        <name>Facet-f39b8051-de4b-4d70-b7b4-733c116a4dce</name>
+        <name>Facet-84c749e5-983c-4a1a-a392-6aea2e10f8a5</name>
         <type>Facet</type>
     </flexiPageRegions>
     <flexiPageRegions>
@@ -185,7 +151,7 @@
                 <identifier>RecordCreatedByIdField</identifier>
             </fieldInstance>
         </itemInstances>
-        <name>Facet-3de21ded-c7de-4572-b714-f2cf7abe3600</name>
+        <name>Facet-d6e3b442-e0a3-4e08-8ed3-799a6a49c10f</name>
         <type>Facet</type>
     </flexiPageRegions>
     <flexiPageRegions>
@@ -199,7 +165,7 @@
                 <identifier>RecordLastModifiedByIdField</identifier>
             </fieldInstance>
         </itemInstances>
-        <name>Facet-ad6a4ace-d068-4b6d-ad92-d003572e18e8</name>
+        <name>Facet-9cc9451b-4bf9-41b0-8f24-7c9c8507d012</name>
         <type>Facet</type>
     </flexiPageRegions>
     <flexiPageRegions>
@@ -207,7 +173,7 @@
             <componentInstance>
                 <componentInstanceProperties>
                     <name>body</name>
-                    <value>Facet-3de21ded-c7de-4572-b714-f2cf7abe3600</value>
+                    <value>Facet-d6e3b442-e0a3-4e08-8ed3-799a6a49c10f</value>
                 </componentInstanceProperties>
                 <componentName>flexipage:column</componentName>
                 <identifier>flexipage_column3</identifier>
@@ -217,13 +183,13 @@
             <componentInstance>
                 <componentInstanceProperties>
                     <name>body</name>
-                    <value>Facet-ad6a4ace-d068-4b6d-ad92-d003572e18e8</value>
+                    <value>Facet-9cc9451b-4bf9-41b0-8f24-7c9c8507d012</value>
                 </componentInstanceProperties>
                 <componentName>flexipage:column</componentName>
                 <identifier>flexipage_column4</identifier>
             </componentInstance>
         </itemInstances>
-        <name>Facet-d4885fdd-6a70-4439-b1ce-b0fbb2216157</name>
+        <name>Facet-65e80db0-e0f8-472f-8674-dd1b5f1cdd2e</name>
         <type>Facet</type>
     </flexiPageRegions>
     <flexiPageRegions>
@@ -231,7 +197,7 @@
             <componentInstance>
                 <componentInstanceProperties>
                     <name>columns</name>
-                    <value>Facet-f39b8051-de4b-4d70-b7b4-733c116a4dce</value>
+                    <value>Facet-84c749e5-983c-4a1a-a392-6aea2e10f8a5</value>
                 </componentInstanceProperties>
                 <componentInstanceProperties>
                     <name>horizontalAlignment</name>
@@ -249,7 +215,7 @@
             <componentInstance>
                 <componentInstanceProperties>
                     <name>columns</name>
-                    <value>Facet-d4885fdd-6a70-4439-b1ce-b0fbb2216157</value>
+                    <value>Facet-65e80db0-e0f8-472f-8674-dd1b5f1cdd2e</value>
                 </componentInstanceProperties>
                 <componentInstanceProperties>
                     <name>horizontalAlignment</name>
@@ -324,9 +290,9 @@
         <name>sidebar</name>
         <type>Region</type>
     </flexiPageRegions>
-    <masterLabel>AA Service Record Page</masterLabel>
+    <masterLabel>AA Branch Working Hour Record Page</masterLabel>
     <parentFlexiPage>flexipage__default_rec_L</parentFlexiPage>
-    <sobjectType>AA_Service__c</sobjectType>
+    <sobjectType>AA_Branch_Working_Hour__c</sobjectType>
     <template>
         <name>flexipage:recordHomeTemplateDesktop</name>
     </template>

@@ -14,6 +14,22 @@
         <enabled>true</enabled>
     </classAccesses>
     <classAccesses>
+        <apexClass>AA_BranchWorkingHourTriggerHandler</apexClass>
+        <enabled>false</enabled>
+    </classAccesses>
+    <classAccesses>
+        <apexClass>AA_CustomerTriggerHandler</apexClass>
+        <enabled>false</enabled>
+    </classAccesses>
+    <classAccesses>
+        <apexClass>AA_EmployeeTriggerHandler</apexClass>
+        <enabled>false</enabled>
+    </classAccesses>
+    <classAccesses>
+        <apexClass>AA_EmployeeWorkingHourTriggerHandler</apexClass>
+        <enabled>false</enabled>
+    </classAccesses>
+    <classAccesses>
         <apexClass>AA_Logger</apexClass>
         <enabled>false</enabled>
     </classAccesses>
@@ -31,6 +47,10 @@
     </classAccesses>
     <classAccesses>
         <apexClass>AA_Scripts</apexClass>
+        <enabled>false</enabled>
+    </classAccesses>
+    <classAccesses>
+        <apexClass>AA_ServiceCategoryTriggerHandler</apexClass>
         <enabled>false</enabled>
     </classAccesses>
     <classAccesses>
@@ -390,6 +410,11 @@
     <fieldPermissions>
         <editable>false</editable>
         <field>AA_Service__c.Count_Appointments_Done__c</field>
+        <readable>false</readable>
+    </fieldPermissions>
+    <fieldPermissions>
+        <editable>false</editable>
+        <field>AA_Service__c.Description__c</field>
         <readable>false</readable>
     </fieldPermissions>
     <fieldPermissions>
