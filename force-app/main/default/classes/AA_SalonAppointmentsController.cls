@@ -332,7 +332,7 @@ public with sharing class AA_SalonAppointmentsController {
         Id businessId = getBusinessId();
         return [SELECT Id, Name, First_Name__c, Last_Name__c, Is_Admin__c, Business_Branch__r.Name 
                 FROM AA_Employee__c 
-                WHERE Business_Id__c = :businessId 
+                WHERE Business_Branch__r.Business__c = :businessId
                 ORDER BY First_Name__c ASC];
     }
 
