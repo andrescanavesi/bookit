@@ -3,18 +3,14 @@
     <flexiPageRegions>
         <itemInstances>
             <componentInstance>
-                <componentInstanceProperties>
-                    <name>businessId</name>
-                    <value>a02gL00000Ix6AHQAZ</value>
-                </componentInstanceProperties>
-                <componentName>aA_PublicAgenda</componentName>
-                <identifier>c_aA_PublicAgenda</identifier>
+                <componentName>aASalonCustomersTable</componentName>
+                <identifier>c_aASalonCustomersTable</identifier>
             </componentInstance>
         </itemInstances>
         <name>main</name>
         <type>Region</type>
     </flexiPageRegions>
-    <masterLabel>AA Public Agenda Test</masterLabel>
+    <masterLabel>AA_SalonCustomersTable</masterLabel>
     <template>
         <name>flexipage:defaultAppHomeTemplate</name>
     </template>

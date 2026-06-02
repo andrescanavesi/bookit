@@ -5,7 +5,7 @@
             <componentInstance>
                 <componentInstanceProperties>
                     <name>businessId</name>
-                    <value>a02gL00000Ix6AHQAZ</value>
+                    <value>a02gL00000Ix6ILQAZ</value>
                 </componentInstanceProperties>
                 <componentName>aA_PublicAgenda</componentName>
                 <identifier>c_aA_PublicAgenda</identifier>
@@ -14,7 +14,7 @@
         <name>main</name>
         <type>Region</type>
     </flexiPageRegions>
-    <masterLabel>AA Public Agenda Test</masterLabel>
+    <masterLabel>AA_Agenda_Silvina</masterLabel>
     <template>
         <name>flexipage:defaultAppHomeTemplate</name>
     </template>

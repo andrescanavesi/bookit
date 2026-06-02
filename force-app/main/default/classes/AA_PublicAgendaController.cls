@@ -1,30 +1,25 @@
 public without sharing class AA_PublicAgendaController {
     
-    private static Id BUSINESS_ID = 'a02gL00000Ix6AHQAZ'; 
-    private static Id BRANCH_ID = 'a03gL00000YGsWJQA1'; 
-    private static String BUSSINESS_PHONE_ID = '1036897699507386';
-    
     @AuraEnabled(cacheable=false)
-    public static AA_Customer__c getOrCreateCustomer(String phoneNumber){
+    public static AA_Customer__c getOrCreateCustomer(String phoneNumber, Id businessId){
         AA_Logger logger = new AA_Logger(true);
-        logger.info('getOrCreateCustomer, phoneNumber '+phoneNumber);
-        // TODO for now we assume we have only one business
-        AA_Business__c  business = getBusiness();
-        //String fullName = 'guest'; 
-        
+        logger.info('getOrCreateCustomer, phoneNumber '+phoneNumber+' businessId: '+businessId);
         List<AA_Customer__c> customers = [SELECT Id, Name, Email__c, First_Name__c, Last_Name__c, Phone_Number__c, Business__r.Business_Phone_Id__c
                                           FROM AA_Customer__c 
-                                          WHERE Phone_Number__c = :phoneNumber LIMIT 1];
+                                          WHERE Phone_Number__c = :phoneNumber 
+                                          AND Business__c = :businessId
+                                          LIMIT 1];
         if(!customers.isEmpty()){
-            logger.info('getOrCreateCustomer, customer found by found number '+phoneNumber);
+            logger.info('getOrCreateCustomer, customer found by phone number '+phoneNumber+' businessId: '+businessId);
             return customers.get(0);
         }else{
-            logger.info('getOrCreateCustomer, a new customer will be created with the phone '+phoneNumber);
+            logger.info('getOrCreateCustomer, a new customer will be created with the phone number '+phoneNumber+' businessId: '+businessId);
             AA_Customer__c customer = new AA_Customer__c();
             customer.Name  = phoneNumber;
             customer.Phone_Number__c = phoneNumber;
-            customer.Business__c = business.Id;
+            customer.Business__c = businessId;
             insert customer;
+            logger.info('customer created, customerId '+customer.Id+ ' phoneNumber: '+phoneNumber+' businessId: '+businessId);
             return customer;
         }
     }
@@ -55,25 +50,18 @@ public without sharing class AA_PublicAgendaController {
         
     }
     
-    private static AA_Business__c getBusiness(){
-        
-        List<AA_Business__c> businesses = [SELECT Id FROM AA_Business__c 
-                                           WHERE Business_Phone_Id__c = :BUSSINESS_PHONE_ID
-                                           LIMIT 1];
-        if(businesses.isEmpty()){
-            throw new HandledException('business not found by phone number id '+BUSSINESS_PHONE_ID);
-        }
-        return businesses.get(0);
-    }
+    /*private static AA_Business__c getBusiness(Id businessId){        
+        return [SELECT Id, Name FROM AA_Business__c  WHERE Id = :businessId LIMIT 1];
+    }*/
     
     @AuraEnabled(cacheable=true)
-    public static AA_Business__c getBusinessInfo() {
+    public static AA_Business__c getBusinessInfo(Id businessId) {
         AA_Logger logger = new AA_Logger(true);
         logger.info('getBusinessInfo called');
         List<AA_Business__c> businesses = [
             SELECT Id, Name, Address__c, Logo_URL__c, Phone_Number__c 
             FROM AA_Business__c 
-            WHERE Id = :BUSINESS_ID
+            WHERE Id = :businessId
             LIMIT 1
         ];
         if(businesses.isEmpty()){
@@ -84,7 +72,7 @@ public without sharing class AA_PublicAgendaController {
     
     private static AA_Business_Branch__c getBusinessBranch(Id businessId){
         List<AA_Business_Branch__c> branches = [SELECT Id, Name, Address__c 
-        FROM AA_Business_Branch__c 
+                                                FROM AA_Business_Branch__c 
                                                 WHERE Business__c = :businessId
                                                 ORDER BY CreatedDate DESC
                                                 LIMIT 1];
@@ -94,14 +82,15 @@ public without sharing class AA_PublicAgendaController {
     }
     
     @AuraEnabled(cacheable=true)
-    public static List<AA_Service_Category__c> getCategories() {
+    public static List<AA_Service_Category__c> getCategories(Id businessId) {
         AA_Logger logger = new AA_Logger(true);
-        logger.info('getCategories, branch id '+BRANCH_ID);
+        AA_Business_Branch__c branch = getBusinessBranch(businessId); 
+        Id BRANCH_ID = branch.Id;
+        logger.info('getCategories, branch id '+branch.Id);
         List<AA_Service_Category__c> categories = [
             SELECT Id, Name, Description_Short__c 
             FROM AA_Service_Category__c 
-            WHERE Business_Branch__c = :BRANCH_ID
-            // Sugerencia: podrías agregar un campo 'Order__c' para controlar la posición
+            WHERE Business_Branch__c = :branch.Id
             ORDER BY Name ASC 
             LIMIT 100
         ];
@@ -111,12 +100,13 @@ public without sharing class AA_PublicAgendaController {
     }
     
     @AuraEnabled(cacheable=true)
-    public static List<AA_Service__c> getServices() {
+    public static List<AA_Service__c> getServices(Id businessId) {
         AA_Logger logger = new AA_Logger(true);
-        logger.info('getServices, branch id '+BRANCH_ID);
+        AA_Business_Branch__c branch = getBusinessBranch(businessId); 
+        logger.info('getServices, branch id '+branch.Id);
         List<AA_Service__c>  services =  [SELECT Id, Name, Duration_Minutes__c, Price__c, AA_Service_Category__c
                                           FROM AA_Service__c 
-                                          WHERE Business_Branch__c = :BRANCH_ID
+                                          WHERE Business_Branch__c = :branch.Id
                                           LIMIT 100];
         
         logger.info('services: '+JSON.serializePretty(services));
@@ -156,17 +146,17 @@ public without sharing class AA_PublicAgendaController {
     }
 
     @AuraEnabled(cacheable=false)
-    public static List<AA_Appointment__c> getMisTurnos(String celular) {
+    public static List<AA_Appointment__c> getMisTurnos(String celular, Id businessId) {
         // Limpiamos el número por si el usuario ingresó espacios o guiones
         String cleanPhone = celular != null ? celular.replaceAll('[^0-9]', '') : '';
-        
+        AA_Business_Branch__c branch = getBusinessBranch(businessId); 
         return [
            SELECT Id, Name, Employee__r.Name, Start_Date_Time__c, End_Date_Time__c, Duration_Minutes__c, Service__r.Name, 
            Status__c, Customer__r.Name, Amount__c, Customer_Confirmation_Date__c, Internal_Comments__c
            FROM AA_Appointment__c 
            WHERE Customer__r.Phone_Number__c = :celular 
            AND Start_Date_Time__c >= TODAY  
-           AND Service__r.Business_Branch__c = :BRANCH_ID
+           AND Service__r.Business_Branch__c = :branch.Id
            AND Status__c = 'Pending'
            ORDER BY Start_Date_Time__c ASC
             LIMIT 10

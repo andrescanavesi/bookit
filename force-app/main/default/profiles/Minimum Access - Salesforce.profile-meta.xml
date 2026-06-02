@@ -295,6 +295,16 @@
     </fieldPermissions>
     <fieldPermissions>
         <editable>true</editable>
+        <field>AA_Business__c.Cancellation_Policy__c</field>
+        <readable>true</readable>
+    </fieldPermissions>
+    <fieldPermissions>
+        <editable>true</editable>
+        <field>AA_Business__c.Email__c</field>
+        <readable>true</readable>
+    </fieldPermissions>
+    <fieldPermissions>
+        <editable>true</editable>
         <field>AA_Business__c.Favicon_URL__c</field>
         <readable>true</readable>
     </fieldPermissions>
@@ -306,6 +316,11 @@
     <fieldPermissions>
         <editable>true</editable>
         <field>AA_Business__c.Manager_Contact__c</field>
+        <readable>true</readable>
+    </fieldPermissions>
+    <fieldPermissions>
+        <editable>true</editable>
+        <field>AA_Business__c.Phone_Number__c</field>
         <readable>true</readable>
     </fieldPermissions>
     <fieldPermissions>
@@ -389,6 +404,14 @@
         <readable>true</readable>
     </fieldPermissions>
     <tabVisibilities>
+        <tab>AA_Agenda_Silvina</tab>
+        <visibility>DefaultOn</visibility>
+    </tabVisibilities>
+    <tabVisibilities>
+        <tab>AA_Agenda_Zentidos</tab>
+        <visibility>DefaultOn</visibility>
+    </tabVisibilities>
+    <tabVisibilities>
         <tab>AA_Appointment__c</tab>
         <visibility>DefaultOn</visibility>
     </tabVisibilities>
@@ -434,6 +457,14 @@
     </tabVisibilities>
     <tabVisibilities>
         <tab>AA_Public_Agenda_Test</tab>
+        <visibility>DefaultOn</visibility>
+    </tabVisibilities>
+    <tabVisibilities>
+        <tab>AA_SalonCustomersTable</tab>
+        <visibility>DefaultOn</visibility>
+    </tabVisibilities>
+    <tabVisibilities>
+        <tab>AA_SalonEmployeesTable</tab>
         <visibility>DefaultOn</visibility>
     </tabVisibilities>
     <tabVisibilities>

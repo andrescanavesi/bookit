@@ -14,7 +14,7 @@
         <name>main</name>
         <type>Region</type>
     </flexiPageRegions>
-    <masterLabel>AA Public Agenda Test</masterLabel>
+    <masterLabel>AA_Agenda_Zentidos</masterLabel>
     <template>
         <name>flexipage:defaultAppHomeTemplate</name>
     </template>

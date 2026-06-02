@@ -184,9 +184,9 @@ export default class AAPublicAgenda extends LightningElement {
     connectedCallback() {
 
         // TODO this is for testing. Remove it for prod
-        if(!this.businessId){
-            this.businessId = 'a02gL00000Ix6AHQAZ';
-        }
+        //if(!this.businessId){
+        //    this.businessId = 'a02gL00000Ix6AHQAZ';
+        //}
         if(this.businessId) {
             this.loadData();
         } else{
@@ -199,9 +199,9 @@ export default class AAPublicAgenda extends LightningElement {
         try {
             // Cargamos categorías, servicios e info del negocio en paralelo para ganar velocidad
             const [categoriesDB, servicesDB, businessDB] = await Promise.all([
-                getCategories(),
-                getServices(),
-                getBusinessInfo()
+                getCategories({ businessId: this.businessId }),
+                getServices({ businessId: this.businessId }),
+                getBusinessInfo({ businessId: this.businessId })
             ]);
 
             if (businessDB) {
@@ -361,7 +361,7 @@ export default class AAPublicAgenda extends LightningElement {
         this.isLoadingTurnos = true;
 
         try {
-            const turnosDB = await getMisTurnos({ celular: this.misTurnosLogin.celular });
+            const turnosDB = await getMisTurnos({ celular: this.misTurnosLogin.celular,businessId:this.businessId });
 
             const DOW = ['dom', 'lun', 'mar', 'mié', 'jue', 'vie', 'sáb'];
             const MESES = ['enero', 'febrero', 'marzo', 'abril', 'mayo', 'junio', 'julio', 'agosto', 'setiembre', 'octubre', 'noviembre', 'diciembre'];
@@ -534,7 +534,7 @@ export default class AAPublicAgenda extends LightningElement {
 
         try {
             // 2. Llamada al backend (Apex)
-            const clienteExistente = await getOrCreateCustomer({ phoneNumber: this.persona.celular });
+            const clienteExistente = await getOrCreateCustomer({ phoneNumber: this.persona.celular, businessId: this.businessId });
             
             if (clienteExistente.Email__c) {
                 console.log('Cliente encontrado en SF: '+ clienteExistente.Id);
