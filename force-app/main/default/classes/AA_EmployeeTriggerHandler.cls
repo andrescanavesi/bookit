@@ -50,4 +50,46 @@ public with sharing class AA_EmployeeTriggerHandler {
             }
         }
     }
+    
+    public static void handleAfterInsert(List<AA_Employee__c> newRecords) {
+        List<AA_Employee_Working_Hour__c> workingHoursToInsert = new List<AA_Employee_Working_Hour__c>();
+        List<String> daysOfWeek = new List<String>{'Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'};
+        
+        Time startHour = Time.newInstance(9, 0, 0, 0);
+        Time endHour = Time.newInstance(18, 0, 0, 0);
+        Time breakStart = Time.newInstance(12, 0, 0, 0);
+        Time breakEnd = Time.newInstance(13, 0, 0, 0);
+        
+        for (AA_Employee__c employee : newRecords) {
+            for (String day : daysOfWeek) {
+                // Generate a random 8 length string for Name
+                String randomName = generateRandomString(8);
+                
+                AA_Employee_Working_Hour__c workingHour = new AA_Employee_Working_Hour__c(
+                    Name = randomName,
+                    Employee__c = employee.Id,
+                    Day_Of_Week__c = day,
+                    Start_Hour__c = startHour,
+                    End_Hour__c = endHour,
+                    Start_Default_Break_Hour__c = breakStart,
+                    End_Default_Break_Hour__c = breakEnd
+                );
+                workingHoursToInsert.add(workingHour);
+            }
+        }
+        
+        if (!workingHoursToInsert.isEmpty()) {
+            insert workingHoursToInsert;
+        }
+    }
+    
+    private static String generateRandomString(Integer len) {
+        final String chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789abcdefghijklmnopqrstuvwxyz';
+        String randStr = '';
+        while (randStr.length() < len) {
+            Integer idx = Math.mod(Math.abs(Crypto.getRandomInteger()), chars.length());
+            randStr += chars.substring(idx, idx+1);
+        }
+        return randStr; 
+    }
 }
