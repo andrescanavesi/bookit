@@ -88,7 +88,7 @@ public without sharing class AA_PublicAgendaController {
         Id BRANCH_ID = branch.Id;
         logger.info('getCategories, branch id '+branch.Id);
         List<AA_Service_Category__c> categories = [
-            SELECT Id, Name, Description_Short__c 
+            SELECT Id, Name, Display_Name__c, Description_Short__c 
             FROM AA_Service_Category__c 
             WHERE Business_Branch__c = :branch.Id
             ORDER BY Name ASC 
@@ -104,7 +104,7 @@ public without sharing class AA_PublicAgendaController {
         AA_Logger logger = new AA_Logger(true);
         AA_Business_Branch__c branch = getBusinessBranch(businessId); 
         logger.info('getServices, branch id '+branch.Id);
-        List<AA_Service__c>  services =  [SELECT Id, Name, Duration_Minutes__c, Price__c, AA_Service_Category__c
+        List<AA_Service__c>  services =  [SELECT Id, Name, Display_Name__c, Duration_Minutes__c, Price__c, AA_Service_Category__c
                                           FROM AA_Service__c 
                                           WHERE Business_Branch__c = :branch.Id
                                           LIMIT 100];
@@ -151,7 +151,7 @@ public without sharing class AA_PublicAgendaController {
         String cleanPhone = celular != null ? celular.replaceAll('[^0-9]', '') : '';
         AA_Business_Branch__c branch = getBusinessBranch(businessId); 
         return [
-           SELECT Id, Name, Employee__r.Name, Start_Date_Time__c, End_Date_Time__c, Duration_Minutes__c, Service__r.Name, 
+           SELECT Id, Name, Employee__r.Name, Employee__r.First_Name__c, Employee__r.Last_Name__c, Start_Date_Time__c, End_Date_Time__c, Duration_Minutes__c, Service__r.Name, Service__r.Display_Name__c, 
            Status__c, Customer__r.Name, Amount__c, Customer_Confirmation_Date__c, Internal_Comments__c
            FROM AA_Appointment__c 
            WHERE Customer__r.Phone_Number__c = :celular 

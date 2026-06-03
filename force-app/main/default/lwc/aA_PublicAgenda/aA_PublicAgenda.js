@@ -111,6 +111,12 @@ export default class AAPublicAgenda extends LightningElement {
         return this.categories;
     }
     
+    get titlePaso4() {
+        if (!this.reserva.grupoSel) return '¿Qué servicio querés reservar?';
+        const cat = this.categories.find(c => c.id === this.reserva.grupoSel);
+        return cat ? `¿Qué servicio querés reservar de ${cat.label}?` : '¿Qué servicio querés reservar?';
+    }
+    
     get serviciosFiltrados() {
         console.info('serviciosFiltrados, grupo seleccionado '+this.reserva.grupoSel);
         //console.info(JSON.stringify( this.services, null, 2));
@@ -230,7 +236,7 @@ export default class AAPublicAgenda extends LightningElement {
                 
                 return {
                     id: cat.Id,
-                    label: cat.Name,
+                    label: cat.Display_Name__c ? cat.Display_Name__c : cat.Name,
                     sub: cat.Description_Short__c,
                     cssClass: esCombinado ? 'card card--accent between-rows' : 'card between-rows'
                 };
@@ -239,7 +245,7 @@ export default class AAPublicAgenda extends LightningElement {
             // Mapeamos servicios (asegúrate de que Category__c ahora traiga el Id del Lookup)
             this.services = servicesDB.map(s => ({
                 Id: s.Id,
-                Nombre_Visible__c: s.Name,
+                Nombre_Visible__c: s.Display_Name__c ? s.Display_Name__c : s.Name,
                 Duracion_Base_Min__c: s.Duration_Minutes__c,
                 Precio__c: s.Price__c,
                 Grupo_Servicio__c: s.AA_Service_Category__c, // Ahora es el ID de la categoría
@@ -383,8 +389,8 @@ export default class AAPublicAgenda extends LightningElement {
                     fechaStr: `${DOW[dt.getDay()]} ${dt.getDate()} de ${MESES[dt.getMonth()]}`,
                     // Formato HH:mm
                     horaStr: dt.toLocaleTimeString('es-UY', { hour: '2-digit', minute: '2-digit' }),
-                    servicio: t.Service__r ? t.Service__r.Name : 'Servicio',
-                    profesional: t.Employee__r ? t.Employee__r.Name : 'El equipo',
+                    servicio: t.Service__r ? (t.Service__r.Display_Name__c ? t.Service__r.Display_Name__c : t.Service__r.Name) : 'Servicio',
+                    profesional: t.Employee__r ? ((t.Employee__r.First_Name__c ? t.Employee__r.First_Name__c + ' ' : '') + t.Employee__r.Last_Name__c) : 'El equipo',
                     status: t.Status__c,
                     startDateTimeObj: dt,
                     confirmText: isConfirmado ? 'Asistencia confirmada' : 'Confirmar asistencia',

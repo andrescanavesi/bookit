@@ -13,14 +13,14 @@ public without sharing class AA_AppointmentService {
         List<AA_AvailableSlot> finalAvailableSlots = new List<AA_AvailableSlot>();
         
         // 1. Get Service Duration
-        AA_Service__c service = [SELECT Id, Name, Duration_Minutes__c, Business_Branch__c, Business_Branch__r.Name 
+        AA_Service__c service = [SELECT Id, Name, Display_Name__c, Duration_Minutes__c, Business_Branch__c, Business_Branch__r.Name
                                  FROM AA_Service__c WHERE Id = :serviceId LIMIT 1];
         Integer durationMinutes = (Integer)service.Duration_Minutes__c;
         logger.info('Service name: '+service.Name+'. Duration in minutes: '+durationMinutes);
         
         // 2. Find all Employees who provide this Service
         List<AA_Employee_Service__c> empServices = [
-            SELECT Employee__c, Employee__r.Name 
+            SELECT Employee__c, Employee__r.Name, Employee__r.First_Name__c, Employee__r.Last_Name__c 
             FROM AA_Employee_Service__c 
             WHERE Service__c = :serviceId
         ];
@@ -33,7 +33,8 @@ public without sharing class AA_AppointmentService {
         Map<Id, String> employeeNames = new Map<Id, String>();
         for (AA_Employee_Service__c es : empServices) {
             employeeIds.add(es.Employee__c);
-            employeeNames.put(es.Employee__c, es.Employee__r.Name);
+            String fName = es.Employee__r.First_Name__c != null ? es.Employee__r.First_Name__c + ' ' : '';
+            employeeNames.put(es.Employee__c, fName + es.Employee__r.Last_Name__c);
         }
         
         // 3. Setup Time Context
@@ -124,7 +125,7 @@ public without sharing class AA_AppointmentService {
                         currentPointer, 
                         empId, 
                         employeeNames.get(empId),
-                        service.Name,
+                        service.Display_Name__c != null ? service.Display_Name__c : service.Name,
                         service.Id,
                         service.Business_Branch__r.Name,
                         service.Business_Branch__c
@@ -143,19 +144,20 @@ public without sharing class AA_AppointmentService {
         List<AA_AvailableSlot> finalAvailableSlots = new List<AA_AvailableSlot>();
         
         // 1. Get Service & Duration
-        AA_Service__c service = [SELECT Id, Name, Duration_Minutes__c, Business_Branch__c, Business_Branch__r.Name 
+        AA_Service__c service = [SELECT Id, Name, Display_Name__c, Duration_Minutes__c, Business_Branch__c, Business_Branch__r.Name 
                                  FROM AA_Service__c WHERE Id = :serviceId LIMIT 1];
         Integer durationMinutes = (Integer)service.Duration_Minutes__c;
         
         // 2. Find Employees
-        List<AA_Employee_Service__c> empServices = [SELECT Employee__c, Employee__r.Name FROM AA_Employee_Service__c WHERE Service__c = :serviceId];
+        List<AA_Employee_Service__c> empServices = [SELECT Employee__c, Employee__r.Name, Employee__r.First_Name__c, Employee__r.Last_Name__c FROM AA_Employee_Service__c WHERE Service__c = :serviceId];
         if (empServices.isEmpty()) return finalAvailableSlots;
         
         Set<Id> employeeIds = new Set<Id>();
         Map<Id, String> employeeNames = new Map<Id, String>();
         for (AA_Employee_Service__c es : empServices) {
             employeeIds.add(es.Employee__c);
-            employeeNames.put(es.Employee__c, es.Employee__r.Name);
+            String fName = es.Employee__r.First_Name__c != null ? es.Employee__r.First_Name__c + ' ' : '';
+            employeeNames.put(es.Employee__c, fName + es.Employee__r.Last_Name__c);
         }
         
         // 3. Setup Range Context
@@ -243,7 +245,7 @@ public without sharing class AA_AppointmentService {
                     if (isSlotFree) {
                         finalAvailableSlots.add(new AA_AvailableSlot(
                             currentPointer, empId, employeeNames.get(empId),
-                            service.Name, service.Id, service.Business_Branch__r.Name, service.Business_Branch__c
+                            service.Display_Name__c != null ? service.Display_Name__c : service.Name, service.Id, service.Business_Branch__r.Name, service.Business_Branch__c
                         ));
                         currentPointer = potentialSlotEnd; 
                     }

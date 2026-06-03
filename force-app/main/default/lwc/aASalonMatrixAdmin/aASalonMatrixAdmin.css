@@ -545,4 +545,7 @@
     background-color: #FFFFFF;
     color: var(--brand-dark);
     box-shadow: 0 2px 4px rgba(0,0,0,0.05); /* Efecto de relieve suave */
+}/* Fix for the first hour label being hidden under the header */
+tbody tr:first-child .time-text {
+    top: 4px;
 }

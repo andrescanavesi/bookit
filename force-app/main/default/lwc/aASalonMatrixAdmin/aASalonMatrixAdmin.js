@@ -137,7 +137,7 @@ export default class AASalonMatrixAdmin extends LightningElement {
             this.activeEmployees = data.employees.map(emp => {
                 const color = this.employeeColors[colorIndex % this.employeeColors.length];
                 colorIndex++;
-                return { id: emp.Id, name: emp.Name, color: color };
+                return { id: emp.Id, name: ((emp.First_Name__c ? emp.First_Name__c + ' ' : '') + (emp.Last_Name__c ? emp.Last_Name__c : '')).trim() || emp.Name, color: color };
             });
 
             this.activeAppointments = data.appointments.map(appt => {
@@ -641,7 +641,7 @@ export default class AASalonMatrixAdmin extends LightningElement {
         return true;
     }
 
-    handleFreeCellClick(event) {
+    handleBlockedClick(event) {
         const type = event.currentTarget.dataset.type;
         console.info('handleBlockedClick: '+type);
         if (!type) return; // Si es un click fuera de hora, se ignora
