@@ -147,9 +147,9 @@ public class AA_Scripts {
     /**
      * Genera 50 clientes de prueba con nombres femeninos uruguayos, correos .invalid,
      * teléfonos locales y comentarios de salón de manicura.
-     * * Para ejecutar:  AA_Scripts.generateCustomers();
+     * * Para ejecutar:  AA_Scripts.generateCustomers('businessId');
      */
-    public static void generateCustomers() {
+    public static void generateCustomers(Id businessId) {
         System.debug('Iniciando creación masiva de clientas...');
 
         // Listados de datos uruguayos
@@ -181,10 +181,9 @@ public class AA_Scripts {
             'Prefiere uñas cortas y cuadradas para poder tipear cómoda.'
         };
 
-        Id businessId = BUSINESS_ID;
         List<AA_Customer__c> customersToInsert = new List<AA_Customer__c>();
 
-        for (Integer i = 0; i < 50; i++) {
+        for (Integer i = 0; i < 20; i++) {
             // Selecciones aleatorias
             String fName = firstNames[Math.mod(Math.abs(Crypto.getRandomInteger()), firstNames.size())];
             String lName = lastNames[Math.mod(Math.abs(Crypto.getRandomInteger()), lastNames.size())];
@@ -330,6 +329,44 @@ public class AA_Scripts {
         if (!empHours.isEmpty()) {
             update empHours;
             System.debug('Actualizados ' + empHours.size() + ' horarios de empleado.');
+        }
+    }
+    /**
+     * Genera 5 empleadas de prueba con nombres femeninos uruguayos para una sucursal.
+     * * Para ejecutar: AA_Scripts.generateEmployees('Id_de_la_Sucursal');
+     */
+    public static void generateEmployees(Id branchId) {
+        System.debug('Iniciando creación de 5 empleadas...');
+
+        List<String> firstNames = new List<String>{
+            'Lucía', 'María', 'Camila', 'Sofía', 'Valentina', 'Martina', 'Romina', 
+            'Florencia', 'Paula', 'Julieta', 'Micaela', 'Agustina', 'Valeria', 
+            'Daniela', 'Mariana', 'Catalina', 'Emilia', 'Antonella', 'Carolina', 'Victoria'
+        };
+
+        List<String> lastNames = new List<String>{
+            'Rodríguez', 'González', 'Pérez', 'Silva', 'García', 'Fernández', 
+            'Martínez', 'Sosa', 'López', 'Gómez', 'Suárez', 'Díaz', 'Cabrera', 
+            'Alonso', 'Gutiérrez'
+        };
+
+        List<AA_Employee__c> employeesToInsert = new List<AA_Employee__c>();
+
+        for (Integer i = 0; i < 5; i++) {
+            String fName = firstNames[Math.mod(Math.abs(Crypto.getRandomInteger()), firstNames.size())];
+            String lName = lastNames[Math.mod(Math.abs(Crypto.getRandomInteger()), lastNames.size())];
+
+            AA_Employee__c emp = new AA_Employee__c();
+            emp.First_Name__c = fName;
+            emp.Last_Name__c = lName;
+            emp.Business_Branch__c = branchId;
+
+            employeesToInsert.add(emp);
+        }
+
+        if (!employeesToInsert.isEmpty()) {
+            insert employeesToInsert;
+            System.debug('Se insertaron ' + employeesToInsert.size() + ' empleadas con éxito.');
         }
     }
 
