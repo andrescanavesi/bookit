@@ -291,5 +291,46 @@ public class AA_Scripts {
             }
         }
     }
+    /**
+     * Actualiza todos los registros existentes de horarios.
+     * AA_Scripts.updateAllWorkingHours();
+     */
+    public static void updateAllWorkingHours() {
+        System.debug('Actualizando todos los horarios (Sucursal y Empleados)...');
+
+        // Horarios para Sucursal (8 AM a 8 PM)
+        Time branchOpen = Time.newInstance(8, 0, 0, 0);
+        Time branchClose = Time.newInstance(20, 0, 0, 0);
+        
+        List<AA_Branch_Working_Hour__c> branchHours = [SELECT Id FROM AA_Branch_Working_Hour__c];
+        for (AA_Branch_Working_Hour__c bh : branchHours) {
+            bh.Open_Time__c = branchOpen;
+            bh.Close_Time__c = branchClose;
+        }
+        
+        if (!branchHours.isEmpty()) {
+            update branchHours;
+            System.debug('Actualizados ' + branchHours.size() + ' horarios de sucursal.');
+        }
+        
+        // Horarios para Empleados
+        Time empStart = Time.newInstance(8, 0, 0, 0);
+        Time empEnd = Time.newInstance(20, 0, 0, 0);
+        Time breakStart = Time.newInstance(12, 0, 0, 0);
+        Time breakEnd = Time.newInstance(13, 0, 0, 0);
+        
+        List<AA_Employee_Working_Hour__c> empHours = [SELECT Id FROM AA_Employee_Working_Hour__c];
+        for (AA_Employee_Working_Hour__c eh : empHours) {
+            eh.Start_Hour__c = empStart;
+            eh.End_Hour__c = empEnd;
+            eh.Start_Default_Break_Hour__c = breakStart;
+            eh.End_Default_Break_Hour__c = breakEnd;
+        }
+        
+        if (!empHours.isEmpty()) {
+            update empHours;
+            System.debug('Actualizados ' + empHours.size() + ' horarios de empleado.');
+        }
+    }
 
 }
