@@ -1,0 +1,82 @@
+<template>
+    <lightning-card title="Matrix Semanal de Ocupación" icon-name="standard:event">
+        <div slot="actions">
+            <lightning-button-group>
+                <lightning-button icon-name="utility:chevronleft" onclick={handlePrevWeek} title="Semana Anterior"></lightning-button>
+                <lightning-button label="Semana Actual" onclick={handleCurrentWeek}></lightning-button>
+                <lightning-button icon-name="utility:chevronright" onclick={handleNextWeek} title="Semana Siguiente"></lightning-button>
+            </lightning-button-group>
+        </div>
+
+        <div class="slds-p-horizontal_medium">
+            <!-- Selector de Fecha y Sucursal -->
+            <div class="header-controls slds-m-bottom_medium slds-grid slds-grid_align-spread">
+                <div class="slds-col slds-size_1-of-3">
+                    <p class="slds-text-heading_small"><strong>Semana del:</strong> {formattedStartOfWeek} al {formattedEndOfWeek}</p>
+                    <p if:true={matrixData} class="slds-text-color_weak slds-m-top_xx-small">Sucursal: {matrixData.branchName}</p>
+                </div>
+                <div class="slds-col slds-size_1-of-4">
+                    <lightning-input type="date" label="Saltar a Fecha" value={selectedDate} onchange={handleDateChange}></lightning-input>
+                </div>
+            </div>
+
+            <template if:true={isLoading}>
+                <div class="slds-is-relative" style="height: 200px;">
+                    <lightning-spinner alternative-text="Cargando" size="medium"></lightning-spinner>
+                </div>
+            </template>
+
+            <template if:false={isLoading}>
+                <template if:true={matrixData}>
+                    <div class="matrix-container slds-scrollable_x">
+                        <table class="slds-table slds-table_cell-buffer slds-table_bordered slds-table_col-bordered matrix-table">
+                            <thead>
+                                <tr class="slds-line-height_reset">
+                                    <th class="" scope="col" style="width: 80px;">
+                                        <div class="slds-truncate" title="Hora">Hora</div>
+                                    </th>
+                                    <template for:each={columns} for:item="col">
+                                        <th key={col.dateStr} class="slds-text-align_center" scope="col">
+                                            <div class="slds-truncate" title={col.label}>
+                                                <strong>{col.dayName}</strong><br/>
+                                                <small>{col.shortDate}</small>
+                                            </div>
+                                        </th>
+                                    </template>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <template for:each={rows} for:item="row">
+                                    <tr key={row.timeSlot}>
+                                        <td class="time-column slds-theme_shade">
+                                            <strong>{row.timeSlot}</strong>
+                                        </td>
+                                        <template for:each={row.cells} for:item="cell">
+                                            <td key={cell.id} class={cell.cssClass}>
+                                                <template if:true={cell.isActive}>
+                                                    <div class="cell-content slds-text-align_center" title={cell.tooltip}>
+                                                        <span class="capacity-text">{cell.occupied} / {cell.capacity}</span>
+                                                    </div>
+                                                </template>
+                                                <template if:false={cell.isActive}>
+                                                    <div class="cell-content slds-text-align_center slds-text-color_weak" title="Cerrado">
+                                                        <span>-</span>
+                                                    </div>
+                                                </template>
+                                            </td>
+                                        </template>
+                                    </tr>
+                                </template>
+                            </tbody>
+                        </table>
+                    </div>
+                </template>
+                <template if:false={matrixData}>
+                    <div class="slds-p-around_medium slds-text-align_center">
+                        No hay datos de horario para esta sucursal.
+                    </div>
+                </template>
+            </template>
+        </div>
+    </lightning-card>
+</template>

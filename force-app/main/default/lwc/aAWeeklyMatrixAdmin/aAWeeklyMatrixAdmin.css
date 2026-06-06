@@ -1,0 +1,61 @@
+.matrix-container {
+    max-height: 500px;
+    overflow-y: auto;
+    border: 1px solid #d8dde6;
+    border-radius: 0.25rem;
+}
+
+.matrix-table th {
+    position: sticky;
+    top: 0;
+    background-color: #f3f2f2;
+    z-index: 10;
+    box-shadow: 0 1px 0 #d8dde6;
+}
+
+.time-column {
+    background-color: #fafaf9;
+    border-right: 1px solid #d8dde6;
+    width: 80px;
+    text-align: center;
+}
+
+.matrix-cell {
+    padding: 0 !important;
+    vertical-align: middle;
+}
+
+.cell-content {
+    padding: 0.5rem;
+    height: 100%;
+    min-height: 40px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.capacity-text {
+    font-weight: bold;
+    font-size: 0.85rem;
+}
+
+/* Colors for status */
+.status-libre {
+    background-color: #e0f2f1; /* Light Green */
+    color: #00695c;
+}
+
+.status-parcial {
+    background-color: #fff3e0; /* Light Orange */
+    color: #e65100;
+}
+
+.status-lleno {
+    background-color: #ffebee; /* Light Red */
+    color: #c62828;
+}
+
+.status-inactivo {
+    background-color: #f4f6f9; /* Grey */
+    background-image: repeating-linear-gradient(45deg, transparent, transparent 5px, rgba(0,0,0,.03) 5px, rgba(0,0,0,.03) 10px);
+}
