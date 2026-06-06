@@ -152,14 +152,14 @@ public without sharing class AA_PublicAgendaController {
     }
 
     @AuraEnabled(cacheable=false)
-    public static List<AA_Appointment__c> saveComboAppointments(Id customerId, String comboSlotJson) {
+    public static List<AA_Appointment__c> saveComboAppointments(Id customerId, String comboSlotJson, String formaPago) {
         AA_Logger logger = new AA_Logger(true);
         try {
             AA_ComboSlot combo = (AA_ComboSlot) JSON.deserialize(comboSlotJson, AA_ComboSlot.class);
             List<AA_Appointment__c> apps = new List<AA_Appointment__c>();
             
             for (AA_AvailableSlot slot : combo.slots) {
-                AA_Appointment__c app = AA_AppointmentService.saveAppointment(customerId, slot.employeeId, slot.serviceId, slot.slotDayString, slot.slotTimeString);
+                AA_Appointment__c app = AA_AppointmentService.saveAppointment(customerId, slot.employeeId, slot.serviceId, slot.slotDayString, slot.slotTimeString, formaPago);
                 apps.add(app);
             }
             

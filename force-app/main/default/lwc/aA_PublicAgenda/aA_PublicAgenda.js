@@ -404,7 +404,8 @@ export default class AAPublicAgenda extends LightningElement {
             } else {
                 const params = {
                     customerId: this.persona.id,
-                    comboSlotJson: JSON.stringify(this.reserva.slotData)
+                    comboSlotJson: JSON.stringify(this.reserva.slotData),
+                    formaPago: this.reserva.formaPago
                 };
                 console.info('Enviando datos de reserva combo a Salesforce:', JSON.stringify(params));
                 const apps = await saveComboAppointments(params);

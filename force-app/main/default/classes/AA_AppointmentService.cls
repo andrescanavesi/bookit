@@ -258,12 +258,19 @@ public without sharing class AA_AppointmentService {
     }
     
     public static AA_Appointment__c saveAppointment(Id customerId, Id employeeId, Id serviceId, String dayString, String hourString){
+        return saveAppointment(customerId, employeeId, serviceId, dayString, hourString, null);
+    }
+    
+    public static AA_Appointment__c saveAppointment(Id customerId, Id employeeId, Id serviceId, String dayString, String hourString, String formaPago){
         AA_Appointment__c  app = new AA_Appointment__c();
         app.Customer__c = customerId;
         app.Employee__c = employeeId;
         app.Service__c = serviceId;
         app.Start_Date_Time__c = convertToGmtMinus3(dayString, hourString);
         app.Status__c = 'Pending';
+        if (String.isNotBlank(formaPago)) {
+            app.Payment_Method__c = formaPago;
+        }
         insert app;
         return app;
     }
