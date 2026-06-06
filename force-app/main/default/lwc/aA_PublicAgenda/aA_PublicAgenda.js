@@ -7,6 +7,8 @@ import getBusinessInfo from '@salesforce/apex/AA_PublicAgendaController.getBusin
 import updateCustomer from '@salesforce/apex/AA_PublicAgendaController.updateCustomer';
 import getAvailableSlots from '@salesforce/apex/AA_PublicAgendaController.getAvailableSlots';
 import saveAppointment from '@salesforce/apex/AA_PublicAgendaController.saveAppointment';
+import getComboSlots from '@salesforce/apex/AA_PublicAgendaController.getComboSlots';
+import saveComboAppointments from '@salesforce/apex/AA_PublicAgendaController.saveComboAppointments';
 import getMisTurnos from '@salesforce/apex/AA_PublicAgendaController.getMisTurnos';
 import cancelarAppointment from '@salesforce/apex/AA_PublicAgendaController.cancelarAppointment';
 import confirmarAsistencia from '@salesforce/apex/AA_PublicAgendaController.confirmarAsistencia';
@@ -59,6 +61,37 @@ export default class AAPublicAgenda extends LightningElement {
     get isMisTurnos()   { return this.currentScreen === 'misTurnos'; }
     get isPrecios()     { return this.currentScreen === 'precios'; }
     get isConsulta()    { return this.currentScreen === 'consulta'; }
+
+    // --- SELECCION MULTIPLE ---
+    @track selectedServiceIds = [];
+    showMaxServicesWarning = false;
+
+    get groupedServicesUI() {
+        return this.categories.map(cat => {
+            const catServices = this.services
+                .filter(s => s.Grupo_Servicio__c === cat.id)
+                .map(s => {
+                    const isSelected = this.selectedServiceIds.includes(s.Id);
+                    return {
+                        ...s,
+                        cssClass: isSelected ? 'card card--service card--service-selected' : 'card card--service'
+                    };
+                });
+            return {
+                ...cat,
+                services: catServices,
+                hasServices: catServices.length > 0
+            };
+        }).filter(cat => cat.hasServices);
+    }
+
+    get hasSelectedServices() {
+        return this.selectedServiceIds.length > 0;
+    }
+
+    get nextButtonLabel() {
+        return `Siguiente (${this.selectedServiceIds.length} servicio${this.selectedServiceIds.length > 1 ? 's' : ''})`;
+    }
 
     // --- GETTERS: RESERVAS Y CLIENTES ---
     get isReservaPaso1() { return this.reservaStep === 1; }
@@ -165,17 +198,43 @@ export default class AAPublicAgenda extends LightningElement {
         if (this.reserva.retiro && this.reserva.retiro.material === 'duro') totalCalculado += 300;
         
         // Extraemos los datos formateados directamente desde la respuesta de Apex
-        const slot = this.reserva.slotData;
+        const combo = this.reserva.slotData;
+        const firstSlot = combo.slots[0];
+        
+        let serviciosArr = [];
+        let profsArr = [];
+        let profsSet = new Set();
+        let totalMinutos = 0;
+        
+        combo.slots.forEach(s => {
+            serviciosArr.push(s.serviceName);
+            if (!profsSet.has(s.employeeName)) {
+                profsSet.add(s.employeeName);
+                profsArr.push(s.employeeName);
+            }
+            totalMinutos += s.durationMinutes || 0;
+        });
+
+        const servicioNombre = serviciosArr.join(' y ');
+        const servicioLabel = serviciosArr.length > 1 ? 'SERVICIOS' : 'SERVICIO';
+        const profNombre = profsArr.join(' y ');
+        const profLabel = profsArr.length > 1 ? 'PROFESIONALES' : 'PROFESIONAL';
 
         return { 
             cliente: `${this.persona.firstName} ${this.persona.lastName}`.trim(),
-            servicio: srv.Nombre_Visible__c, 
-            profesional: slot.employeeName, // <-- Dinámico desde el backend
-            fecha: `${slot.dayOfTheWeek} ${slot.dayNumber} de ${slot.monthName}`, // Ej: Miércoles 5 de Mayo
-            hora: slot.hour24, 
-            duracion: `${srv.Duracion_Base_Min__c} min`, 
+            servicio: servicioNombre, 
+            servicioLabel: servicioLabel,
+            profesional: profNombre, 
+            profesionalLabel: profLabel,
+            fecha: `${firstSlot.dayOfTheWeek} ${firstSlot.dayNumber} de ${firstSlot.monthName}`, // Ej: Miércoles 5 de Mayo
+            hora: combo.timeFormatted, 
+            duracion: totalMinutos > 0 ? `${totalMinutos} min` : 'Varios min', 
             total: totalCalculado 
         };
+    }
+
+    get hasHorasDisponibles() {
+        return this.horasDisponiblesList && this.horasDisponiblesList.length > 0;
     }
 
     get opcionesPago() {
@@ -260,30 +319,42 @@ export default class AAPublicAgenda extends LightningElement {
     handleInputChange(event) { this.persona[event.target.dataset.id] = event.target.value; }
     handleIndicacionesToggle(event) { this.tieneIndicaciones = (event.target.dataset.valor === 'si'); if (!this.tieneIndicaciones) this.persona.indicaciones = ''; }
     
-    // avanzar paso 4 (service category selected, now the user has to select the service)
-    handleSelectCategoria(event) { 
-        console.info('handleSelectCategoria, avanzar paso 4: '+event.currentTarget.dataset.id);
-        console.info(JSON.stringify(event.currentTarget.dataset, null, 2));
-        this.reserva.grupoSel = event.currentTarget.dataset.id; 
-        //this.serviciosFiltrados();
-        this.reservaStep = 4; 
+    handleToggleService(event) {
+        const srvId = event.currentTarget.dataset.id;
+        this.showMaxServicesWarning = false;
+        
+        if (this.selectedServiceIds.includes(srvId)) {
+            // Deseleccionar
+            this.selectedServiceIds = this.selectedServiceIds.filter(id => id !== srvId);
+        } else {
+            // Seleccionar (máximo 2)
+            if (this.selectedServiceIds.length >= 2) {
+                this.showMaxServicesWarning = true;
+                // Ocultar el mensaje después de 3 segundos
+                setTimeout(() => { this.showMaxServicesWarning = false; }, 3000);
+            } else {
+                this.selectedServiceIds = [...this.selectedServiceIds, srvId];
+            }
         }
+    }
 
-    // Al seleccionar un servicio (Paso 4), guardamos su ID y decidimos a dónde ir (Retiro o Fecha)
-    handleSelectServicio(event) { 
-        console.info('handleSelectServicio: '+event.currentTarget.dataset.id);
-        //console.info(JSON.stringify(event.currentTarget.dataset, null, 2));
-        const srvId = event.currentTarget.dataset.id; 
-        this.reserva.servicioSel = srvId;
-        const srv = this.services.find(s => s.Id === srvId);
-        console.info('handleSelectServicio, srv: '+JSON.stringify(srv, null, 2));
-        if (srv && srv.Requiere_Pregunta_Retiro__c) { 
-            console.info('handleSelectServicio, to step 5');
-            this.reservaStep = 5; 
-        } else { 
-            console.info('handleSelectServicio, to step 6');
-            //this.reservaStep = 6; 
-             this.goToStep6(); 
+    handleContinuarServicios() {
+        if (this.selectedServiceIds.length === 0) return;
+        
+        // Para la compatibilidad de la UI, usaremos el primer servicio en el flow existente
+        const firstSrvId = this.selectedServiceIds[0];
+        this.reserva.servicioSel = firstSrvId;
+        
+        // Verificar si algún servicio seleccionado requiere retiro
+        const requiereRetiro = this.selectedServiceIds.some(id => {
+            const s = this.services.find(srv => srv.Id === id);
+            return s && s.Requiere_Pregunta_Retiro__c;
+        });
+        
+        if (requiereRetiro) {
+            this.reservaStep = 5;
+        } else {
+            this.goToStep6();
         }
     }
 
@@ -314,24 +385,15 @@ export default class AAPublicAgenda extends LightningElement {
         
         try {
             // Tomamos los datos de nuestro estado local
-            const params = {
-                customerId: this.persona.id,
-                employeeId: this.reserva.slotData.employeeId, // Viene del objeto AA_AvailableSlot
-                serviceId: this.reserva.servicioSel,
-                dayString: this.reserva.fechaSel, // Ej: '2026-05-21'
-                hourString: this.reserva.horaSel  // Ej: '09:00'
-            };
-
-            console.info('Enviando datos de reserva a Salesforce:', JSON.stringify(params));
-
-            // Llamada al backend
+            // slotData is now an AA_ComboSlot
             let nuevaReserva;
             if (this.isRecoordinando) {
+                // If it's a rescheduling, we assume it's only 1 service for now and take the first slot's employee
                 nuevaReserva = await recoordinarAppointment({
                     oldAppointmentId: this.oldAppointmentId,
                     customerId: this.persona.id,
-                    employeeId: this.reserva.slotData.employeeId,
-                    serviceId: this.reserva.servicioSel,
+                    employeeId: this.reserva.slotData.slots[0].employeeId,
+                    serviceId: this.reserva.servicioSel, // this might need to be selectedServiceIds[0] if we change the meaning of servicioSel
                     dayString: this.reserva.fechaSel,
                     hourString: this.reserva.horaSel
                 });
@@ -340,7 +402,13 @@ export default class AAPublicAgenda extends LightningElement {
                 this.isRecoordinando = false;
                 this.oldAppointmentId = null;
             } else {
-                nuevaReserva = await saveAppointment(params);
+                const params = {
+                    customerId: this.persona.id,
+                    comboSlotJson: JSON.stringify(this.reserva.slotData)
+                };
+                console.info('Enviando datos de reserva combo a Salesforce:', JSON.stringify(params));
+                const apps = await saveComboAppointments(params);
+                nuevaReserva = apps[0]; // just grab the first one to show success
             }
             
             console.info('¡Reserva creada exitosamente!', nuevaReserva.Id);
@@ -523,11 +591,20 @@ export default class AAPublicAgenda extends LightningElement {
     }
 
     // --- NAVEGACIÓN ---
-    navToWelcome()     { this.currentScreen = 'welcome'; }
+    navToWelcome()     { this.currentScreen = 'welcome'; this.resetReserva(); }
     navToMisTurnos()   { this.currentScreen = 'misTurnos'; this.misTurnosStep = 1; }
     navToPrecios()     { this.currentScreen = 'precios'; }
     navToConsulta()    { this.currentScreen = 'consulta'; }
-    navToReserva()     { this.currentScreen = 'reserva'; this.reservaStep = 1; }
+    navToReserva()     { this.currentScreen = 'reserva'; this.reservaStep = 1; this.resetReserva(); }
+
+    resetReserva() {
+        this.selectedServiceIds = [];
+        this.reserva.servicioSel = null;
+        this.reserva.fechaSel = null;
+        this.reserva.horaSel = null;
+        this.reserva.formaPago = null;
+        this.reserva.slotData = null;
+    }
 
     //avanzarPaso2() { this.reservaStep = 2; }
 
@@ -624,11 +701,14 @@ export default class AAPublicAgenda extends LightningElement {
     }
     
     volverPaso3()  { this.reservaStep = 3; }
-    volverPaso4()  { this.mostrarSubOpcionesRetiro = false; this.reservaStep = 4; }
+    volverPaso4()  { this.mostrarSubOpcionesRetiro = false; this.reservaStep = 3; }
     volverPaso5()  { this.reservaStep = 5; }
     volverPasoDesde6() {
-        const srv = this.services.find(s => s.Id === this.reserva.servicioSel);
-        if (srv && srv.Requiere_Pregunta_Retiro__c) { this.reservaStep = 5; } else { this.reservaStep = 4; }
+        const requiereRetiro = this.selectedServiceIds.some(id => {
+            const s = this.services.find(srv => srv.Id === id);
+            return s && s.Requiere_Pregunta_Retiro__c;
+        });
+        if (requiereRetiro) { this.reservaStep = 5; } else { this.reservaStep = 3; }
     }
     avanzarPaso7() { this.reservaStep = 7; } 
     volverPaso6()  { this.reservaStep = 6; }
@@ -685,23 +765,23 @@ export default class AAPublicAgenda extends LightningElement {
 
         try {
             const params = { 
-                serviceId: this.reserva.servicioSel,  
+                serviceIds: this.selectedServiceIds,  
                 targetDateStr: this.reserva.fechaSel 
             };
-            console.info('getAvailableSlots params: '+JSON.stringify(params));
-            const availableSlots = await getAvailableSlots(params);
+            console.info('getComboSlots params: '+JSON.stringify(params));
+            const comboSlots = await getComboSlots(params);
             
-            // Desduplicación: Si hay dos empleadas libres a la misma hora, mostramos un solo botón.
+            // Desduplicación: Si hay dos combos a la misma hora, mostramos un solo botón.
             const uniqueTimes = new Map();
-            console.info('availableSlots');
-            console.info(JSON.stringify(availableSlots, null, 2));
-            availableSlots.forEach(slot => {
-                // Usamos hour24 (Ej: '09:00') como clave única
-                if (!uniqueTimes.has(slot.hour24)) {
-                    uniqueTimes.set(slot.hour24, { 
-                        val: slot.hour24, 
+            console.info('comboSlots');
+            console.info(JSON.stringify(comboSlots, null, 2));
+            comboSlots.forEach(combo => {
+                // Usamos timeFormatted (Ej: '09:00') como clave única
+                if (!uniqueTimes.has(combo.timeFormatted)) {
+                    uniqueTimes.set(combo.timeFormatted, { 
+                        val: combo.timeFormatted, 
                         cssClass: 'slot-btn',
-                        slotData: slot // Guardamos el objeto AA_AvailableSlot completo
+                        slotData: combo // Guardamos el objeto AA_ComboSlot completo
                     });
                 }
             });

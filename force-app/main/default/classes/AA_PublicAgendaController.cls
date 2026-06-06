@@ -146,6 +146,42 @@ public without sharing class AA_PublicAgendaController {
     }
 
     @AuraEnabled(cacheable=false)
+    public static List<AA_ComboSlot> getComboSlots(List<Id> serviceIds, String targetDateStr) {
+        Date targetDate = Date.valueOf(targetDateStr);
+        return AA_AppointmentService.getComboAvailableSlots(serviceIds, targetDate);
+    }
+
+    @AuraEnabled(cacheable=false)
+    public static List<AA_Appointment__c> saveComboAppointments(Id customerId, String comboSlotJson) {
+        AA_Logger logger = new AA_Logger(true);
+        try {
+            AA_ComboSlot combo = (AA_ComboSlot) JSON.deserialize(comboSlotJson, AA_ComboSlot.class);
+            List<AA_Appointment__c> apps = new List<AA_Appointment__c>();
+            
+            for (AA_AvailableSlot slot : combo.slots) {
+                AA_Appointment__c app = AA_AppointmentService.saveAppointment(customerId, slot.employeeId, slot.serviceId, slot.slotDayString, slot.slotTimeString);
+                apps.add(app);
+            }
+            
+            // Update second app with comment linking to the first
+            if (apps.size() == 2) {
+                AA_Appointment__c app1 = [SELECT Id, Name FROM AA_Appointment__c WHERE Id = :apps[0].Id LIMIT 1];
+                AA_Appointment__c app2 = [SELECT Id, Internal_Comments__c FROM AA_Appointment__c WHERE Id = :apps[1].Id LIMIT 1];
+                
+                String newComment = 'Agendado junto a la cita ' + app1.Name;
+                app2.Internal_Comments__c = (app2.Internal_Comments__c != null ? app2.Internal_Comments__c + '\n' : '') + newComment;
+                update app2;
+                apps[1] = app2;
+            }
+            
+            return apps;
+        } catch (Exception e) {
+            logger.error('error saving combo appointments: '+e.getMessage()+' '+e.getStackTraceString());
+            throw new AuraHandledException('Error al confirmar la reserva: ' + e.getMessage());
+        }
+    }
+
+    @AuraEnabled(cacheable=false)
     public static List<AA_Appointment__c> getMisTurnos(String celular, Id businessId) {
         // Limpiamos el número por si el usuario ingresó espacios o guiones
         String cleanPhone = celular != null ? celular.replaceAll('[^0-9]', '') : '';

@@ -104,7 +104,7 @@
                     <div class="spacer-md"></div>
                     <button class="btn" onclick={avanzarPaso3}>Continuar</button>
                 </template>
-               <!-- PASO 3: Selección de Categoría (Visualmente Paso 2) -->
+               <!-- PASO 3: Menú de Servicios Agrupados -->
                 <template if:true={isReservaPaso3}>
                     <div class="step-head">
                         <div class="step-head__top">
@@ -112,48 +112,42 @@
                             <span class="step-counter">PASO 2 DE 5</span>
                         </div>
                         <h2 class="h2">Hola {primerNombre}</h2>
-                        <p class="subtitle">¿Qué servicio querés reservar?</p>
+                        <p class="subtitle">¿Qué servicios te gustaría realizar hoy?</p>
                     </div>
 
-                    <!-- Iterador de Tarjetas -->
-                    <div>
-                        <template for:each={categorias} for:item="cat">
-                            <button key={cat.id} class={cat.cssClass} data-id={cat.id} onclick={handleSelectCategoria}>
-                                <div class="card__content">
-                                    <div class="card__title">{cat.label}</div>
-                                    <div class="card__eyebrow">{cat.sub}</div>
-                                </div>
-                                <span class="chevron">&rsaquo;</span>
-                            </button>
+                    <!-- Menú Agrupado por Categorías -->
+                    <div style="padding-bottom: 80px;">
+                        <template for:each={groupedServicesUI} for:item="cat">
+                            <div key={cat.id} class="category-group" style="margin-bottom: 32px;">
+                                <h3 style="font-size: 14px; letter-spacing: 1px; text-transform: uppercase; margin-bottom: 12px; border-bottom: 1px solid #ccc; padding-bottom: 4px;">{cat.label}</h3>
+                                <template for:each={cat.services} for:item="srv">
+                                    <button key={srv.Id} class={srv.cssClass} data-id={srv.Id} onclick={handleToggleService}>
+                                        <div class="card__content">
+                                            <div style="display: flex; justify-content: space-between; align-items: center; width: 100%;">
+                                                <div class="card__title card__title--sm" style="flex: 1;">{srv.Nombre_Visible__c}</div>
+                                                <div style="font-weight: 500;">${srv.Precio__c}</div>
+                                            </div>
+                                            <template if:true={srv.Descripcion_Extendida__c}>
+                                                <div class="card__desc" style="font-size: 13px; margin-top: 4px; color: #666;">{srv.Descripcion_Extendida__c}</div>
+                                            </template>
+                                        </div>
+                                    </button>
+                                </template>
+                            </div>
                         </template>
                     </div>
-                </template>
 
-               <!-- PASO 4: Selección de Servicio Específico -->
-                <template if:true={isReservaPaso4}>
-                    <div class="step-head" style="margin-bottom: 24px;">
-                        <h2 class="h2">Hola {primerNombre}</h2>
-                        <p class="subtitle">{titlePaso4}</p>
-                    </div>
-
-                    <button class="change-link" onclick={volverPaso3}>&larr; Cambiar categoría</button>
-
-                    <!-- Iterador de Servicios -->
-                    <div>
-                        <template for:each={serviciosFiltrados} for:item="srv">
-                            <button key={srv.Id} class="card card--service" data-id={srv.Id} onclick={handleSelectServicio}>
-                                <div class="card__content">
-                                    <div class="card__title card__title--sm">{srv.Nombre_Visible__c}</div>
-                                    
-                                    <template if:true={srv.tieneDescripcion}>
-                                        <div class="card__desc">{srv.Descripcion_Extendida__c}</div>
-                                    </template>
-                                    
-                                    <div class="card__duration">{srv.duracionFormateada}</div>
-                                </div>
+                    <!-- Botón Flotante -->
+                    <template if:true={hasSelectedServices}>
+                        <div class="floating-btn-container">
+                            <template if:true={showMaxServicesWarning}>
+                                <div class="floating-warning">Puedes seleccionar hasta 2 servicios.</div>
+                            </template>
+                            <button class="btn" style="box-shadow: 0 4px 12px rgba(0,0,0,0.15);" onclick={handleContinuarServicios}>
+                                {nextButtonLabel}
                             </button>
-                        </template>
-                    </div>
+                        </div>
+                    </template>
                 </template>
 
               <!-- PASO 5: Retiro de Material (Condicional) -->
@@ -227,13 +221,22 @@
                     </div>
 
                     <!-- Grilla de Horas -->
-                    <div class="slot-grid">
-                        <template for:each={horasDisponiblesList} for:item="hora">
-                            <button key={hora.val} class={hora.cssClass} data-hora={hora.val} onclick={handleSelectHora}>
-                                {hora.val}
-                            </button>
+                    <template if:true={hasHorasDisponibles}>
+                        <div class="slot-grid">
+                            <template for:each={horasDisponiblesList} for:item="hora">
+                                <button key={hora.val} class={hora.cssClass} data-hora={hora.val} onclick={handleSelectHora}>
+                                    {hora.val}
+                                </button>
+                            </template>
+                        </div>
+                    </template>
+                    <template if:false={hasHorasDisponibles}>
+                        <template if:false={isLoadingHours}>
+                            <div style="text-align: center; margin-top: 32px; margin-bottom: 32px;">
+                                <p style="color: #8A7B6E; line-height: 1.5; font-size: 16px;">No tenemos disponibilidad para este día, por favor selecciona otro día.</p>
+                            </div>
                         </template>
-                    </div>
+                    </template>
 
                     <div class="spacer-md"></div>
                     <button class="btn" onclick={avanzarPaso7} disabled={isBotonFechaContinuarDeshabilitado}>Continuar</button>
@@ -257,11 +260,11 @@
                             <span class="body-text text-right">{resumenDatos.cliente}</span>
                         </div>
                         <div class="resumen__row">
-                            <span class="label-caps">SERVICIO</span>
+                            <span class="label-caps">{resumenDatos.servicioLabel}</span>
                             <span class="body-text text-right">{resumenDatos.servicio}</span>
                         </div>
                         <div class="resumen__row">
-                            <span class="label-caps">PROFESIONAL</span>
+                            <span class="label-caps">{resumenDatos.profesionalLabel}</span>
                             <span class="body-text text-right">{resumenDatos.profesional}</span>
                         </div>
                         <div class="resumen__row">

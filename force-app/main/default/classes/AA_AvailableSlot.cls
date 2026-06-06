@@ -1,5 +1,7 @@
 public class AA_AvailableSlot {
    @AuraEnabled public Datetime slotTime;        // Almacenado en UTC
+    @AuraEnabled public Datetime endTime;         // Hora de fin calculada
+    @AuraEnabled public Integer durationMinutes;  // Duración del servicio en minutos
     @AuraEnabled public String slotTimeFormatted; // Almacenado como GMT-3 String
     @AuraEnabled public Id employeeId;
     @AuraEnabled public String employeeName;
@@ -20,8 +22,10 @@ public class AA_AvailableSlot {
     
     
     public AA_AvailableSlot(Datetime slotTime, Id employeeId, String employeeName, String serviceName, 
-                            Id serviceId, String branchName, Id branchId) {
+                            Id serviceId, String branchName, Id branchId, Integer durationMinutes) {
         this.slotTime = slotTime;
+        this.durationMinutes = durationMinutes != null ? durationMinutes : 0;
+        this.endTime = slotTime != null ? slotTime.addMinutes(this.durationMinutes) : null;
         this.employeeId = employeeId;
         this.employeeName = employeeName;
         this.serviceName = serviceName;
@@ -65,7 +69,7 @@ public class AA_AvailableSlot {
     // AA_AvailableSlot.testSlot();
     public static void testSlot(){
         AA_AvailableSlot slot = new AA_AvailableSlot(Datetime.now(), 'a05gL00000GUkNZQA1', 'Juan', 'Masaje', 
-                            'a05gL00000GUkNZQA1', 'Pocitos', 'a05gL00000GUkNZQA1');
+                            'a05gL00000GUkNZQA1', 'Pocitos', 'a05gL00000GUkNZQA1', 60);
         System.debug(slot.fullDateTime);
     }
     

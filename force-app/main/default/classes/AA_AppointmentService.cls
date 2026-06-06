@@ -128,7 +128,8 @@ public without sharing class AA_AppointmentService {
                         service.Display_Name__c != null ? service.Display_Name__c : service.Name,
                         service.Id,
                         service.Business_Branch__r.Name,
-                        service.Business_Branch__c
+                        service.Business_Branch__c,
+                        durationMinutes
                     ));
                     currentPointer = potentialSlotEnd; 
                 }
@@ -245,7 +246,7 @@ public without sharing class AA_AppointmentService {
                     if (isSlotFree) {
                         finalAvailableSlots.add(new AA_AvailableSlot(
                             currentPointer, empId, employeeNames.get(empId),
-                            service.Display_Name__c != null ? service.Display_Name__c : service.Name, service.Id, service.Business_Branch__r.Name, service.Business_Branch__c
+                            service.Display_Name__c != null ? service.Display_Name__c : service.Name, service.Id, service.Business_Branch__r.Name, service.Business_Branch__c, durationMinutes
                         ));
                         currentPointer = potentialSlotEnd; 
                     }
@@ -284,6 +285,34 @@ public without sharing class AA_AppointmentService {
         // To store 14:30 (GMT-3) in Salesforce (UTC), we must ADD 3 hours.
         // 14:30 + 3 = 17:30 UTC
         return localDt.addHours(3);
+    }
+    
+    public static List<AA_ComboSlot> getComboAvailableSlots(List<Id> serviceIds, Date targetDate) {
+        List<AA_ComboSlot> combos = new List<AA_ComboSlot>();
+        if (serviceIds == null || serviceIds.isEmpty()) return combos;
+        
+        if (serviceIds.size() == 1) {
+            List<AA_AvailableSlot> slots = getAvailableSlots(serviceIds[0], targetDate);
+            for (AA_AvailableSlot s : slots) {
+                combos.add(new AA_ComboSlot(s.slotTime, new List<AA_AvailableSlot>{s}));
+            }
+            return combos;
+        }
+        
+        if (serviceIds.size() == 2) {
+            List<AA_AvailableSlot> slotsA = getAvailableSlots(serviceIds[0], targetDate);
+            List<AA_AvailableSlot> slotsB = getAvailableSlots(serviceIds[1], targetDate);
+            
+            for (AA_AvailableSlot a : slotsA) {
+                for (AA_AvailableSlot b : slotsB) {
+                    if (a.endTime == b.slotTime) {
+                        combos.add(new AA_ComboSlot(a.slotTime, new List<AA_AvailableSlot>{a, b}));
+                    }
+                }
+            }
+        }
+        
+        return combos;
     }
     
 }
