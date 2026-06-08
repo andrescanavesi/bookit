@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ListView xmlns="http://soap.sforce.com/2006/04/metadata">
+    <fullName>Silvina_U_as_Pocitos</fullName>
+    <columns>NAME</columns>
+    <columns>Description_Short__c</columns>
+    <columns>Display_Name__c</columns>
+    <columns>LAST_UPDATE</columns>
+    <filterScope>Everything</filterScope>
+    <filters>
+        <field>NAME</field>
+        <operation>contains</operation>
+        <value>Silvina</value>
+    </filters>
+    <label>Silvina Uñas Pocitos</label>
+</ListView>

@@ -14,7 +14,8 @@ public with sharing class AA_ServiceTriggerHandler {
                 AA_Service__c oldRecord = oldMap.get(record.Id);
                 if (record.Name != oldRecord.Name || 
                     record.Display_Name__c != oldRecord.Display_Name__c || 
-                    record.Business_Branch__c != oldRecord.Business_Branch__c) {
+                    record.Business_Branch__c != oldRecord.Business_Branch__c ||
+                    record.Is_Active__c != oldRecord.Is_Active__c) {
                     needsUpdate = true;
                 }
             }
@@ -22,6 +23,17 @@ public with sharing class AA_ServiceTriggerHandler {
             if (needsUpdate && record.Business_Branch__c != null) {
                 recordsToProcess.add(record);
                 branchIds.add(record.Business_Branch__c);
+            } else if (needsUpdate && record.Business_Branch__c == null) {
+                // If there's no branch, we still might need to append/remove the suffix
+                if (record.Is_Active__c == false) {
+                    if (record.Name != null && !record.Name.endsWith(' - Inactive')) {
+                        record.Name = (record.Name + ' - Inactive').abbreviate(80);
+                    }
+                } else {
+                    if (record.Name != null && record.Name.endsWith(' - Inactive')) {
+                        record.Name = record.Name.removeEnd(' - Inactive').trim();
+                    }
+                }
             }
         }
         
@@ -35,7 +47,12 @@ public with sharing class AA_ServiceTriggerHandler {
                 if (branch != null) {
                     String displayName = record.Display_Name__c != null ? record.Display_Name__c : '';
                     String newName = displayName + ' ' + branch.Name;
-                    record.Name = newName.abbreviate(75);
+                    
+                    if (record.Is_Active__c == false) {
+                        newName += ' - Inactive';
+                    }
+                    
+                    record.Name = newName.abbreviate(80);
                 }
             }
         }

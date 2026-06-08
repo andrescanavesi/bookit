@@ -2,14 +2,16 @@ import { LightningElement, track } from 'lwc';
 import getWeeklyOccupancy from '@salesforce/apex/AA_WeeklyMatrixController.getWeeklyOccupancy';
 
 export default class AAWeeklyMatrixAdmin extends LightningElement {
-    @track targetDate = new Date();
+    @track targetDate = new Date(new Date().getFullYear(), new Date().getMonth(), new Date().getDate());
     @track matrixData = null;
     @track columns = [];
     @track rows = [];
     @track isLoading = false;
 
     get selectedDate() {
-        return this.targetDate.toISOString().split('T')[0];
+        return this.targetDate.getFullYear() + '-' + 
+               String(this.targetDate.getMonth() + 1).padStart(2, '0') + '-' + 
+               String(this.targetDate.getDate()).padStart(2, '0');
     }
 
     get startOfWeek() {
@@ -48,21 +50,22 @@ export default class AAWeeklyMatrixAdmin extends LightningElement {
     }
 
     handlePrevWeek() {
-        const d = new Date(this.targetDate);
+        const d = new Date(this.targetDate.getTime());
         d.setDate(d.getDate() - 7);
-        this.targetDate = d;
+        this.targetDate = new Date(d.getFullYear(), d.getMonth(), d.getDate());
         this.loadData();
     }
 
     handleNextWeek() {
-        const d = new Date(this.targetDate);
+        const d = new Date(this.targetDate.getTime());
         d.setDate(d.getDate() + 7);
-        this.targetDate = d;
+        this.targetDate = new Date(d.getFullYear(), d.getMonth(), d.getDate());
         this.loadData();
     }
 
     handleCurrentWeek() {
-        this.targetDate = new Date();
+        const d = new Date();
+        this.targetDate = new Date(d.getFullYear(), d.getMonth(), d.getDate());
         this.loadData();
     }
 
@@ -158,7 +161,11 @@ export default class AAWeeklyMatrixAdmin extends LightningElement {
                 
                 if (cellData && cellData.status !== 'Inactivo') {
                     isActive = true;
-                    if (cellData.status === 'Libre') {
+                    if (cellData.status === 'Feriado') {
+                        cssClass += 'status-feriado';
+                        const holidayName = this.matrixData.holidays[dateStr] || 'Feriado';
+                        tooltip = 'Feriado: ' + holidayName;
+                    } else if (cellData.status === 'Libre') {
                         cssClass += 'status-libre';
                         tooltip = 'Libre - ' + cellData.capacity + ' disponibles';
                     } else if (cellData.status === 'Lleno') {
@@ -176,6 +183,7 @@ export default class AAWeeklyMatrixAdmin extends LightningElement {
                 row.cells.push({
                     id: dateStr + '_' + tSlot,
                     isActive: isActive,
+                    isFeriado: (cellData && cellData.status === 'Feriado'),
                     occupied: cellData ? cellData.occupied : 0,
                     capacity: cellData ? cellData.capacity : 0,
                     cssClass: cssClass,

@@ -68,13 +68,25 @@ export default class AAPublicAgenda extends LightningElement {
 
     get groupedServicesUI() {
         return this.categories.map(cat => {
+            const hasSelectedInCategory = this.services
+                .filter(s => s.Grupo_Servicio__c === cat.id)
+                .some(s => this.selectedServiceIds.includes(s.Id));
+
             const catServices = this.services
                 .filter(s => s.Grupo_Servicio__c === cat.id)
                 .map(s => {
                     const isSelected = this.selectedServiceIds.includes(s.Id);
+                    const isDisabled = hasSelectedInCategory && !isSelected;
+                    
+                    let cssClass = isSelected ? 'card card--service card--service-selected' : 'card card--service';
+                    if (isDisabled) {
+                        cssClass += ' card--disabled';
+                    }
+
                     return {
                         ...s,
-                        cssClass: isSelected ? 'card card--service card--service-selected' : 'card card--service'
+                        isDisabled: isDisabled,
+                        cssClass: cssClass
                     };
                 });
             return {
@@ -186,14 +198,24 @@ export default class AAPublicAgenda extends LightningElement {
 
     get isBotonFechaContinuarDeshabilitado() { return !this.reserva.horaSel; }
 
+    get todayIso() {
+        const d = new Date();
+        return d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0');
+    }
+
   get resumenDatos() {
         console.info('resumen datos');
         console.info(JSON.stringify(this.reserva, null, 2));
         if (!this.reserva.servicioSel || !this.reserva.fechaSel || !this.reserva.slotData) return {};
         
-        const srv = this.services.find(s => s.Id === this.reserva.servicioSel);
+        let totalCalculado = 0;
+        this.selectedServiceIds.forEach(id => {
+            const service = this.services.find(s => s.Id === id);
+            if (service && service.Precio__c) {
+                totalCalculado += service.Precio__c;
+            }
+        });
         
-        let totalCalculado = srv.Precio__c;
         if (this.reserva.retiro && this.reserva.retiro.material === 'blando') totalCalculado += 200;
         if (this.reserva.retiro && this.reserva.retiro.material === 'duro') totalCalculado += 300;
         
@@ -238,7 +260,7 @@ export default class AAPublicAgenda extends LightningElement {
     }
 
     get opcionesPago() {
-        const opciones = ['Efectivo', 'Transferencia', 'Mercado Pago', 'Decido en el momento'];
+        const opciones = ['Efectivo', 'Transferencia', 'Decido en el momento'];
         return opciones.map(op => ({ label: op, cssClass: this.reserva.formaPago === op ? 'pill pill--active' : 'pill' }));
     }
 
@@ -321,6 +343,20 @@ export default class AAPublicAgenda extends LightningElement {
     
     handleToggleService(event) {
         const srvId = event.currentTarget.dataset.id;
+        
+        const srv = this.services.find(s => s.Id === srvId);
+        if (srv) {
+            const catId = srv.Grupo_Servicio__c;
+            const hasSelectedInCategory = this.services
+                .filter(s => s.Grupo_Servicio__c === catId)
+                .some(s => this.selectedServiceIds.includes(s.Id));
+            
+            const isSelected = this.selectedServiceIds.includes(srvId);
+            if (hasSelectedInCategory && !isSelected) {
+                return;
+            }
+        }
+
         this.showMaxServicesWarning = false;
         
         if (this.selectedServiceIds.includes(srvId)) {
@@ -718,37 +754,59 @@ export default class AAPublicAgenda extends LightningElement {
      // --- DISPONIBILIDAD LÓGICA ---
     goToStep6() {
         console.info('goToStep6');
-        this.generarDiasDisponibles();
+        
+        let d = new Date();
+        while (d.getDay() === 0) { // skip sunday
+            d.setDate(d.getDate() + 1);
+        }
+        
+        this.reserva.fechaSel = d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0');
+        
+        this.generarDiasDisponibles(d);
         this.reservaStep = 6;
     }
 
-    generarDiasDisponibles() {
+    handleDatePick(event) {
+        const selectedIso = event.target.value;
+        if (selectedIso) {
+            this.reserva.fechaSel = selectedIso;
+            this.reserva.horaSel = null;
+            const parts = selectedIso.split('-');
+            const d = new Date(parts[0], parts[1] - 1, parts[2]);
+            this.generarDiasDisponibles(d);
+        }
+    }
+
+    generarDiasDisponibles(startDateObj) {
         console.info('generarDiasDisponibles');
         const DOW = ['DOM', 'LUN', 'MAR', 'MIÉ', 'JUE', 'VIE', 'SÁB'];
         const MESES = ['ENE', 'FEB', 'MAR', 'ABR', 'MAY', 'JUN', 'JUL', 'AGO', 'SEP', 'OCT', 'NOV', 'DIC'];
         let dias = []; 
-        let hoy = new Date();
         
-        for(let i=1; i<=14; i++) {
-            let d = new Date(hoy); 
+        let start = new Date(startDateObj);
+        
+        let i = 0;
+        let added = 0;
+        while(added < 5) {
+            let d = new Date(start); 
             d.setDate(d.getDate() + i);
+            i++;
             if(d.getDay() === 0) continue; // Salteamos domingos
             
-            let iso = d.toISOString().split('T')[0];
+            let iso = d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0');
+            let isSelected = (iso === this.reserva.fechaSel);
+            
             dias.push({ 
                 iso: iso, 
                 dow: DOW[d.getDay()], 
                 num: d.getDate(), 
                 mon: MESES[d.getMonth()], 
-                cssClass: 'day-pill' 
+                cssClass: isSelected ? 'day-pill day-pill--selected' : 'day-pill'
             });
+            added++;
         }
 
-        // Auto-seleccionar primer día disponible
-        if (dias.length > 0) {
-            this.reserva.fechaSel = dias[0].iso;
-            dias[0].cssClass = 'day-pill day-pill--selected';
-        }
+        // Si la fecha seleccionada no está en los botones (ej: eligieron un domingo), se queda sin seleccionar
         
         this.diasDisponiblesList = dias;
         this.fetchHorasDisponibles();

@@ -55,7 +55,12 @@
                                             <td key={cell.id} class={cell.cssClass}>
                                                 <template if:true={cell.isActive}>
                                                     <div class="cell-content slds-text-align_center" title={cell.tooltip}>
-                                                        <span class="capacity-text">{cell.occupied} / {cell.capacity}</span>
+                                                        <template if:true={cell.isFeriado}>
+                                                            <!-- Contenido para feriado (vacío o ícono) -->
+                                                        </template>
+                                                        <template if:false={cell.isFeriado}>
+                                                            <span class="capacity-text">{cell.occupied} / {cell.capacity}</span>
+                                                        </template>
                                                     </div>
                                                 </template>
                                                 <template if:false={cell.isActive}>

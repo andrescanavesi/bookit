@@ -1088,3 +1088,10 @@ h2 {
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
   display: inline-block;
 }
+
+/* Estado deshabilitado para las tarjetas de servicio */
+.card--disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+  pointer-events: none;
+}

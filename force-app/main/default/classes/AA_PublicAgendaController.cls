@@ -91,6 +91,7 @@ public without sharing class AA_PublicAgendaController {
             SELECT Id, Name, Display_Name__c, Description_Short__c 
             FROM AA_Service_Category__c 
             WHERE Business_Branch__c = :branch.Id
+            AND Is_Active__c = true
             ORDER BY Name ASC 
             LIMIT 100
         ];
@@ -107,6 +108,7 @@ public without sharing class AA_PublicAgendaController {
         List<AA_Service__c>  services =  [SELECT Id, Name, Display_Name__c, Duration_Minutes__c, Price__c, AA_Service_Category__c
                                           FROM AA_Service__c 
                                           WHERE Business_Branch__c = :branch.Id
+                                          AND Is_Active__c = true
                                           LIMIT 100];
         
         logger.info('services: '+JSON.serializePretty(services));

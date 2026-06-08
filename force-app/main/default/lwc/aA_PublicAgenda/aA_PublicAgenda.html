@@ -210,6 +210,10 @@
                     </div>
 
                     <!-- Selector de Días (Horizontal Scroll) -->
+                    <div style="margin-bottom: 16px; padding: 0 24px;">
+                        <input type="date" class="field__input" onchange={handleDatePick} min={todayIso} value={reserva.fechaSel} style="width: 100%; border: 1px solid var(--line); border-radius: 8px; padding: 12px; font-family: inherit; font-size: 16px; background-color: transparent; color: var(--black);" />
+                    </div>
+
                     <div class="day-picker">
                         <template for:each={diasDisponiblesList} for:item="dia">
                             <button key={dia.iso} class={dia.cssClass} data-fecha={dia.iso} onclick={handleSelectFecha}>

@@ -6,11 +6,13 @@ public with sharing class AA_WeeklyMatrixController {
         @AuraEnabled public Map<String, Map<String, SlotCapacity>> matrix { get; set; }
         @AuraEnabled public String branchId { get; set; }
         @AuraEnabled public String branchName { get; set; }
+        @AuraEnabled public Map<String, String> holidays { get; set; }
         
         public WeeklyMatrixResponse() {
             this.branchHours = new Map<String, BranchDayHour>();
             this.timeSlots = new List<String>();
             this.matrix = new Map<String, Map<String, SlotCapacity>>();
+            this.holidays = new Map<String, String>();
         }
     }
 
@@ -33,146 +35,170 @@ public with sharing class AA_WeeklyMatrixController {
 
     @AuraEnabled(cacheable=true)
     public static WeeklyMatrixResponse getWeeklyOccupancy(Date targetDate) {
-        WeeklyMatrixResponse response = new WeeklyMatrixResponse();
-        
-        // 1. Get Branch (assume first one for now)
-        List<AA_Business_Branch__c> branches = [SELECT Id, Name FROM AA_Business_Branch__c LIMIT 1];
-        if (branches.isEmpty()) return response;
-        AA_Business_Branch__c branch = branches[0];
-        response.branchId = branch.Id;
-        response.branchName = branch.Name;
-
-        // Determine Start of Week (Monday)
-        Date startOfWeek = targetDate.toStartOfWeek();
-        Datetime dt = Datetime.newInstance(startOfWeek.year(), startOfWeek.month(), startOfWeek.day());
-        String dayOfWeekStr = dt.format('EEEE'); // e.g., 'Sunday'
-        if (dayOfWeekStr == 'Sunday') {
-            startOfWeek = startOfWeek.addDays(1);
-        } else if (dayOfWeekStr != 'Monday') {
-            Integer daysToSubtract = 0;
-            if (dayOfWeekStr == 'Tuesday') daysToSubtract = 1;
-            else if (dayOfWeekStr == 'Wednesday') daysToSubtract = 2;
-            else if (dayOfWeekStr == 'Thursday') daysToSubtract = 3;
-            else if (dayOfWeekStr == 'Friday') daysToSubtract = 4;
-            else if (dayOfWeekStr == 'Saturday') daysToSubtract = 5;
-            startOfWeek = startOfWeek.addDays(-daysToSubtract);
-        }
-        Date endOfWeek = startOfWeek.addDays(6); // Sunday
-        
-        // 2. Get Branch Working Hours
-        List<AA_Branch_Working_Hour__c> bwhs = [SELECT Day_Of_Week__c, Open_Time__c, Close_Time__c FROM AA_Branch_Working_Hour__c WHERE Business_Branch__c = :branch.Id];
-        
-        Time minOpenTime = Time.newInstance(23, 59, 0, 0);
-        Time maxCloseTime = Time.newInstance(0, 0, 0, 0);
-        
-        for (AA_Branch_Working_Hour__c bwh : bwhs) {
-            BranchDayHour bdh = new BranchDayHour();
-            bdh.openTime = formatTime(bwh.Open_Time__c);
-            bdh.closeTime = formatTime(bwh.Close_Time__c);
-            response.branchHours.put(bwh.Day_Of_Week__c, bdh);
+        AA_Logger logger = new AA_Logger(true);
+        logger.info('getWeeklyOccupancy, targetDate '+targetDate);
+        try{
+            WeeklyMatrixResponse response = new WeeklyMatrixResponse();
             
-            if (bwh.Open_Time__c < minOpenTime) minOpenTime = bwh.Open_Time__c;
-            if (bwh.Close_Time__c > maxCloseTime) maxCloseTime = bwh.Close_Time__c;
-        }
+            // 1. Get Branch (assume first one for now)
+            List<AA_Business_Branch__c> branches = [SELECT Id, Name FROM AA_Business_Branch__c LIMIT 1];
+            if (branches.isEmpty()) return response;
+            AA_Business_Branch__c branch = branches[0];
+            response.branchId = branch.Id;
+            response.branchName = branch.Name;
 
-        // Generate Time Slots (every 30 mins)
-        Time currentSlot = minOpenTime;
-        while (currentSlot < maxCloseTime) {
-            response.timeSlots.add(formatTime(currentSlot));
-            currentSlot = currentSlot.addMinutes(30);
-        }
-
-        // 3. Employee Working Hours (Base Capacity)
-        List<AA_Employee_Working_Hour__c> ewhs = [SELECT Employee__c, Day_Of_Week__c, Start_Hour__c, End_Hour__c, Start_Default_Break_Hour__c, End_Default_Break_Hour__c FROM AA_Employee_Working_Hour__c WHERE Employee__r.Business_Branch__c = :branch.Id];
-        
-        // Pre-build matrix structure
-        Map<String, String> dateToDayOfWeek = new Map<String, String>();
-        for (Integer i = 0; i < 7; i++) {
-            Date d = startOfWeek.addDays(i);
-            String dateStr = String.valueOf(d);
-            String dow = getEnglishDayOfWeek(d);
-            dateToDayOfWeek.put(dateStr, dow);
-            
-            if (response.branchHours.containsKey(dow)) {
-                Map<String, SlotCapacity> dayMap = new Map<String, SlotCapacity>();
-                for (String tSlot : response.timeSlots) {
-                    dayMap.put(tSlot, new SlotCapacity());
-                }
-                response.matrix.put(dateStr, dayMap);
+            // Determine Start of Week (Monday)
+            Date startOfWeek = targetDate.toStartOfWeek();
+            Datetime dt = Datetime.newInstance(startOfWeek.year(), startOfWeek.month(), startOfWeek.day());
+            String dayOfWeekStr = dt.format('EEEE'); // e.g., 'Sunday'
+            if (dayOfWeekStr == 'Sunday') {
+                startOfWeek = startOfWeek.addDays(1);
+            } else if (dayOfWeekStr != 'Monday') {
+                Integer daysToSubtract = 0;
+                if (dayOfWeekStr == 'Tuesday') daysToSubtract = 1;
+                else if (dayOfWeekStr == 'Wednesday') daysToSubtract = 2;
+                else if (dayOfWeekStr == 'Thursday') daysToSubtract = 3;
+                else if (dayOfWeekStr == 'Friday') daysToSubtract = 4;
+                else if (dayOfWeekStr == 'Saturday') daysToSubtract = 5;
+                startOfWeek = startOfWeek.addDays(-daysToSubtract);
             }
-        }
+            Date endOfWeek = startOfWeek.addDays(6); // Sunday
+            
+            // 2. Get Branch Working Hours
+            List<AA_Branch_Working_Hour__c> bwhs = [SELECT Day_Of_Week__c, Open_Time__c, Close_Time__c FROM AA_Branch_Working_Hour__c WHERE Business_Branch__c = :branch.Id];
+            
+            Time minOpenTime = Time.newInstance(23, 59, 0, 0);
+            Time maxCloseTime = Time.newInstance(0, 0, 0, 0);
+            
+            for (AA_Branch_Working_Hour__c bwh : bwhs) {
+                BranchDayHour bdh = new BranchDayHour();
+                bdh.openTime = formatTime(bwh.Open_Time__c);
+                bdh.closeTime = formatTime(bwh.Close_Time__c);
+                response.branchHours.put(bwh.Day_Of_Week__c, bdh);
+                
+                if (bwh.Open_Time__c < minOpenTime) minOpenTime = bwh.Open_Time__c;
+                if (bwh.Close_Time__c > maxCloseTime) maxCloseTime = bwh.Close_Time__c;
+            }
 
-        // Calculate capacity per slot based on Employee Working Hours
-        for (AA_Employee_Working_Hour__c ewh : ewhs) {
-            String dow = ewh.Day_Of_Week__c;
-            for (String dateStr : response.matrix.keySet()) {
-                if (dateToDayOfWeek.get(dateStr) == dow) {
-                    Map<String, SlotCapacity> dayMap = response.matrix.get(dateStr);
-                    for (String tSlot : dayMap.keySet()) {
-                        Time t = parseTime(tSlot);
-                        Boolean isWorking = (t >= ewh.Start_Hour__c && t < ewh.End_Hour__c);
-                        Boolean isBreak = false;
-                        if (ewh.Start_Default_Break_Hour__c != null && ewh.End_Default_Break_Hour__c != null) {
-                            if (t >= ewh.Start_Default_Break_Hour__c && t < ewh.End_Default_Break_Hour__c) {
-                                isBreak = true;
+            // Generate Time Slots (every 30 mins)
+            Time currentSlot = minOpenTime;
+            while (currentSlot < maxCloseTime) {
+                response.timeSlots.add(formatTime(currentSlot));
+                currentSlot = currentSlot.addMinutes(30);
+            }
+
+            // 3. Employee Working Hours (Base Capacity)
+            List<AA_Employee_Working_Hour__c> ewhs = [SELECT Employee__c, Day_Of_Week__c, Start_Hour__c, End_Hour__c, Start_Default_Break_Hour__c, End_Default_Break_Hour__c FROM AA_Employee_Working_Hour__c WHERE Employee__r.Business_Branch__c = :branch.Id];
+            
+            // Pre-build matrix structure
+            Map<String, String> dateToDayOfWeek = new Map<String, String>();
+            for (Integer i = 0; i < 7; i++) {
+                Date d = startOfWeek.addDays(i);
+                String dateStr = String.valueOf(d);
+                String dow = getEnglishDayOfWeek(d);
+                dateToDayOfWeek.put(dateStr, dow);
+                
+                if (response.branchHours.containsKey(dow)) {
+                    Map<String, SlotCapacity> dayMap = new Map<String, SlotCapacity>();
+                    for (String tSlot : response.timeSlots) {
+                        dayMap.put(tSlot, new SlotCapacity());
+                    }
+                    response.matrix.put(dateStr, dayMap);
+                }
+            }
+
+            // Calculate capacity per slot based on Employee Working Hours
+            for (AA_Employee_Working_Hour__c ewh : ewhs) {
+                String dow = ewh.Day_Of_Week__c;
+                for (String dateStr : response.matrix.keySet()) {
+                    if (dateToDayOfWeek.get(dateStr) == dow) {
+                        Map<String, SlotCapacity> dayMap = response.matrix.get(dateStr);
+                        for (String tSlot : dayMap.keySet()) {
+                            Time t = parseTime(tSlot);
+                            Boolean isWorking = (t >= ewh.Start_Hour__c && t < ewh.End_Hour__c);
+                            Boolean isBreak = false;
+                            if (ewh.Start_Default_Break_Hour__c != null && ewh.End_Default_Break_Hour__c != null) {
+                                if (t >= ewh.Start_Default_Break_Hour__c && t < ewh.End_Default_Break_Hour__c) {
+                                    isBreak = true;
+                                }
                             }
-                        }
-                        if (isWorking && !isBreak) {
-                            dayMap.get(tSlot).capacity++;
+                            if (isWorking && !isBreak) {
+                                dayMap.get(tSlot).capacity++;
+                            }
                         }
                     }
                 }
             }
-        }
 
-        // 4. Appointments & Absences
-        Datetime weekStartDt = Datetime.newInstance(startOfWeek.year(), startOfWeek.month(), startOfWeek.day(), 0, 0, 0);
-        Datetime weekEndDt = Datetime.newInstance(endOfWeek.year(), endOfWeek.month(), endOfWeek.day(), 23, 59, 59);
+            // 4. Appointments & Absences
+            Datetime weekStartDt = Datetime.newInstance(startOfWeek.year(), startOfWeek.month(), startOfWeek.day(), 0, 0, 0);
+            Datetime weekEndDt = Datetime.newInstance(endOfWeek.year(), endOfWeek.month(), endOfWeek.day(), 23, 59, 59);
 
-        List<AA_Appointment__c> appointments = [
-            SELECT Start_Date_Time__c, End_Date_Time__c, Employee__c 
-            FROM AA_Appointment__c 
-            WHERE Service__r.Business_Branch__c = :branch.Id 
-            AND Start_Date_Time__c >= :weekStartDt 
-            AND Start_Date_Time__c <= :weekEndDt
-            AND Status__c != 'Canceled'
-        ];
+            List<AA_Appointment__c> appointments = [
+                SELECT Start_Date_Time__c, End_Date_Time__c, Employee__c 
+                FROM AA_Appointment__c 
+                WHERE Service__r.Business_Branch__c = :branch.Id 
+                AND Start_Date_Time__c >= :weekStartDt 
+                AND Start_Date_Time__c <= :weekEndDt
+                AND Status__c != 'Canceled'
+            ];
 
-        List<AA_Employee_Absence__c> absences = [
-            SELECT Start_Date_Time__c, End_Date_Time__c, Employee__c 
-            FROM AA_Employee_Absence__c 
-            WHERE Employee__r.Business_Branch__c = :branch.Id 
-            AND Start_Date_Time__c >= :weekStartDt 
-            AND Start_Date_Time__c <= :weekEndDt
-        ];
+            List<AA_Employee_Absence__c> absences = [
+                SELECT Start_Date_Time__c, End_Date_Time__c, Employee__c 
+                FROM AA_Employee_Absence__c 
+                WHERE Employee__r.Business_Branch__c = :branch.Id 
+                AND Start_Date_Time__c >= :weekStartDt 
+                AND Start_Date_Time__c <= :weekEndDt
+            ];
 
-        // Process Appointments
-        for (AA_Appointment__c app : appointments) {
-            markOccupied(app.Start_Date_Time__c, app.End_Date_Time__c, response.matrix);
-        }
-        
-        for (AA_Employee_Absence__c abs : absences) {
-            markOccupied(abs.Start_Date_Time__c, abs.End_Date_Time__c, response.matrix);
-        }
+            // Process Appointments
+            for (AA_Appointment__c app : appointments) {
+                markOccupied(app.Start_Date_Time__c, app.End_Date_Time__c, response.matrix);
+            }
+            
+            for (AA_Employee_Absence__c abs : absences) {
+                markOccupied(abs.Start_Date_Time__c, abs.End_Date_Time__c, response.matrix);
+            }
 
-        // 5. Compute Status
-        for (String dateStr : response.matrix.keySet()) {
-            Map<String, SlotCapacity> dayMap = response.matrix.get(dateStr);
-            for (String tSlot : dayMap.keySet()) {
-                SlotCapacity sc = dayMap.get(tSlot);
-                if (sc.capacity == 0) {
-                    sc.status = 'Inactivo';
-                } else if (sc.occupied == 0) {
-                    sc.status = 'Libre';
-                } else if (sc.occupied >= sc.capacity) {
-                    sc.status = 'Lleno';
-                } else {
-                    sc.status = 'Parcial';
+            // 4.5 Get Holidays
+            List<AA_Branch_Holiday__c> weekHolidays = [
+                SELECT Id, Name, Date__c 
+                FROM AA_Branch_Holiday__c 
+                WHERE Business_Branch__c = :branch.Id 
+                AND Date__c >= :startOfWeek 
+                AND Date__c <= :endOfWeek
+            ];
+            
+            for (AA_Branch_Holiday__c hol : weekHolidays) {
+                String holDateStr = String.valueOf(hol.Date__c);
+                response.holidays.put(holDateStr, hol.Name);
+            }
+
+            // 5. Compute Status
+            for (String dateStr : response.matrix.keySet()) {
+                Map<String, SlotCapacity> dayMap = response.matrix.get(dateStr);
+                for (String tSlot : dayMap.keySet()) {
+                    SlotCapacity sc = dayMap.get(tSlot);
+                    if (response.holidays.containsKey(dateStr)) {
+                        sc.status = 'Feriado';
+                    } else if (sc.capacity == 0) {
+                        sc.status = 'Inactivo';
+                    } else if (sc.occupied == 0) {
+                        sc.status = 'Libre';
+                    } else if (sc.occupied >= sc.capacity) {
+                        sc.status = 'Lleno';
+                    } else {
+                        sc.status = 'Parcial';
+                    }
                 }
             }
+            logger.info('getWeeklyOccupancy, response \n '+JSON.serializePretty(response));
+            return response;
+        }catch(Exception e){
+            String message = 'errorgetting weekly occupancy: '+e.getMessage()+' '+e.getStackTraceString();
+            logger.error(message);
+            throw new AuraHandledException(message);
         }
-
-        return response;
     }
 
     private static void markOccupied(Datetime startDt, Datetime endDt, Map<String, Map<String, SlotCapacity>> matrix) {
