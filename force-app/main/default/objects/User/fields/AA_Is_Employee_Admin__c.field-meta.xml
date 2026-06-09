@@ -3,7 +3,6 @@
     <fullName>AA_Is_Employee_Admin__c</fullName>
     <defaultValue>false</defaultValue>
     <description>Useful to check more or less information in the portal. for example a different menu</description>
-    <externalId>false</externalId>
     <inlineHelpText>Useful to check more or less information in the portal. for example a different menu</inlineHelpText>
     <label>AA Is Employee Admin</label>
     <trackFeedHistory>false</trackFeedHistory>

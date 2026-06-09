@@ -3,7 +3,6 @@
     <fullName>User__c</fullName>
     <deleteConstraint>SetNull</deleteConstraint>
     <description>User used for login</description>
-    <externalId>false</externalId>
     <inlineHelpText>User used for login</inlineHelpText>
     <label>User</label>
     <referenceTo>User</referenceTo>

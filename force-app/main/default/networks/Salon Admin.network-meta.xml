@@ -7,6 +7,7 @@
     <disableReputationRecordConversations>true</disableReputationRecordConversations>
     <emailSenderAddress>andres.canavesi@gmail.com</emailSenderAddress>
     <emailSenderName>Salon Admin</emailSenderName>
+    <embeddedLoginEnabled>false</embeddedLoginEnabled>
     <enableApexCDNCaching>true</enableApexCDNCaching>
     <enableCustomVFErrorPageOverrides>false</enableCustomVFErrorPageOverrides>
     <enableDirectMessages>true</enableDirectMessages>

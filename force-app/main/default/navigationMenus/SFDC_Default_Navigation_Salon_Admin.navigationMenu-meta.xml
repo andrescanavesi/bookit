@@ -10,4 +10,11 @@
         <target>/appointments</target>
         <type>InternalLink</type>
     </navigationMenuItem>
+    <navigationMenuItem>
+        <label>Salir</label>
+        <position>2</position>
+        <publiclyAvailable>false</publiclyAvailable>
+        <target>Logout</target>
+        <type>Event</type>
+    </navigationMenuItem>
 </NavigationMenu>

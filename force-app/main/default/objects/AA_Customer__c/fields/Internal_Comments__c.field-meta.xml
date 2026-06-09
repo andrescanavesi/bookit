@@ -2,7 +2,6 @@
 <CustomField xmlns="http://soap.sforce.com/2006/04/metadata">
     <fullName>Internal_Comments__c</fullName>
     <description>Comments made by the internal team about this customer</description>
-    <externalId>false</externalId>
     <inlineHelpText>Comments made by the internal team about this customer</inlineHelpText>
     <label>Internal Comments</label>
     <required>false</required>

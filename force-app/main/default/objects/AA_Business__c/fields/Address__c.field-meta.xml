@@ -2,7 +2,6 @@
 <CustomField xmlns="http://soap.sforce.com/2006/04/metadata">
     <fullName>Address__c</fullName>
     <description>Ej: Av. Brasil 2377 — Apto 1803 · Pocitos, Montevideo</description>
-    <externalId>false</externalId>
     <inlineHelpText>Ej: Av. Brasil 2377 — Apto 1803 · Pocitos, Montevideo</inlineHelpText>
     <label>Address</label>
     <required>false</required>

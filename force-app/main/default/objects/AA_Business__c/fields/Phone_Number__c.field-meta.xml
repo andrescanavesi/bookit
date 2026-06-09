@@ -2,7 +2,6 @@
 <CustomField xmlns="http://soap.sforce.com/2006/04/metadata">
     <fullName>Phone_Number__c</fullName>
     <description>This phone number will be used for &quot;write a text message to us for more info&quot;</description>
-    <externalId>false</externalId>
     <inlineHelpText>This phone number will be used for &quot;write a text message to us for more info&quot;</inlineHelpText>
     <label>Phone Number</label>
     <required>false</required>
