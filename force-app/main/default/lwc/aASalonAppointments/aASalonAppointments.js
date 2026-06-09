@@ -40,7 +40,7 @@ export default class AASalonAppointments extends LightningElement {
                 const firstName = appt.Customer__r?.First_Name__c || '';
                 const lastName = appt.Customer__r?.Last_Name__c || '';
                 const phone = appt.Customer__r?.Phone_Number__c || '';
-                const serviceName = appt.Service__r?.Name || 'Servicio';
+                const serviceName = appt.Service__r?.Display_Name__c ? appt.Service__r.Display_Name__c : (appt.Service__r?.Name || 'Servicio');
                 
                 const isSent = !!appt.Reminder_Sent_Date__c;
 
@@ -53,7 +53,7 @@ export default class AASalonAppointments extends LightningElement {
                     phone: phone || 'Sin teléfono',
                     serviceName: serviceName,
                     duration: appt.Service__r?.Duration_Minutes__c || 30,
-                    employeeName: appt.Employee__r?.Name || 'Equipo',
+                    employeeName: (appt.Employee__r?.First_Name__c || appt.Employee__r?.Last_Name__c) ? `${appt.Employee__r?.First_Name__c || ''} ${appt.Employee__r?.Last_Name__c || ''}`.trim() : (appt.Employee__r?.Name || 'Equipo'),
                     employeeId: appt.Employee__c,
                     // Mapeo de estados nativos
                     isCancelled: appt.Status__c === 'Cancelled',

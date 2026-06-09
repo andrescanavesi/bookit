@@ -49,7 +49,15 @@
         <name>CustomSite</name>
     </types>
 
+    <types>
+        <members>*</members>
+        <name>SiteDotCom</name>
+    </types>
 
+    <types>
+        <members>*</members>
+        <name>NetworkBranding</name>
+    </types>
 
     <types>
         <members>*</members>

@@ -15,6 +15,7 @@ public with sharing class AA_EmployeeTriggerHandler {
                 if (record.Name != oldRecord.Name || 
                     record.First_Name__c != oldRecord.First_Name__c || 
                     record.Last_Name__c != oldRecord.Last_Name__c || 
+                    record.Is_Active__c != oldRecord.Is_Active__c ||
                     record.Business_Branch__c != oldRecord.Business_Branch__c) {
                     needsUpdate = true;
                 }
@@ -43,6 +44,10 @@ public with sharing class AA_EmployeeTriggerHandler {
                     }
                     if (String.isNotBlank(branch.Name)) {
                         newName += (String.isNotBlank(newName) ? ' - ' : '') + branch.Name;
+                    }
+                    
+                    if (record.Is_Active__c == false) {
+                        newName += ' - Inactive';
                     }
                     
                     record.Name = newName.abbreviate(75);

@@ -52,7 +52,7 @@ public with sharing class AA_SalonAppointmentsController {
             businessId = currentEmployee.Business_Id__c;
             
             // Inicializamos la consulta base
-            String query = 'SELECT Id, Reminder_Sent_Date__c, Is_Reminder_Sent__c,  Customer_Confirmation_Date__c, Is_Customer_Confirmed__c, Start_Date_Time__c, Status__c, Customer__r.First_Name__c, Customer__r.Last_Name__c, Customer__r.Phone_Number__c, Service__r.Name, Service__r.Duration_Minutes__c, Employee__r.Name, Employee__c ';
+            String query = 'SELECT Id, Reminder_Sent_Date__c, Is_Reminder_Sent__c,  Customer_Confirmation_Date__c, Is_Customer_Confirmed__c, Start_Date_Time__c, Status__c, Customer__r.First_Name__c, Customer__r.Last_Name__c, Customer__r.Phone_Number__c, Service__r.Name, Service__r.Display_Name__c, Service__r.Duration_Minutes__c, Employee__r.Name, Employee__r.First_Name__c, Employee__r.Last_Name__c, Employee__c ';
                 query += ' FROM AA_Appointment__c WHERE Business_Id__c = \'' + businessId + '\'';
                 query += ' AND Status__c != \'Done\' ';
             
@@ -162,12 +162,12 @@ public with sharing class AA_SalonAppointmentsController {
             
              Id businessId = getBusinessId();
             
-            // 1. Recuperamos todos los profesionales del salón
+            // 1. Recuperamos todos los profesionales activos del salón
             wrapper.employees = [
                 SELECT Id, Name, First_Name__c, Last_Name__c 
                 FROM AA_Employee__c 
                 WHERE Business_Branch__r.Business__c = :businessId
-                AND Is_Admin__c = false
+                AND Is_Active__c = true
                 ORDER BY Name ASC
             ];
             
@@ -216,6 +216,7 @@ public with sharing class AA_SalonAppointmentsController {
             wrapper.allServices = [SELECT Id, Name, Duration_Minutes__c, Price__c 
                 FROM AA_Service__c 
                 WHERE Business_Branch__r.Business__c  = :businessId
+                AND Is_Active__c = true
                 ORDER BY Name ASC];
             
             wrapper.employeeServices = [SELECT Employee__c, Service__c 
