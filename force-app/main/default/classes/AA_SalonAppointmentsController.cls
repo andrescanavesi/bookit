@@ -174,7 +174,7 @@ public with sharing class AA_SalonAppointmentsController {
             wrapper.appointments = [
                 SELECT Id, Name, Start_Date_Time__c, Status__c, Employee__c,
                        Customer__r.First_Name__c, Customer__r.Last_Name__c, Customer__r.Phone_Number__c,
-                       Service__r.Name, Service__r.Duration_Minutes__c, Service__r.Price__c,
+                       Service__r.Name, Service__r.Display_Name__c, Service__r.Duration_Minutes__c, Service__r.Price__c,
                        Internal_Comments__c, Is_Reminder_Sent__c, Is_Customer_Confirmed__c, Reminder_Sent_Date__c
                 FROM AA_Appointment__c 
                 WHERE DAY_ONLY(Start_Date_Time__c) = :selectedDate 
@@ -213,7 +213,7 @@ public with sharing class AA_SalonAppointmentsController {
                 wrapper.branchWorkingHour = bwhList[0];
             }
 
-            wrapper.allServices = [SELECT Id, Name, Duration_Minutes__c, Price__c 
+            wrapper.allServices = [SELECT Id, Name, Display_Name__c, Duration_Minutes__c, Price__c 
                 FROM AA_Service__c 
                 WHERE Business_Branch__r.Business__c  = :businessId
                 AND Is_Active__c = true

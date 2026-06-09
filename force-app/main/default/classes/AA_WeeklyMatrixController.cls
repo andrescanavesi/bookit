@@ -33,6 +33,21 @@ public with sharing class AA_WeeklyMatrixController {
         }
     }
 
+    /**
+     * @description Obtiene la ocupación semanal (matriz) para una fecha objetivo.
+     * Calcula la disponibilidad y ocupación de cada slot de 30 minutos basado en la 
+     * capacidad (empleados activos disponibles) y la ocupación (citas agendadas).
+     * 
+     * El estado de cada slot se determina según el siguiente criterio:
+     * - 'Feriado': Si la fecha coincide con un día feriado configurado.
+     * - 'Inactivo': Si la capacidad es 0 (no hay empleados trabajando en ese horario o fuera del horario del local).
+     * - 'Libre': Si hay capacidad disponible (capacidad > 0) pero no hay citas agendadas (ocupado = 0).
+     * - 'Lleno': Si la cantidad de citas agendadas (ocupado) es mayor o igual a la capacidad (empleados disponibles).
+     * - 'Parcial': Si hay citas agendadas (ocupado > 0) pero aún hay capacidad disponible (ocupado < capacidad).
+     * 
+     * @param targetDate La fecha base para calcular la semana (normalmente el primer día de la semana).
+     * @return WeeklyMatrixResponse Objeto con la información de horarios, matriz de slots y feriados.
+     */
     @AuraEnabled(cacheable=true)
     public static WeeklyMatrixResponse getWeeklyOccupancy(Date targetDate) {
         AA_Logger logger = new AA_Logger(true);
@@ -41,7 +56,7 @@ public with sharing class AA_WeeklyMatrixController {
         logger.info('getWeeklyOccupancy, targetDate '+targetDate+' user id '+currentUserId);
         try{
             List<AA_Employee__c> employees = [
-                SELECT Id, Business_Branch__c, Business_Id__c, Is_Admin__c
+                SELECT Id, Business_Branch__c, Business_Id__c, Is_Admin__c, Is_Active__c
                 FROM AA_Employee__c 
                 WHERE User__c = :currentUserId 
                 LIMIT 1
@@ -55,12 +70,16 @@ public with sharing class AA_WeeklyMatrixController {
             if (!currentEmployee.Is_Admin__c) {
                 throw new AuraHandledException('El empleado '+currentEmployee+' no es admin. No puede ver la weekly matrix');
             }
+             if (!currentEmployee.Is_Active__c) {
+                throw new AuraHandledException('El empleado '+currentEmployee+' no esta activo. No puede ver la weekly matrix');
+            }
             businessId = currentEmployee.Business_Id__c;
 
             WeeklyMatrixResponse response = new WeeklyMatrixResponse();
             
             // 1. Get Branch (assume first one for now)
-            List<AA_Business_Branch__c> branches = [SELECT Id, Name FROM AA_Business_Branch__c  WHERE Business__c = :businessId LIMIT 1];
+            List<AA_Business_Branch__c> branches = [SELECT Id, Name 
+                FROM AA_Business_Branch__c  WHERE Business__c = :businessId LIMIT 1];
             if (branches.isEmpty()) return response;
             AA_Business_Branch__c branch = branches[0];
             response.branchId = branch.Id;
@@ -84,7 +103,9 @@ public with sharing class AA_WeeklyMatrixController {
             Date endOfWeek = startOfWeek.addDays(6); // Sunday
             
             // 2. Get Branch Working Hours
-            List<AA_Branch_Working_Hour__c> bwhs = [SELECT Day_Of_Week__c, Open_Time__c, Close_Time__c FROM AA_Branch_Working_Hour__c WHERE Business_Branch__c = :branch.Id];
+            List<AA_Branch_Working_Hour__c> bwhs = [SELECT Day_Of_Week__c, Open_Time__c, Close_Time__c 
+                                                        FROM AA_Branch_Working_Hour__c 
+                                                        WHERE Business_Branch__c = :branch.Id];
             
             Time minOpenTime = Time.newInstance(23, 59, 0, 0);
             Time maxCloseTime = Time.newInstance(0, 0, 0, 0);
@@ -107,7 +128,8 @@ public with sharing class AA_WeeklyMatrixController {
             }
 
             // 3. Employee Working Hours (Base Capacity)
-            List<AA_Employee_Working_Hour__c> ewhs = [SELECT Employee__c, Day_Of_Week__c, Start_Hour__c, End_Hour__c, Start_Default_Break_Hour__c, End_Default_Break_Hour__c FROM AA_Employee_Working_Hour__c WHERE Employee__r.Business_Branch__c = :branch.Id];
+            List<AA_Employee_Working_Hour__c> ewhs = [SELECT Employee__c, Day_Of_Week__c, Start_Hour__c, End_Hour__c, Start_Default_Break_Hour__c, End_Default_Break_Hour__c 
+                                                    FROM AA_Employee_Working_Hour__c WHERE Employee__r.Business_Branch__c = :branch.Id AND Employee__r.Is_Active__c = true];
             
             // Pre-build matrix structure
             Map<String, String> dateToDayOfWeek = new Map<String, String>();

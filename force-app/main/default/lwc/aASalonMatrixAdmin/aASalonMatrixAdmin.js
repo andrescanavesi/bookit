@@ -161,7 +161,7 @@ export default class AASalonMatrixAdmin extends LightningElement {
                     duration: durationMins,
                     customer: `${firstName} ${lastName}`.trim() || 'Sin Nombre',
                     phone: appt.Customer__r?.Phone_Number__c || '', 
-                    service: appt.Service__r?.Name || 'Servicio',
+                    service: appt.Service__r?.Display_Name__c ? appt.Service__r.Display_Name__c : (appt.Service__r?.Name || 'Servicio'),
                     timeRange: `${startTimeStr} - ${endTimeStr}`,
                     priceText: rawPrice ? `$${rawPrice}` : 'Sin costo',
                     status: appt.Status__c,
@@ -415,7 +415,7 @@ export default class AASalonMatrixAdmin extends LightningElement {
         this.serviceOptions = this.rawAllServices
             .filter(service => allowedServiceIds.includes(service.Id))
             .map(s => ({ 
-                label: `${s.Name} (${s.Duration_Minutes__c} min)`, 
+                label: `${s.Display_Name__c ? s.Display_Name__c : s.Name} (${s.Duration_Minutes__c} min)`, 
                 value: s.Id 
             }));
 
