@@ -2,6 +2,7 @@
 <CustomField xmlns="http://soap.sforce.com/2006/04/metadata">
     <fullName>Done_Date__c</fullName>
     <description>Date when the appointment is completed and the work is done</description>
+    <externalId>false</externalId>
     <inlineHelpText>Date when the appointment is completed and the work is done</inlineHelpText>
     <label>Done Date</label>
     <required>false</required>

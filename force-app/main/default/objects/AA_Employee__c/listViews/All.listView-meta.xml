@@ -6,6 +6,8 @@
     <columns>First_Name__c</columns>
     <columns>Last_Name__c</columns>
     <columns>Is_Admin__c</columns>
+    <columns>User__c</columns>
+    <columns>LAST_UPDATE</columns>
     <filterScope>Everything</filterScope>
     <label>All</label>
 </ListView>

@@ -18,6 +18,10 @@
         <enabled>false</enabled>
     </classAccesses>
     <classAccesses>
+        <apexClass>AA_ComboSlot</apexClass>
+        <enabled>false</enabled>
+    </classAccesses>
+    <classAccesses>
         <apexClass>AA_CustomerTriggerHandler</apexClass>
         <enabled>false</enabled>
     </classAccesses>
@@ -67,6 +71,10 @@
     </classAccesses>
     <classAccesses>
         <apexClass>AA_Utils</apexClass>
+        <enabled>false</enabled>
+    </classAccesses>
+    <classAccesses>
+        <apexClass>AA_WeeklyMatrixController</apexClass>
         <enabled>false</enabled>
     </classAccesses>
     <classAccesses>
@@ -294,6 +302,11 @@
     </fieldPermissions>
     <fieldPermissions>
         <editable>true</editable>
+        <field>AA_Appointment__c.Payment_Method__c</field>
+        <readable>true</readable>
+    </fieldPermissions>
+    <fieldPermissions>
+        <editable>true</editable>
         <field>AA_Appointment__c.Reminder_Sent_Date__c</field>
         <readable>true</readable>
     </fieldPermissions>
@@ -345,6 +358,11 @@
     <fieldPermissions>
         <editable>true</editable>
         <field>AA_Business__c.Phone_Number__c</field>
+        <readable>true</readable>
+    </fieldPermissions>
+    <fieldPermissions>
+        <editable>false</editable>
+        <field>AA_Customer__c.Business_Name__c</field>
         <readable>true</readable>
     </fieldPermissions>
     <fieldPermissions>
@@ -408,6 +426,11 @@
         <readable>true</readable>
     </fieldPermissions>
     <fieldPermissions>
+        <editable>true</editable>
+        <field>AA_Service_Category__c.Is_Active__c</field>
+        <readable>true</readable>
+    </fieldPermissions>
+    <fieldPermissions>
         <editable>false</editable>
         <field>AA_Service__c.Count_Appointments_Done__c</field>
         <readable>true</readable>
@@ -420,6 +443,11 @@
     <fieldPermissions>
         <editable>true</editable>
         <field>AA_Service__c.Duration_Minutes__c</field>
+        <readable>true</readable>
+    </fieldPermissions>
+    <fieldPermissions>
+        <editable>true</editable>
+        <field>AA_Service__c.Is_Active__c</field>
         <readable>true</readable>
     </fieldPermissions>
     <fieldPermissions>
@@ -510,6 +538,10 @@
     </tabVisibilities>
     <tabVisibilities>
         <tab>AA_Service__c</tab>
+        <visibility>DefaultOn</visibility>
+    </tabVisibilities>
+    <tabVisibilities>
+        <tab>AA_WeeklyMatrixAdmin</tab>
         <visibility>DefaultOn</visibility>
     </tabVisibilities>
     <tabVisibilities>

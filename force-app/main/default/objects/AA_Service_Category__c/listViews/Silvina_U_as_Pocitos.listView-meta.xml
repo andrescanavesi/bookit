@@ -5,6 +5,7 @@
     <columns>Description_Short__c</columns>
     <columns>Display_Name__c</columns>
     <columns>LAST_UPDATE</columns>
+    <columns>Is_Active__c</columns>
     <filterScope>Everything</filterScope>
     <filters>
         <field>NAME</field>

@@ -4,6 +4,7 @@
     <columns>NAME</columns>
     <columns>Employee__c</columns>
     <columns>Day_Of_Week__c</columns>
+    <columns>LAST_UPDATE</columns>
     <columns>Start_Hour__c</columns>
     <columns>End_Hour__c</columns>
     <columns>Start_Default_Break_Hour__c</columns>

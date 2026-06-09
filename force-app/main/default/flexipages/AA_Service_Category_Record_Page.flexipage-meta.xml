@@ -103,6 +103,12 @@
                 <identifier>RecordDisplay_Name_cField</identifier>
             </fieldInstance>
         </itemInstances>
+        <itemInstances>
+            <fieldInstance>
+                <fieldItem>Record.Is_Active__c</fieldItem>
+                <identifier>RecordIs_Active__cField</identifier>
+            </fieldInstance>
+        </itemInstances>
         <name>Facet-22a33459-f1be-4cd9-8b1a-085247623025</name>
         <type>Facet</type>
     </flexiPageRegions>

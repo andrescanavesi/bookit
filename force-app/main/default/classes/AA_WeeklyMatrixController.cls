@@ -36,12 +36,31 @@ public with sharing class AA_WeeklyMatrixController {
     @AuraEnabled(cacheable=true)
     public static WeeklyMatrixResponse getWeeklyOccupancy(Date targetDate) {
         AA_Logger logger = new AA_Logger(true);
-        logger.info('getWeeklyOccupancy, targetDate '+targetDate);
+        String businessId = '';
+        Id currentUserId = UserInfo.getUserId();
+        logger.info('getWeeklyOccupancy, targetDate '+targetDate+' user id '+currentUserId);
         try{
+            List<AA_Employee__c> employees = [
+                SELECT Id, Business_Branch__c, Business_Id__c, Is_Admin__c
+                FROM AA_Employee__c 
+                WHERE User__c = :currentUserId 
+                LIMIT 1
+            ];
+
+            if (employees.isEmpty()) {
+                throw new AuraHandledException('El empleado no está configurado como usuario');
+            }
+
+            AA_Employee__c currentEmployee = employees[0];
+            if (!currentEmployee.Is_Admin__c) {
+                throw new AuraHandledException('El empleado '+currentEmployee+' no es admin. No puede ver la weekly matrix');
+            }
+            businessId = currentEmployee.Business_Id__c;
+
             WeeklyMatrixResponse response = new WeeklyMatrixResponse();
             
             // 1. Get Branch (assume first one for now)
-            List<AA_Business_Branch__c> branches = [SELECT Id, Name FROM AA_Business_Branch__c LIMIT 1];
+            List<AA_Business_Branch__c> branches = [SELECT Id, Name FROM AA_Business_Branch__c  WHERE Business__c = :businessId LIMIT 1];
             if (branches.isEmpty()) return response;
             AA_Business_Branch__c branch = branches[0];
             response.branchId = branch.Id;
@@ -195,7 +214,7 @@ public with sharing class AA_WeeklyMatrixController {
             logger.info('getWeeklyOccupancy, response \n '+JSON.serializePretty(response));
             return response;
         }catch(Exception e){
-            String message = 'errorgetting weekly occupancy: '+e.getMessage()+' '+e.getStackTraceString();
+            String message = 'error getting weekly occupancy: '+e.getMessage()+' '+e.getStackTraceString();
             logger.error(message);
             throw new AuraHandledException(message);
         }
