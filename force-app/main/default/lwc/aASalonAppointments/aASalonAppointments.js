@@ -92,7 +92,7 @@ export default class AASalonAppointments extends LightningElement {
         const apptId = event.currentTarget.dataset.id;
         this.updateAppointmentLoadingState(apptId, 'isConfirming', true);
 
-        confirmAppointment({ appointmentId: apptId })
+        confirmAppointment({ appointmentId: apptId, internalComments: 'Confirmada por el salon'})
             .then(() => { return refreshApex(this.wiredAppointmentsResult); })
             .catch(error => { 
                 console.error('Error al confirmar la cita:', error);
@@ -105,7 +105,7 @@ export default class AASalonAppointments extends LightningElement {
         const apptId = event.currentTarget.dataset.id;
         this.updateAppointmentLoadingState(apptId, 'isCompleting', true);
 
-        completeAppointment({ appointmentId: apptId })
+        completeAppointment({ appointmentId: apptId, internalComments: 'Finalizada por el salon' })
             .then(() => { return refreshApex(this.wiredAppointmentsResult); })
             .catch(error => {
                 console.error('Error al finalizar la cita:', error);
@@ -117,7 +117,7 @@ export default class AASalonAppointments extends LightningElement {
         const apptId = event.currentTarget.dataset.id;
         this.updateAppointmentLoadingState(apptId, 'isCancelling', true);
 
-        cancelAppointment({ appointmentId: apptId })
+        cancelAppointment({ appointmentId: apptId, internalComments: 'Cancelada por el salon' })
             .then(() => { return refreshApex(this.wiredAppointmentsResult); })
             .catch(error => {
                 console.error('Error al cancelar la cita:', error);
