@@ -413,7 +413,10 @@
 .appt-name { font-size: 10px; opacity: 0.8; letter-spacing: 0.5px; }
 .appt-icons { display: flex; gap: 4px; }
 .icon-reminder, .icon-confirmed {
+    --sds-c-icon-color-foreground: #FFFFFF;
     --sds-c-icon-color-foreground-default: #FFFFFF;
+    --lwc-colorTextIconDefault: #FFFFFF;
+    --lwc-iconColorForeground: #FFFFFF;
 }
 
 /* =========================================

@@ -1,4 +1,4 @@
-public with sharing class AA_SalonAppointmentsController {
+public without sharing class AA_SalonAppointmentsController {
 
     public class AgendaContext {
         @AuraEnabled public Boolean isAdmin { get; set; }
