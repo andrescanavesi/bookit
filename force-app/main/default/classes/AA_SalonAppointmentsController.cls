@@ -55,6 +55,8 @@ public with sharing class AA_SalonAppointmentsController {
             String query = 'SELECT Id, Reminder_Sent_Date__c, Is_Reminder_Sent__c,  Customer_Confirmation_Date__c, Is_Customer_Confirmed__c, Start_Date_Time__c, Status__c, Customer__r.First_Name__c, Customer__r.Last_Name__c, Customer__r.Phone_Number__c, Service__r.Name, Service__r.Display_Name__c, Service__r.Duration_Minutes__c, Employee__r.Name, Employee__r.First_Name__c, Employee__r.Last_Name__c, Employee__c ';
                 query += ' FROM AA_Appointment__c WHERE Business_Id__c = \'' + businessId + '\'';
                 query += ' AND Status__c != \'Done\' ';
+                query += ' AND Start_Date_Time__c >= TODAY ';
+                
             
             // Si NO es admin, agregamos un filtro estricto por su propio ID de empleado
             if (!currentEmployee.Is_Admin__c) {

@@ -128,6 +128,12 @@
                 <identifier>RecordIs_Admin_cField</identifier>
             </fieldInstance>
         </itemInstances>
+        <itemInstances>
+            <fieldInstance>
+                <fieldItem>Record.Is_Active__c</fieldItem>
+                <identifier>RecordIs_Active__cField</identifier>
+            </fieldInstance>
+        </itemInstances>
         <name>Facet-21ccb584-6cd7-49a8-aebf-3e4f7e8c72f6</name>
         <type>Facet</type>
     </flexiPageRegions>

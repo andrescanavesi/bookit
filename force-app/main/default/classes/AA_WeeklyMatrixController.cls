@@ -74,16 +74,19 @@ public with sharing class AA_WeeklyMatrixController {
                 throw new AuraHandledException('El empleado '+currentEmployee+' no esta activo. No puede ver la weekly matrix');
             }
             businessId = currentEmployee.Business_Id__c;
+            logger.info('getWeeklyOccupancy, businessId '+businessId);
 
             WeeklyMatrixResponse response = new WeeklyMatrixResponse();
             
             // 1. Get Branch (assume first one for now)
             List<AA_Business_Branch__c> branches = [SELECT Id, Name 
-                FROM AA_Business_Branch__c  WHERE Business__c = :businessId LIMIT 1];
+                FROM AA_Business_Branch__c  WHERE Business__c = :businessId 
+                ORDER By CreatedDate ASC LIMIT 1];
             if (branches.isEmpty()) return response;
             AA_Business_Branch__c branch = branches[0];
             response.branchId = branch.Id;
             response.branchName = branch.Name;
+            logger.info('getWeeklyOccupancy, branchId '+branch.Id+' branchName '+branch.Name);
 
             // Determine Start of Week (Monday)
             Date startOfWeek = targetDate.toStartOfWeek();
@@ -182,7 +185,9 @@ public with sharing class AA_WeeklyMatrixController {
                 AND Start_Date_Time__c >= :weekStartDt 
                 AND Start_Date_Time__c <= :weekEndDt
                 AND Status__c != 'Canceled'
+                AND Status__c != 'Done'
             ];
+            logger.info('getWeeklyOccupancy, appointments size '+appointments.size());
 
             List<AA_Employee_Absence__c> absences = [
                 SELECT Start_Date_Time__c, End_Date_Time__c, Employee__c 
