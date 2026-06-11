@@ -1,4 +1,4 @@
-public with sharing class AA_SalonRemindersController {
+public without sharing class AA_SalonRemindersController {
 
     public class RemindersDataWrapper {
         @AuraEnabled public List<AA_Appointment__c> confirmations {get;set;}
