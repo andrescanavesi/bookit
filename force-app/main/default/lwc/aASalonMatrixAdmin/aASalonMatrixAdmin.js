@@ -133,10 +133,9 @@ export default class AASalonMatrixAdmin extends LightningElement {
         const { error, data } = result;
         
         if (data) {
-            let colorIndex = 0;
             this.activeEmployees = data.employees.map(emp => {
-                const color = this.employeeColors[colorIndex % this.employeeColors.length];
-                colorIndex++;
+                // Toma el color de Salesforce, o asigna uno aleatorio de la paleta si está vacío
+                const color = emp.Color__c ? emp.Color__c : this.employeeColors[Math.floor(Math.random() * this.employeeColors.length)];
                 return { id: emp.Id, name: ((emp.First_Name__c ? emp.First_Name__c + ' ' : '') + (emp.Last_Name__c ? emp.Last_Name__c : '')).trim() || emp.Name, color: color };
             });
 

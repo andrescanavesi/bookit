@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomField xmlns="http://soap.sforce.com/2006/04/metadata">
+    <fullName>Payment_Amount__c</fullName>
+    <description>Most of the time it will be the service&apos;s amount but sometimes there are some extra fees that the customer has to pay for extra work. This value represents the amount paid by the customer</description>
+    <inlineHelpText>Most of the time it will be the service&apos;s amount but sometimes there are some extra fees that the customer has to pay for extra work. This value represents the amount paid by the customer</inlineHelpText>
+    <label>Payment Amount</label>
+    <precision>6</precision>
+    <required>false</required>
+    <scale>0</scale>
+    <trackHistory>false</trackHistory>
+    <trackTrending>false</trackTrending>
+    <type>Currency</type>
+</CustomField>

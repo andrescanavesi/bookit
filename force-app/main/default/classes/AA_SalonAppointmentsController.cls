@@ -166,7 +166,7 @@ public without sharing class AA_SalonAppointmentsController {
             
             // 1. Recuperamos todos los profesionales activos del salón
             wrapper.employees = [
-                SELECT Id, Name, First_Name__c, Last_Name__c 
+                SELECT Id, Name, First_Name__c, Last_Name__c, Color__c 
                 FROM AA_Employee__c 
                 WHERE Business_Branch__r.Business__c = :businessId
                 AND Is_Active__c = true

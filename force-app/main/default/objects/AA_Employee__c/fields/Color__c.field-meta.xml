@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomField xmlns="http://soap.sforce.com/2006/04/metadata">
+    <fullName>Color__c</fullName>
+    <description>Hexadecimal color including the # character, example: #E5DFD5</description>
+    <externalId>false</externalId>
+    <inlineHelpText>Hexadecimal color including the # character, example: #E5DFD5</inlineHelpText>
+    <label>Color</label>
+    <length>7</length>
+    <required>true</required>
+    <trackHistory>false</trackHistory>
+    <trackTrending>false</trackTrending>
+    <type>Text</type>
+    <unique>false</unique>
+</CustomField>
