@@ -1,0 +1,88 @@
+<template>
+    <div class="reminders-container">
+        
+        <!-- TABS -->
+        <div class="tabs-container">
+            <template for:each={tabs} for:item="tab">
+                <button key={tab.id} 
+                        class={tab.cssClass} 
+                        data-id={tab.id} 
+                        onclick={handleTabChange}>
+                    {tab.label}
+                </button>
+            </template>
+        </div>
+
+        <!-- TABLE HEADER -->
+        <div class="table-header-container">
+            <table class="reminders-table">
+                <thead>
+                    <tr>
+                        <th class="col-id">ID</th>
+                        <th class="col-name">NOMBRE</th>
+                        <th class="col-phone">CELULAR</th>
+                        <th class="col-datetime">FECHA</th>
+                        <th class="col-service">SERVICIO</th>
+                        <template if:true={isPendingPaymentsTab}>
+                            <th class="col-amount">MONTO</th>
+                        </template>
+                        <th class="col-action">ACCIÓN</th>
+                    </tr>
+                </thead>
+            </table>
+        </div>
+
+        <!-- TABLE BODY -->
+        <div class="table-scroll-container">
+            <table class="reminders-table">
+                <tbody>
+                    <template if:false={hasData}>
+                        <tr>
+                            <td colspan="4" class="no-data-msg">No hay citas en esta sección.</td>
+                        </tr>
+                    </template>
+                    <template for:each={currentData} for:item="appt">
+                        <tr key={appt.Id}>
+                            <td class="col-id">
+                                <span class="id-text">{appt.apptName}</span>
+                            </td>
+                            <td class="col-name">
+                                <div class="name-cell">
+                                    <div class="avatar-circle">{appt.initial}</div>
+                                    <span class="full-name">{appt.fullName}</span>
+                                </div>
+                            </td>
+                            <td class="col-phone">
+                                <span class="phone-text">{appt.Phone_Number__c}</span>
+                            </td>
+                            <td class="col-datetime">
+                                <span class="datetime-text">{appt.formattedDateTime}</span>
+                            </td>
+                            <td class="col-service">
+                                <span class="service-text">{appt.serviceName}</span>
+                            </td>
+                            <template if:true={isPendingPaymentsTab}>
+                                <td class="col-amount">
+                                    <span class="service-text">{appt.amountText}</span>
+                                </td>
+                            </template>
+                            <td class="col-action">
+                                <template if:false={isAwaitingTab}>
+                                    <button class="btn-whatsapp" data-phone={appt.Phone_Number__c} data-message={appt.whatsappMessage} onclick={handleWhatsAppClick}>
+                                        Enviar WhatsApp
+                                    </button>
+                                </template>
+                                <template if:true={isAwaitingTab}>
+                                    <button class="btn-confirm" data-id={appt.Id} onclick={handleConfirmClick}>
+                                        Confirmar
+                                    </button>
+                                </template>
+                            </td>
+                        </tr>
+                    </template>
+                </tbody>
+            </table>
+        </div>
+        
+    </div>
+</template>
