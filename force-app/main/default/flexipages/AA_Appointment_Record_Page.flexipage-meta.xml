@@ -313,6 +313,18 @@
                 <identifier>RecordIs_Payment_Pending__cField</identifier>
             </fieldInstance>
         </itemInstances>
+        <itemInstances>
+            <fieldInstance>
+                <fieldItem>Record.Book_Confirmation_Sent_Date__c</fieldItem>
+                <identifier>RecordBook_Confirmation_Sent_Date__cField</identifier>
+            </fieldInstance>
+        </itemInstances>
+        <itemInstances>
+            <fieldInstance>
+                <fieldItem>Record.Is_Book_Confirmation_Sent__c</fieldItem>
+                <identifier>RecordIs_Book_Confirmation_Sent__cField</identifier>
+            </fieldInstance>
+        </itemInstances>
         <name>Facet-adced6cf-3125-4996-b02a-8adf1ba0d393</name>
         <type>Facet</type>
     </flexiPageRegions>
