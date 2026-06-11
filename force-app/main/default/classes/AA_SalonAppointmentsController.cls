@@ -98,6 +98,32 @@ public without sharing class AA_SalonAppointmentsController {
     }
 
     @AuraEnabled
+    public static void markBookConfirmationAsSent(Id appointmentId) {
+        try {
+            AA_Appointment__c appt = new AA_Appointment__c(
+                Id = appointmentId,
+                Book_Confirmation_Sent_Date__c = System.now()
+            );
+            update appt;
+        } catch (Exception e) {
+            throw new AuraHandledException('Error al registrar la confirmación enviada: ' + e.getMessage());
+        }
+    }
+
+    @AuraEnabled
+    public static void markAsPaid(Id appointmentId) {
+        try {
+            AA_Appointment__c appt = new AA_Appointment__c(
+                Id = appointmentId,
+                Payment_Date__c = System.today()
+            );
+            update appt;
+        } catch (Exception e) {
+            throw new AuraHandledException('Error al registrar el pago: ' + e.getMessage());
+        }
+    }
+
+    @AuraEnabled
     public static void confirmAppointment(Id appointmentId, String internalComments) {
         try {
             AA_Appointment__c appt = new AA_Appointment__c(
