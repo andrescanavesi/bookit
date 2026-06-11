@@ -289,6 +289,30 @@
                 <identifier>RecordPayment_Method__cField</identifier>
             </fieldInstance>
         </itemInstances>
+        <itemInstances>
+            <fieldInstance>
+                <fieldItem>Record.Payment_Amount__c</fieldItem>
+                <identifier>RecordPayment_Amount__cField</identifier>
+            </fieldInstance>
+        </itemInstances>
+        <itemInstances>
+            <fieldInstance>
+                <fieldItem>Record.Payment_Date__c</fieldItem>
+                <identifier>RecordPayment_Date__cField</identifier>
+            </fieldInstance>
+        </itemInstances>
+        <itemInstances>
+            <fieldInstance>
+                <fieldItem>Record.Is_Paid__c</fieldItem>
+                <identifier>RecordIs_Paid__cField</identifier>
+            </fieldInstance>
+        </itemInstances>
+        <itemInstances>
+            <fieldInstance>
+                <fieldItem>Record.Is_Payment_Pending__c</fieldItem>
+                <identifier>RecordIs_Payment_Pending__cField</identifier>
+            </fieldInstance>
+        </itemInstances>
         <name>Facet-adced6cf-3125-4996-b02a-8adf1ba0d393</name>
         <type>Facet</type>
     </flexiPageRegions>

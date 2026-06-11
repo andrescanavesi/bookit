@@ -3,6 +3,7 @@
     <fullName>All</fullName>
     <columns>NAME</columns>
     <columns>CREATED_DATE</columns>
+    <columns>OWNER.ALIAS</columns>
     <columns>Level__c</columns>
     <columns>Log__c</columns>
     <filterScope>Everything</filterScope>

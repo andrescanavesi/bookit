@@ -9,6 +9,7 @@
     <columns>User__c</columns>
     <columns>LAST_UPDATE</columns>
     <columns>Is_Active__c</columns>
+    <columns>Color__c</columns>
     <filterScope>Everything</filterScope>
     <label>All</label>
 </ListView>
