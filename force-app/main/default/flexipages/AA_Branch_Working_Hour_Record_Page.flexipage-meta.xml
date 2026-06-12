@@ -123,6 +123,18 @@
                 <identifier>RecordOwnerIdField</identifier>
             </fieldInstance>
         </itemInstances>
+        <itemInstances>
+            <fieldInstance>
+                <fieldItem>Record.Admin_Open_Time__c</fieldItem>
+                <identifier>RecordAdmin_Open_Time__cField</identifier>
+            </fieldInstance>
+        </itemInstances>
+        <itemInstances>
+            <fieldInstance>
+                <fieldItem>Record.Admin_Close_Time__c</fieldItem>
+                <identifier>RecordAdmin_Close_Time__cField</identifier>
+            </fieldInstance>
+        </itemInstances>
         <name>Facet-f365020b-14bf-4b4a-bf55-a9a823d48658</name>
         <type>Facet</type>
     </flexiPageRegions>
