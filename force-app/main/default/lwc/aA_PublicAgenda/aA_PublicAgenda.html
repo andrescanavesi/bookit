@@ -201,12 +201,14 @@
                             <button class="step-back" onclick={volverPasoDesde6}>&larr; Volver</button>
                             <span class="step-counter">PASO 3 DE 5</span>
                         </div>
-                        <h2 class="h2" style="margin-bottom: 12px;">Elegí día y hora</h2>
-                        <template if:true={servicioSeleccionadoInfo}>
-                            <p class="subtitle" style="font-size: 16px;">
-                                {servicioSeleccionadoInfo.Nombre_Visible__c} · {servicioSeleccionadoInfo.duracionFormateada}
-                            </p>
-                        </template>
+                        <h2 class="h2" style="margin-bottom: 12px;">
+                            <template if:true={servicioCabeceraInfo}>
+                                Elegí día y hora para {servicioCabeceraInfo.nombre}, {servicioCabeceraInfo.duracion}
+                            </template>
+                            <template if:false={servicioCabeceraInfo}>
+                                Elegí día y hora
+                            </template>
+                        </h2>
                     </div>
 
                     <!-- Selector de Días (Horizontal Scroll) -->
@@ -226,11 +228,24 @@
 
                     <!-- Grilla de Horas -->
                     <template if:true={hasHorasDisponibles}>
-                        <div class="slot-grid">
+                        <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 8px; margin-bottom: 12px; font-size: 12px; font-weight: bold; text-align: center; color: var(--black);">
+                            <div>Actual (Todos)</div>
+                            <div>Opción 1 (Cluster)</div>
+                            <div>Opción 2 (Gap 60m)</div>
+                        </div>
+                        <div style="display: flex; flex-direction: column; gap: 12px;">
                             <template for:each={horasDisponiblesList} for:item="hora">
-                                <button key={hora.val} class={hora.cssClass} data-hora={hora.val} onclick={handleSelectHora}>
-                                    {hora.val}
-                                </button>
+                                <div key={hora.val} style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 8px;">
+                                    <button class={hora.cssClass} data-hora={hora.val} onclick={handleSelectHora}>
+                                        {hora.val}
+                                    </button>
+                                    <button class={hora.cssClass} style={hora.clusterStyle} data-hora={hora.val} onclick={handleSelectHora} disabled={hora.isClusterDisabled}>
+                                        {hora.val}
+                                    </button>
+                                    <button class={hora.cssClass} style={hora.minGapStyle} data-hora={hora.val} onclick={handleSelectHora} disabled={hora.isMinGapDisabled}>
+                                        {hora.val}
+                                    </button>
+                                </div>
                             </template>
                         </div>
                     </template>

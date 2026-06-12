@@ -327,6 +327,9 @@ public without sharing class AA_AppointmentService {
             if (isValidGapBefore && isValidGapAfter) {
                 gapSetMap.get(empId).add(slotStart);
             }
+            
+            slot.isClusterStrategy = isAdjacent;
+            slot.isMinGapStrategy = (isValidGapBefore && isValidGapAfter);
         }
         
         // Print tables per employee

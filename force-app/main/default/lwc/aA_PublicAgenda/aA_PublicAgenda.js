@@ -194,7 +194,29 @@ export default class AAPublicAgenda extends LightningElement {
         return service
     }
 
-    
+    get servicioCabeceraInfo() {
+        if (!this.selectedServiceIds || this.selectedServiceIds.length === 0) return null;
+        
+        let nombres = [];
+        let totalMinutos = 0;
+        
+        this.selectedServiceIds.forEach(id => {
+            const s = this.services.find(srv => srv.Id === id);
+            if (s) {
+                nombres.push(s.Nombre_Visible__c);
+                totalMinutos += s.Duracion_Base_Min__c || 0;
+            }
+        });
+        
+        let duracionFormateada = totalMinutos >= 60 
+            ? `${Math.floor(totalMinutos / 60)} H${totalMinutos % 60 > 0 ? ` ${totalMinutos % 60} MIN` : ''}` 
+            : `${totalMinutos} MIN`;
+            
+        return {
+            nombre: nombres.join(' y '),
+            duracion: duracionFormateada
+        };
+    }
 
     get isBotonFechaContinuarDeshabilitado() { return !this.reserva.horaSel; }
 
@@ -921,16 +943,28 @@ export default class AAPublicAgenda extends LightningElement {
             comboSlots.forEach(combo => {
                 // Usamos timeFormatted (Ej: '09:00') como clave única
                 if (!uniqueTimes.has(combo.timeFormatted)) {
+                    let clusterValid = combo.slots.every(s => s.isClusterStrategy);
+                    let minGapValid = combo.slots.every(s => s.isMinGapStrategy);
+                    
                     uniqueTimes.set(combo.timeFormatted, { 
                         val: combo.timeFormatted, 
                         cssClass: 'slot-btn',
+                        isClusterDisabled: !clusterValid,
+                        clusterStyle: clusterValid ? 'background-color: #4CAF50; color: white; border-color: #4CAF50;' : 'opacity: 0.3; pointer-events: none;',
+                        isMinGapDisabled: !minGapValid,
+                        minGapStyle: minGapValid ? 'background-color: #4CAF50; color: white; border-color: #4CAF50;' : 'opacity: 0.3; pointer-events: none;',
                         slotData: combo // Guardamos el objeto AA_ComboSlot completo
                     });
                 }
             });
             
             // Convertimos el Map a Array para el iterador del HTML
-            this.horasDisponiblesList = Array.from(uniqueTimes.values());
+            let list = Array.from(uniqueTimes.values());
+            
+            // Ordenar por hora (ej. '08:00' antes de '09:00')
+            list.sort((a, b) => a.val.localeCompare(b.val));
+            
+            this.horasDisponiblesList = list;
             console.info('horasDisponiblesList');
             console.info(JSON.stringify(this.horasDisponiblesList, null, 2));
             

@@ -13,6 +13,9 @@ public class AA_AvailableSlot {
     @AuraEnabled public String slotDayString;
     @AuraEnabled public String slotTimeString;
     
+    @AuraEnabled public Boolean isClusterStrategy {get; set;}
+    @AuraEnabled public Boolean isMinGapStrategy {get; set;}
+    
     @AuraEnabled public String dayNumber;
     @AuraEnabled public String dayOfTheWeek;
     @AuraEnabled public String monthName;
@@ -64,6 +67,9 @@ public class AA_AvailableSlot {
         }
         this.compositeId = 'SLOT|'+employeeId+'|'+this.employeeName+'|'+this.serviceId+'|'
             +this.serviceName+'|'+this.branchName+'|'+this.slotDayString+'|'+slotTimeString;
+        
+        this.isClusterStrategy = false;
+        this.isMinGapStrategy = false;
     }
     
     // AA_AvailableSlot.testSlot();
