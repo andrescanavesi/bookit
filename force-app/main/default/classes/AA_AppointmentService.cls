@@ -135,6 +135,7 @@ public without sharing class AA_AppointmentService {
                 }
             }
         }
+        logSchedulingSimulations(finalAvailableSlots, employeeBlockers, workingHoursMap, targetDate);
         logger.info('available slots: '+finalAvailableSlots.size());
         return finalAvailableSlots;
     }
@@ -255,6 +256,102 @@ public without sharing class AA_AppointmentService {
         }
         
         return finalAvailableSlots;
+    }
+    
+    private static void logSchedulingSimulations(
+        List<AA_AvailableSlot> generatedSlots, 
+        Map<Id, List<AA_TimeBlock>> employeeBlockers,
+        Map<Id, AA_Employee_Working_Hour__c> workingHoursMap,
+        Date targetDate) 
+    {
+        AA_Logger logger = new AA_Logger(true);
+        Integer minGapMinutes = 60;
+        
+        Map<Id, Set<Datetime>> clusterSetMap = new Map<Id, Set<Datetime>>();
+        Map<Id, Set<Datetime>> gapSetMap = new Map<Id, Set<Datetime>>();
+        Map<Id, List<AA_AvailableSlot>> empSlotsMap = new Map<Id, List<AA_AvailableSlot>>();
+        
+        for (AA_AvailableSlot slot : generatedSlots) {
+            Id empId = slot.employeeId;
+            AA_Employee_Working_Hour__c wh = workingHoursMap.get(empId);
+            if (wh == null) continue;
+            
+            if(!empSlotsMap.containsKey(empId)) empSlotsMap.put(empId, new List<AA_AvailableSlot>());
+            if(!clusterSetMap.containsKey(empId)) clusterSetMap.put(empId, new Set<Datetime>());
+            if(!gapSetMap.containsKey(empId)) gapSetMap.put(empId, new Set<Datetime>());
+            
+            empSlotsMap.get(empId).add(slot);
+            
+            Datetime shiftStart = Datetime.newInstance(targetDate, wh.Start_Hour__c);
+            Datetime shiftEnd = Datetime.newInstance(targetDate, wh.End_Hour__c);
+            List<AA_TimeBlock> blockers = employeeBlockers.get(empId);
+            
+            Datetime slotStart = slot.slotTime;
+            Datetime slotEnd = slot.endTime;
+            
+            // --- Strategy 1: Cluster Scheduling ---
+            Boolean isAdjacent = false;
+            if (slotStart == shiftStart || slotEnd == shiftEnd) {
+                isAdjacent = true;
+            } else {
+                for (AA_TimeBlock block : blockers) {
+                    if (slotStart == block.endTime || slotEnd == block.startTime) {
+                        isAdjacent = true;
+                        break;
+                    }
+                }
+            }
+            if (isAdjacent) {
+                clusterSetMap.get(empId).add(slotStart);
+            }
+            
+            // --- Strategy 2: Minimum Gap (60 mins) ---
+            Datetime closestBefore = shiftStart;
+            Datetime closestAfter = shiftEnd;
+            
+            for (AA_TimeBlock block : blockers) {
+                if (block.endTime <= slotStart && block.endTime > closestBefore) {
+                    closestBefore = block.endTime;
+                }
+                if (block.startTime >= slotEnd && block.startTime < closestAfter) {
+                    closestAfter = block.startTime;
+                }
+            }
+            
+            Long gapBeforeMins = (slotStart.getTime() - closestBefore.getTime()) / 60000;
+            Long gapAfterMins = (closestAfter.getTime() - slotEnd.getTime()) / 60000;
+            
+            Boolean isValidGapBefore = (gapBeforeMins == 0 || gapBeforeMins >= minGapMinutes);
+            Boolean isValidGapAfter = (gapAfterMins == 0 || gapAfterMins >= minGapMinutes);
+            
+            if (isValidGapBefore && isValidGapAfter) {
+                gapSetMap.get(empId).add(slotStart);
+            }
+        }
+        
+        // Print tables per employee
+        for (Id empId : empSlotsMap.keySet()) {
+            List<AA_AvailableSlot> empSlots = empSlotsMap.get(empId);
+            String empName = empSlots[0].employeeName;
+            
+            List<String> logLines = new List<String>();
+            logLines.add('\\n======================================================================');
+            logLines.add(' SIMULATION: ' + empName + ' | Date: ' + targetDate);
+            logLines.add('======================================================================');
+            logLines.add(' HORA        | ACTUAL         | ESTRATEGIA 1 (Cluster) | ESTRATEGIA 2 (Gap 60m)');
+            logLines.add('----------------------------------------------------------------------');
+            
+            for (AA_AvailableSlot slot : empSlots) {
+                String tStr = slot.slotTimeString; // Using the GMT-3 formatted string
+                String clusterCol = clusterSetMap.get(empId).contains(slot.slotTime) ? tStr.rightPad(22) : 'X'.rightPad(22);
+                String gapCol = gapSetMap.get(empId).contains(slot.slotTime) ? tStr : 'X';
+                
+                logLines.add(' ' + tStr.rightPad(11) + ' | ' + tStr.rightPad(14) + ' | ' + clusterCol + ' | ' + gapCol);
+            }
+            logLines.add('======================================================================\\n');
+            
+            logger.info(String.join(logLines, '\\n'));
+        }
     }
     
     public static AA_Appointment__c saveAppointment(Id customerId, Id employeeId, Id serviceId, String dayString, String hourString){
