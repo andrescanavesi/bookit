@@ -19,6 +19,8 @@ public with sharing class AA_WeeklyMatrixController {
     public class BranchDayHour {
         @AuraEnabled public String openTime { get; set; }
         @AuraEnabled public String closeTime { get; set; }
+        @AuraEnabled public String adminOpenTime { get; set; }
+        @AuraEnabled public String adminCloseTime { get; set; }
     }
 
     public class SlotCapacity {
@@ -106,7 +108,7 @@ public with sharing class AA_WeeklyMatrixController {
             Date endOfWeek = startOfWeek.addDays(6); // Sunday
             
             // 2. Get Branch Working Hours
-            List<AA_Branch_Working_Hour__c> bwhs = [SELECT Day_Of_Week__c, Open_Time__c, Close_Time__c 
+            List<AA_Branch_Working_Hour__c> bwhs = [SELECT Day_Of_Week__c, Open_Time__c, Close_Time__c, Admin_Open_Time__c, Admin_Close_Time__c
                                                         FROM AA_Branch_Working_Hour__c 
                                                         WHERE Business_Branch__c = :branch.Id];
             
@@ -117,10 +119,15 @@ public with sharing class AA_WeeklyMatrixController {
                 BranchDayHour bdh = new BranchDayHour();
                 bdh.openTime = formatTime(bwh.Open_Time__c);
                 bdh.closeTime = formatTime(bwh.Close_Time__c);
+                if (bwh.Admin_Open_Time__c != null) bdh.adminOpenTime = formatTime(bwh.Admin_Open_Time__c);
+                if (bwh.Admin_Close_Time__c != null) bdh.adminCloseTime = formatTime(bwh.Admin_Close_Time__c);
                 response.branchHours.put(bwh.Day_Of_Week__c, bdh);
                 
-                if (bwh.Open_Time__c < minOpenTime) minOpenTime = bwh.Open_Time__c;
-                if (bwh.Close_Time__c > maxCloseTime) maxCloseTime = bwh.Close_Time__c;
+                Time effOpenTime = bwh.Admin_Open_Time__c != null ? bwh.Admin_Open_Time__c : bwh.Open_Time__c;
+                Time effCloseTime = bwh.Admin_Close_Time__c != null ? bwh.Admin_Close_Time__c : bwh.Close_Time__c;
+                
+                if (effOpenTime < minOpenTime) minOpenTime = effOpenTime;
+                if (effCloseTime > maxCloseTime) maxCloseTime = effCloseTime;
             }
 
             // Generate Time Slots (every 30 mins)
@@ -228,7 +235,11 @@ public with sharing class AA_WeeklyMatrixController {
                     if (response.holidays.containsKey(dateStr)) {
                         sc.status = 'Feriado';
                     } else if (sc.capacity == 0) {
-                        sc.status = 'Inactivo';
+                        if (sc.occupied > 0) {
+                            sc.status = 'Lleno';
+                        } else {
+                            sc.status = 'Inactivo';
+                        }
                     } else if (sc.occupied == 0) {
                         sc.status = 'Libre';
                     } else if (sc.occupied >= sc.capacity) {

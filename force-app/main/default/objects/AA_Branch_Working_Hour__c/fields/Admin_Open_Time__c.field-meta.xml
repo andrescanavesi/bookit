@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomField xmlns="http://soap.sforce.com/2006/04/metadata">
+    <fullName>Admin_Open_Time__c</fullName>
+    <description>This field is used to draw the admin calendar. Usually is earlier than the Open_Time__c and is used by the branch admin to schedule special appointments before official opening</description>
+    <inlineHelpText>This field is used to draw the admin calendar. Usually is earlier than the Open_Time__c and is used by the branch admin to schedule special appointments before official opening</inlineHelpText>
+    <label>Admin Open Time</label>
+    <required>true</required>
+    <trackHistory>false</trackHistory>
+    <trackTrending>false</trackTrending>
+    <type>Time</type>
+</CustomField>

@@ -231,7 +231,7 @@ public without sharing class AA_SalonAppointmentsController {
             ];
 
             List<AA_Branch_Working_Hour__c> bwhList = [
-                SELECT Open_Time__c, Close_Time__c
+                SELECT Open_Time__c, Close_Time__c, Admin_Open_Time__c, Admin_Close_Time__c
                 FROM AA_Branch_Working_Hour__c
                 WHERE Business_Branch__r.Business__c = :businessId
                 AND Day_Of_Week__c = :dayOfWeek

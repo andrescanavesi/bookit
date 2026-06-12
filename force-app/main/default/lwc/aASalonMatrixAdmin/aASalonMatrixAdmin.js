@@ -210,8 +210,11 @@ export default class AASalonMatrixAdmin extends LightningElement {
             this.customerOptions = data.allCustomers.map(c => ({ label: c.Name, value: c.Id }));
             
             if (data.branchWorkingHour) {
-                this.branchStartMins = this.sfTimeToMins(data.branchWorkingHour.Open_Time__c);
-                this.branchEndMins = this.sfTimeToMins(data.branchWorkingHour.Close_Time__c);
+                const bwh = data.branchWorkingHour;
+                const effOpen = bwh.Admin_Open_Time__c ? bwh.Admin_Open_Time__c : bwh.Open_Time__c;
+                const effClose = bwh.Admin_Close_Time__c ? bwh.Admin_Close_Time__c : bwh.Close_Time__c;
+                this.branchStartMins = this.sfTimeToMins(effOpen);
+                this.branchEndMins = this.sfTimeToMins(effClose);
             } else {
                 this.branchStartMins = 9 * 60;
                 this.branchEndMins = 18 * 60;
