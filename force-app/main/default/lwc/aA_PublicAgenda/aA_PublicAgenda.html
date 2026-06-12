@@ -337,12 +337,17 @@
 
                         </div>
 
-                        <!-- Contenedor Inferior (Dirección y Botón) -->
+                        <!-- Contenedor Inferior (Dirección y Botones) -->
                         <div class="success-screen__bottom">
                             <div class="notice-block notice-block--final">
                                 <p style="color: var(--black); line-height: 1.5; opacity: 0.8;">
                                     Recibís recordatorio 24h antes. Si necesitás cancelar, hacelo con 12h de anticipación.
                                 </p>
+                            </div>
+
+                            <div style="display: flex; flex-direction: column; gap: 12px; margin-bottom: 24px;">
+                                <a href={googleCalendarUrl} target="_blank" class="btn-ghost" style="text-align: center; text-decoration: none;">Agregar a Google Calendar</a>
+                                <button class="btn-ghost" onclick={handleDownloadIcs}>Agregar a Apple Calendar</button>
                             </div>
                             
                             <button class="btn" onclick={navToWelcome}>Volver al inicio</button>

@@ -55,7 +55,7 @@ public without sharing class AA_PublicAgendaController {
     }*/
     
     @AuraEnabled(cacheable=true)
-    public static AA_Business__c getBusinessInfo(Id businessId) {
+    public static Map<String, String> getBusinessInfo(Id businessId) {
         AA_Logger logger = new AA_Logger(true);
         logger.info('getBusinessInfo called');
         List<AA_Business__c> businesses = [
@@ -67,11 +67,19 @@ public without sharing class AA_PublicAgendaController {
         if(businesses.isEmpty()){
             return null;
         }
-        return businesses.get(0);
+        
+        AA_Business_Branch__c branch = getBusinessBranch(businessId);
+        
+        Map<String, String> result = new Map<String, String>();
+        result.put('Logo_URL__c', businesses[0].Logo_URL__c);
+        result.put('Phone_Number__c', businesses[0].Phone_Number__c);
+        result.put('Address__c', businesses[0].Address__c);
+        result.put('Branch_Name', branch.Display_Name__c != null ? branch.Display_Name__c : branch.Name);
+        return result;
     }
     
     private static AA_Business_Branch__c getBusinessBranch(Id businessId){
-        List<AA_Business_Branch__c> branches = [SELECT Id, Name, Address__c 
+        List<AA_Business_Branch__c> branches = [SELECT Id, Name, Address__c, Display_Name__c 
                                                 FROM AA_Business_Branch__c 
                                                 WHERE Business__c = :businessId
                                                 ORDER BY CreatedDate DESC

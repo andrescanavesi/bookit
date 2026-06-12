@@ -266,6 +266,89 @@ export default class AAPublicAgenda extends LightningElement {
 
     get isBotonConfirmarDeshabilitado() { return !this.reserva.formaPago; }
 
+    get googleCalendarUrl() {
+        if (!this.reserva.fechaSel || !this.reserva.horaSel) return '#';
+        
+        const fechaParts = this.reserva.fechaSel.split('-');
+        const horaParts = this.reserva.horaSel.split(':');
+        const start = new Date(fechaParts[0], fechaParts[1] - 1, fechaParts[2], horaParts[0], horaParts[1]);
+        
+        let durationMins = 0;
+        if (this.reserva.slotData && this.reserva.slotData.slots) {
+            this.reserva.slotData.slots.forEach(s => durationMins += s.durationMinutes || 0);
+        }
+        const end = new Date(start.getTime() + durationMins * 60000);
+
+        const formatGCalDate = (d) => {
+            return d.getFullYear() + 
+                   String(d.getMonth() + 1).padStart(2, '0') + 
+                   String(d.getDate()).padStart(2, '0') + 'T' + 
+                   String(d.getHours()).padStart(2, '0') + 
+                   String(d.getMinutes()).padStart(2, '0') + '00';
+        };
+
+        const branchName = this.businessInfo && this.businessInfo.branchName ? this.businessInfo.branchName : 'nuestro local';
+        const title = encodeURIComponent(`Reserva de ${this.resumenDatos.servicio} en ${branchName}`);
+        const dates = `${formatGCalDate(start)}/${formatGCalDate(end)}`;
+        const details = encodeURIComponent(`Te esperamos para tu servicio de ${this.resumenDatos.servicio}.`);
+        const location = encodeURIComponent(this.businessInfo && this.businessInfo.address ? this.businessInfo.address : '');
+
+        return `https://calendar.google.com/calendar/render?action=TEMPLATE&text=${title}&dates=${dates}&details=${details}&location=${location}`;
+    }
+
+    handleDownloadIcs() {
+        if (!this.reserva.fechaSel || !this.reserva.horaSel) return;
+        
+        const fechaParts = this.reserva.fechaSel.split('-');
+        const horaParts = this.reserva.horaSel.split(':');
+        const start = new Date(fechaParts[0], fechaParts[1] - 1, fechaParts[2], horaParts[0], horaParts[1]);
+        
+        let durationMins = 0;
+        if (this.reserva.slotData && this.reserva.slotData.slots) {
+            this.reserva.slotData.slots.forEach(s => durationMins += s.durationMinutes || 0);
+        }
+        const end = new Date(start.getTime() + durationMins * 60000);
+
+        const formatIcsDate = (d) => {
+            return d.getFullYear() + 
+                   String(d.getMonth() + 1).padStart(2, '0') + 
+                   String(d.getDate()).padStart(2, '0') + 'T' + 
+                   String(d.getHours()).padStart(2, '0') + 
+                   String(d.getMinutes()).padStart(2, '0') + '00';
+        };
+
+        const branchName = this.businessInfo && this.businessInfo.branchName ? this.businessInfo.branchName : 'nuestro local';
+        const title = `Reserva de ${this.resumenDatos.servicio} en ${branchName}`;
+        const description = `Te esperamos para tu servicio de ${this.resumenDatos.servicio}.`;
+        const location = this.businessInfo && this.businessInfo.address ? this.businessInfo.address : '';
+
+        const icsContent = [
+            'BEGIN:VCALENDAR',
+            'VERSION:2.0',
+            'PRODID:-//Bookit//App//ES',
+            'BEGIN:VEVENT',
+            `UID:${new Date().getTime()}@bookit.com`,
+            `DTSTAMP:${formatIcsDate(new Date())}`,
+            `DTSTART:${formatIcsDate(start)}`,
+            `DTEND:${formatIcsDate(end)}`,
+            `SUMMARY:${title}`,
+            `DESCRIPTION:${description}`,
+            `LOCATION:${location}`,
+            'END:VEVENT',
+            'END:VCALENDAR'
+        ].join('\\r\\n');
+
+        const blob = new Blob([icsContent], { type: 'text/calendar;charset=utf-8' });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = 'reserva.ics';
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        URL.revokeObjectURL(url);
+    }
+
     // --- ACCIONES GENERALES ---
 
     connectedCallback() {
@@ -301,7 +384,8 @@ export default class AAPublicAgenda extends LightningElement {
                 this.businessInfo = {
                     logoUrl: businessDB.Logo_URL__c || '',
                     address: businessDB.Address__c || '',
-                    whatsappUrl: defaultWaUrl
+                    whatsappUrl: defaultWaUrl,
+                    branchName: businessDB.Branch_Name || 'nuestro local'
                 };
             }
 
