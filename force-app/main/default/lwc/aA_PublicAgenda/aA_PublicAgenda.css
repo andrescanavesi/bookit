@@ -426,7 +426,7 @@ h2 {
   gap: 12px;
   overflow-x: auto;
   padding-bottom: 8px; /* Espacio para que el scroll no corte el borde */
-  margin: 0 -24px 32px; /* Margen negativo para que ocupe todo el ancho de la pantalla */
+  margin: 0 -24px 16px; /* Margen negativo para que ocupe todo el ancho de la pantalla */
   padding-left: 24px;
   padding-right: 24px;
   -webkit-overflow-scrolling: touch; /* Suavidad en iOS */

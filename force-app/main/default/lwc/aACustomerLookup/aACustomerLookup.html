@@ -1,0 +1,84 @@
+<template>
+    <div class="lookup-container">
+        
+        <!-- Estado Seleccionado -->
+        <template if:true={selectedCustomerId}>
+            <div class="selected-pill">
+                <span class="selected-text">{selectedCustomerName}</span>
+                <button class="clear-btn" onclick={handleClearSelection} title="Quitar selección">✕</button>
+            </div>
+        </template>
+        
+        <!-- Estado Búsqueda -->
+        <template if:false={selectedCustomerId}>
+            <div class="input-wrapper">
+                <input 
+                    type="text" 
+                    class="lookup-input" 
+                    placeholder="Buscar por nombre o celular..." 
+                    value={searchTerm}
+                    oninput={handleSearchTermChange}
+                    onblur={handleBlur}
+                    autocomplete="off"
+                />
+                
+                <template if:true={isSearching}>
+                    <div class="spinner-container">
+                        <lightning-spinner alternative-text="Buscando" size="small"></lightning-spinner>
+                    </div>
+                </template>
+            </div>
+            
+            <!-- Mensaje de Error (si existe) -->
+            <template if:true={errorMsg}>
+                <div class="error-msg">{errorMsg}</div>
+            </template>
+            
+            <!-- Dropdown de Resultados -->
+            <template if:true={showDropdown}>
+                <div class="dropdown-menu">
+                    <template if:true={hasResults}>
+                        <ul class="result-list">
+                            <template for:each={searchResults} for:item="cust">
+                                <li key={cust.id} class="result-item" data-id={cust.id} data-name={cust.name} onclick={handleSelectCustomer}>
+                                    <div class="cust-name">{cust.name}</div>
+                                    <div class="cust-phone">📱 {cust.phone}</div>
+                                </li>
+                            </template>
+                        </ul>
+                    </template>
+                    <template if:false={hasResults}>
+                        <template if:false={isSearching}>
+                            <div class="no-results">No se encontraron clientes.</div>
+                        </template>
+                    </template>
+                    
+                    <!-- Acción de Crear Nueva -->
+                    <div class="create-action" onmousedown={handleOpenCreateForm}>
+                        <span>+ Crear nueva clienta</span>
+                    </div>
+                </div>
+            </template>
+            
+            <!-- Formulario Inline de Creación -->
+            <template if:true={isCreating}>
+                <div class="create-form">
+                    <h4>Nueva Clienta</h4>
+                    <div class="form-row">
+                        <input type="text" class="form-input" placeholder="Nombre *" data-field="newFirstName" value={newFirstName} onchange={handleNewFieldChange}/>
+                        <input type="text" class="form-input" placeholder="Apellido *" data-field="newLastName" value={newLastName} onchange={handleNewFieldChange}/>
+                    </div>
+                    <div class="form-row">
+                        <input type="tel" class="form-input" placeholder="Celular" data-field="newPhone" value={newPhone} onchange={handleNewFieldChange}/>
+                    </div>
+                    
+                    <div class="form-actions">
+                        <button class="btn-cancel" onclick={handleCloseCreateForm}>Cancelar</button>
+                        <button class="btn-save" onclick={handleCreateCustomer}>Guardar y Seleccionar</button>
+                    </div>
+                </div>
+            </template>
+        </template>
+        
+    </div>
+</template>

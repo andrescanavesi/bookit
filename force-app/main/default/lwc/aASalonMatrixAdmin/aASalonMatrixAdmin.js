@@ -380,7 +380,7 @@ export default class AASalonMatrixAdmin extends LightningElement {
                         id: `${emp.id}_${timeLabel}`, isTimeLabel: false, isOccupied: false, isBlocked: false,
                         time: timeLabel, empId: emp.id,
                         cssClass: 'cell-outside-hours free-cell',
-                        outsideLabel: 'Fuera de horario'
+                        outsideLabel: ''
                     });
                 } else if (isBlocked) {
                    cells.push({
@@ -603,10 +603,14 @@ export default class AASalonMatrixAdmin extends LightningElement {
     // ACTUALIZA tu handleFormChange actual para incluir los nuevos selects:
     handleFormChange(event) {
         const field = event.target.name;
-        if (field === 'customer') this.selectedCustomerId = event.target.value;
         if (field === 'service') this.selectedServiceId = event.target.value;
         if (field === 'absenceCategory') this.selectedAbsenceCategory = event.target.value;
         if (field === 'absenceDuration') this.selectedAbsenceDuration = event.target.value;
+    }
+
+    handleCustomerSelect(event) {
+        this.selectedCustomerId = event.detail.customerId;
+        // Optionally save the customerName if needed
     }
 
 // --- ACCIÓN: CLICK EN SLOT BLOQUEADO ---
