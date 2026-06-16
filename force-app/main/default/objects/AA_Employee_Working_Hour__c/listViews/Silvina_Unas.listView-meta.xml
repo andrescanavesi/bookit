@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ListView xmlns="http://soap.sforce.com/2006/04/metadata">
+    <fullName>Silvina_Unas</fullName>
+    <columns>NAME</columns>
+    <columns>Day_Of_Week__c</columns>
+    <columns>Start_Hour__c</columns>
+    <columns>End_Hour__c</columns>
+    <columns>Start_Default_Break_Hour__c</columns>
+    <columns>End_Default_Break_Hour__c</columns>
+    <filterScope>Everything</filterScope>
+    <filters>
+        <field>NAME</field>
+        <operation>contains</operation>
+        <value>Silvina</value>
+    </filters>
+    <label>Silvina Uñas</label>
+</ListView>

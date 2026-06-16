@@ -22,6 +22,10 @@
         <enabled>false</enabled>
     </classAccesses>
     <classAccesses>
+        <apexClass>AA_CustomerLookupController</apexClass>
+        <enabled>false</enabled>
+    </classAccesses>
+    <classAccesses>
         <apexClass>AA_CustomerTriggerHandler</apexClass>
         <enabled>false</enabled>
     </classAccesses>
@@ -445,6 +449,11 @@
         <readable>true</readable>
     </fieldPermissions>
     <fieldPermissions>
+        <editable>false</editable>
+        <field>AA_Employee_Service__c.Branch_Name__c</field>
+        <readable>true</readable>
+    </fieldPermissions>
+    <fieldPermissions>
         <editable>true</editable>
         <field>AA_Employee_Working_Hour__c.End_Default_Break_Hour__c</field>
         <readable>true</readable>
@@ -473,6 +482,16 @@
         <editable>true</editable>
         <field>AA_Employee__c.User__c</field>
         <readable>true</readable>
+    </fieldPermissions>
+    <fieldPermissions>
+        <editable>false</editable>
+        <field>AA_Log_Event__e.Message__c</field>
+        <readable>false</readable>
+    </fieldPermissions>
+    <fieldPermissions>
+        <editable>false</editable>
+        <field>AA_Send_Email_Event__e.Payload__c</field>
+        <readable>false</readable>
     </fieldPermissions>
     <fieldPermissions>
         <editable>true</editable>
@@ -552,6 +571,10 @@
     </tabVisibilities>
     <tabVisibilities>
         <tab>AA_Employee_Absence__c</tab>
+        <visibility>DefaultOn</visibility>
+    </tabVisibilities>
+    <tabVisibilities>
+        <tab>AA_Employee_Service__c</tab>
         <visibility>DefaultOn</visibility>
     </tabVisibilities>
     <tabVisibilities>
