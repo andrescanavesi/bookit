@@ -25,8 +25,9 @@ public without sharing class AA_EmailEventHandler {
                     for (String addr : request.toAddresses) {
                         if (ALLOWED_EMAILS.contains(addr.toLowerCase())) {
                             validAddresses.add(addr);
+                             logger.info('email to be sent '+addr+' subject:'+request.subject);
                         } else {
-                            logger.info('Email bloqueado por seguridad (no está en ALLOWED_EMAILS): ' + addr);
+                            logger.info('Email bloqueado por seguridad (no está en ALLOWED_EMAILS): ' + addr+' subject:'+request.subject);
                         }
                     }
                     
