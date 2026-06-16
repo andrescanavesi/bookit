@@ -145,13 +145,31 @@ export default class AASalonReminders extends LightningElement {
         });
     }
 
+    formatWhatsAppNumber(phone) {
+        if (!phone) return '';
+        // 1. Quitar todo lo que no sea dígito (+, -, espacios, paréntesis)
+        let clean = phone.replace(/\D/g, '');
+        
+        // 2. Si empieza con 00, lo limpiamos (ej: 0059899 -> 59899)
+        if (clean.startsWith('00')) {
+            clean = clean.substring(2);
+        }
+        
+        // 3. Regla específica para Uruguay: Si empieza con 09 y tiene 9 dígitos (ej: 099214387)
+        if (clean.startsWith('09') && clean.length === 9) {
+            clean = '598' + clean.substring(1); // Quitamos el 0 y agregamos 598
+        }
+        
+        return clean;
+    }
+
     async handleWhatsAppClick(event) {
         const phone = event.currentTarget.dataset.phone;
         const message = event.currentTarget.dataset.message;
         const appointmentId = event.currentTarget.dataset.id;
         
         if (phone && phone !== '-' && message) {
-            const cleanPhone = phone.replace(/\D/g, '');
+            const cleanPhone = this.formatWhatsAppNumber(phone);
             window.open(`https://wa.me/${cleanPhone}?text=${encodeURIComponent(message)}`, '_blank');
             
             try {

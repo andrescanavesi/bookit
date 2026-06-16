@@ -2,6 +2,24 @@ public with sharing class AA_CustomerTriggerHandler {
     
     public static void handleBeforeInsertUpdate(List<AA_Customer__c> newRecords, Map<Id, AA_Customer__c> oldMap, Boolean isInsert, Boolean isUpdate) {
         
+        // --- NORMALIZACIÓN DE TELÉFONO (WhatsApp format) ---
+        // Normalizamos el teléfono antes de revisar duplicados para asegurar integridad
+        for (AA_Customer__c record : newRecords) {
+            if (isInsert && String.isNotBlank(record.Phone_Number__c)) {
+                String clean = record.Phone_Number__c.replaceAll('\\D', ''); // Quita todo lo que no sea dígito
+                
+                if (clean.startsWith('00')) {
+                    clean = clean.substring(2);
+                }
+                
+                if (clean.startsWith('09') && clean.length() == 9) {
+                    clean = '598' + clean.substring(1);
+                }
+                
+                record.Phone_Number__c = clean;
+            }
+        }
+        
         List<AA_Customer__c> recordsToProcess = new List<AA_Customer__c>();
         Set<Id> businessIds = new Set<Id>();
         
