@@ -18,7 +18,11 @@ public without sharing class AA_Logger {
         log('INFO', message);
     }
     
-    public void error(String message){
+    public void warning(String message){
+        log('WARNING', message);
+    }
+
+     public void error(String message){
         log('ERROR', message);
     }
     
