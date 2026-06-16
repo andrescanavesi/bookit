@@ -31,6 +31,8 @@
 		<members>AA_Service_Category__c</members>
 		<members>Log__c</members>
 		<members>User</members>
+		<members>AA_Send_Email_Event__e</members>
+		<members>AA_Log_Event__e</members>
 		<name>CustomObject</name>
 	</types>
 	<types>

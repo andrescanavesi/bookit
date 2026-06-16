@@ -32,6 +32,8 @@
     <tabs>AA_Employee_Working_Hour__c</tabs>
     <tabs>AA_Branch_Working_Hour__c</tabs>
     <tabs>AA_Branch_Holiday__c</tabs>
+    <tabs>AA_Employee_Service__c</tabs>
+    <tabs>Log__c</tabs>
     <uiType>Lightning</uiType>
     <utilityBar>AA_Book_It_UtilityBar</utilityBar>
 </CustomApplication>
