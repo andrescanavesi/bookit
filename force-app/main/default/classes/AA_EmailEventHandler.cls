@@ -56,6 +56,9 @@ public without sharing class AA_EmailEventHandler {
                 if (String.isNotBlank(request.plainTextBody)) {
                     mail.setPlainTextBody(request.plainTextBody);
                 }
+                if (String.isNotBlank(request.orgWideEmailAddressId)) {
+                    mail.setOrgWideEmailAddressId(request.orgWideEmailAddressId);
+                }
                 if (request.saveAsActivity != null) {
                     mail.setSaveAsActivity(request.saveAsActivity);
                 }

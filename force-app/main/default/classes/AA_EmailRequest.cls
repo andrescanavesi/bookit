@@ -6,6 +6,7 @@ public class AA_EmailRequest {
     public Id templateId;
     public Id targetObjectId;
     public Id whatId;
+    public Id orgWideEmailAddressId;
     public Boolean saveAsActivity;
     
     // Constructor vacío
