@@ -384,14 +384,13 @@ public without sharing class AA_AppointmentService {
         Integer hour = Integer.valueOf(timeParts[0]);
         Integer minute = Integer.valueOf(timeParts[1]);
         
-        // 3. Create a Datetime instance
-        // newInstance assumes the input is in the "Local" time of the running user
-        Datetime localDt = Datetime.newInstance(d, Time.newInstance(hour, minute, 0, 0));
+        // 3. Create a Datetime instance de forma absoluta en GMT (ignora la zona horaria del usuario que ejecuta)
+        Datetime dtGmt = Datetime.newInstanceGmt(d, Time.newInstance(hour, minute, 0, 0));
         
         // 4. Adjust for GMT-3
         // To store 14:30 (GMT-3) in Salesforce (UTC), we must ADD 3 hours.
         // 14:30 + 3 = 17:30 UTC
-        return localDt.addHours(3);
+        return dtGmt.addHours(3);
     }
     
     public static List<AA_ComboSlot> getComboAvailableSlots(List<Id> serviceIds, Date targetDate) {
