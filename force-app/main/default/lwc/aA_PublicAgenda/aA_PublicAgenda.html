@@ -30,7 +30,7 @@
                 </button>
 
                 <button class="card" onclick={navToConsulta}>
-                    <div class="card__title">Otra consulta</div>
+                    <div class="card__title">Hablar con Silvina</div>
                 </button>
             </div>
         </template>
@@ -361,8 +361,8 @@
                             </div>
 
                             <div style="display: flex; flex-direction: column; gap: 12px; margin-bottom: 24px;">
-                                <a href={googleCalendarUrl} target="_blank" class="btn-ghost" style="text-align: center; text-decoration: none;">Agregar a Google Calendar</a>
-                                <button class="btn-ghost" onclick={handleDownloadIcs}>Agregar a Apple Calendar</button>
+                                <a href={googleCalendarUrl} target="_blank" class="btn-ghost" style="text-align: center; color: #007aff;">Agregar a Google Calendar</a>
+                                <button class="btn-ghost" style="color: #007aff;" onclick={handleDownloadIcs}>Agregar a Apple Calendar</button>
                             </div>
                             
                             <button class="btn" onclick={navToWelcome}>Volver al inicio</button>
@@ -507,7 +507,7 @@
                     
                     <!-- Reemplaza el href con el link real de WhatsApp de la peluquería -->
                     <a class="wa-redirect__cta" href={businessInfo.whatsappUrl} target="_blank" rel="noopener">
-                        &rarr; Coordiná por WhatsApp
+                        &rarr; Contactar con Silvina
                     </a>
                 </div>
 
