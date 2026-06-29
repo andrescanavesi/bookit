@@ -52,7 +52,14 @@
 
                     <div class="field">
                         <label class="field__label">CELULAR</label>
-                        <input class="field__input" type="tel" data-id="celular" placeholder="099 123 456" value={persona.celular} onchange={handleInputChange}>
+                        <div class="phone-input-container">
+                            <select class="phone-country-select" onchange={handleCountryChange}>
+                                <template for:each={countriesConfigReserva} for:item="country">
+                                    <option key={country.code} value={country.code} selected={country.selected}>{country.label}</option>
+                                </template>
+                            </select>
+                            <input class="field__input phone-number-input" type="tel" data-id="celular" placeholder="99 123 456" value={persona.celular} oninput={handlePhoneInput}>
+                        </div>
                         <span class="field__hint">Para enviar la confirmación y recordatorios de tu turno.</span>
                     </div>
 
@@ -78,6 +85,11 @@
                     <div class="field">
                         <label class="field__label">APELLIDO</label>
                         <input class="field__input" type="text" data-id="lastName" placeholder="Schnyder" value={persona.lastName} onchange={handleInputChange}>
+                    </div>
+
+                    <div class="field">
+                        <label class="field__label">CELULAR INGRESADO</label>
+                        <input class="field__input" type="text" disabled value={celularCompletoFormateado} style="background-color: transparent; border-bottom: 1px dashed #ccc; color: #666;">
                     </div>
 
                     <div class="field">
@@ -388,7 +400,14 @@
 
                     <div class="field">
                         <label class="field__label">CELULAR</label>
-                        <input class="field__input" type="tel" data-id="celular" placeholder="099 123 456" value={misTurnosLogin.celular} onchange={handleMisTurnosInput}>
+                        <div class="phone-input-container">
+                            <select class="phone-country-select" onchange={handleCountryChangeMisTurnos}>
+                                <template for:each={countriesConfigMisTurnos} for:item="country">
+                                    <option key={country.code} value={country.code} selected={country.selected}>{country.label}</option>
+                                </template>
+                            </select>
+                            <input class="field__input phone-number-input" type="tel" data-id="celular" placeholder="99 123 456" value={misTurnosLogin.celular} oninput={handleMisTurnosInput}>
+                        </div>
                     </div>
 
                     <div class="spacer-md"></div>

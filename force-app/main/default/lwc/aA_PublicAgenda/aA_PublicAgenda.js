@@ -35,7 +35,7 @@ export default class AAPublicAgenda extends LightningElement {
     oldAppointmentId = null;
 
 
-    @track persona = { id: '', firstName: '', lastName: '', celular: '099999999', email: 'a@a.com', indicaciones: '' };
+    @track persona = { id: '', firstName: '', lastName: '', celular: '', email: '', indicaciones: '' };
    
    @track reserva = { 
         grupoSel: null, 
@@ -48,8 +48,31 @@ export default class AAPublicAgenda extends LightningElement {
         customerId: null 
     };
 
-    @track misTurnosLogin = { celular: '099999999' };
+    @track misTurnosLogin = { celular: '' };
     @track misTurnosEncontrados = []; // Array real para los resultados
+    @track isLoadingTurnos = false;
+
+    selectedCountryCode = '+598';
+    selectedCountryCodeMisTurnos = '+598';
+
+    get countriesConfigReserva() {
+        return this.getCountriesList(this.selectedCountryCode);
+    }
+
+    get countriesConfigMisTurnos() {
+        return this.getCountriesList(this.selectedCountryCodeMisTurnos);
+    }
+
+    getCountriesList(selectedCode) {
+        return [
+            { code: '+598', label: '🇺🇾 +598', selected: selectedCode === '+598' },
+            { code: '+54', label: '🇦🇷 +54', selected: selectedCode === '+54' },
+            { code: '+55', label: '🇧🇷 +55', selected: selectedCode === '+55' },
+            { code: '+56', label: '🇨🇱 +56', selected: selectedCode === '+56' },
+            { code: '+1', label: '🇺🇸 +1', selected: selectedCode === '+1' },
+            { code: '+34', label: '🇪🇸 +34', selected: selectedCode === '+34' }
+        ];
+    }
     @track isLoadingTurnos = false;
 
     tieneIndicaciones = false;
@@ -123,6 +146,12 @@ export default class AAPublicAgenda extends LightningElement {
 
     get primerNombre() { 
         return this.persona.firstName || ''; 
+    }
+
+    get celularCompletoFormateado() {
+        const country = this.getCountriesList(this.selectedCountryCode).find(c => c.selected);
+        const prefix = country ? country.label : this.selectedCountryCode;
+        return `${prefix} ${this.persona.celular}`;
     }
 
     get primerNombreMisTurnos() { return this.misTurnosLogin.nombre ? this.misTurnosLogin.nombre.split(' ')[0] : ''; }
@@ -445,6 +474,46 @@ export default class AAPublicAgenda extends LightningElement {
     }
 
     handleInputChange(event) { this.persona[event.target.dataset.id] = event.target.value; }
+    
+    formatPhoneNumber(val, countryCode) {
+        if (!val) return '';
+        // 1. Quitar todo lo que no sea dígito
+        let digits = val.replace(/\D/g, '');
+        
+        // 2. Si es Uruguay, formatear a XX XXX XXX
+        if (countryCode === '+598') {
+            if (digits.startsWith('0')) {
+                digits = digits.substring(1);
+            }
+            let formatted = '';
+            if (digits.length > 0) {
+                formatted = digits.substring(0, 2);
+            }
+            if (digits.length > 2) {
+                formatted += ' ' + digits.substring(2, 5);
+            }
+            if (digits.length > 5) {
+                formatted += ' ' + digits.substring(5, 8);
+            }
+            return formatted;
+        }
+        
+        // Para otros países, dejar los dígitos de corrido
+        return digits;
+    }
+
+    handlePhoneInput(event) {
+        let val = event.target.value;
+        const formatted = this.formatPhoneNumber(val, this.selectedCountryCode);
+        event.target.value = formatted;
+        this.persona.celular = formatted;
+    }
+
+    handleCountryChange(event) {
+        this.selectedCountryCode = event.target.value;
+        this.persona.celular = this.formatPhoneNumber(this.persona.celular, this.selectedCountryCode);
+    }
+
     handleIndicacionesToggle(event) { this.tieneIndicaciones = (event.target.dataset.valor === 'si'); if (!this.tieneIndicaciones) this.persona.indicaciones = ''; }
     
     handleToggleService(event) {
@@ -567,8 +636,36 @@ export default class AAPublicAgenda extends LightningElement {
         }
     }
     
-    handleMisTurnosInput(event) { this.misTurnosLogin[event.target.dataset.id] = event.target.value; }
+    handleMisTurnosInput(event) { 
+        const fieldId = event.target.dataset.id;
+        let val = event.target.value;
+
+        if (fieldId === 'celular') {
+            const formatted = this.formatPhoneNumber(val, this.selectedCountryCodeMisTurnos);
+            event.target.value = formatted;
+            this.misTurnosLogin[fieldId] = formatted; 
+        } else {
+            this.misTurnosLogin[fieldId] = val; 
+        }
+    }
+
+    handleCountryChangeMisTurnos(event) {
+        this.selectedCountryCodeMisTurnos = event.target.value;
+        this.misTurnosLogin.celular = this.formatPhoneNumber(this.misTurnosLogin.celular, this.selectedCountryCodeMisTurnos);
+    }
    
+    getFormattedPhoneForApex(countryCode, localNumber) {
+        if (!localNumber) return '';
+        // Limpiar cualquier espacio o caracter no numérico
+        const cleanLocalNumber = localNumber.replace(/\D/g, '');
+        
+        // Compatibilidad con datos viejos de Uruguay: enviamos 099... en vez de +59899...
+        if (countryCode === '+598') {
+            return '0' + cleanLocalNumber;
+        }
+        return countryCode + cleanLocalNumber;
+    }
+
     async handleBuscarTurnos() {
         if (!this.misTurnosLogin.celular) {
             alert('Por favor, ingresá tu celular para buscar tus turnos.');
@@ -576,9 +673,10 @@ export default class AAPublicAgenda extends LightningElement {
         }
 
         this.isLoadingTurnos = true;
+        const fullPhone = this.getFormattedPhoneForApex(this.selectedCountryCodeMisTurnos, this.misTurnosLogin.celular);
 
         try {
-            const turnosDB = await getMisTurnos({ celular: this.misTurnosLogin.celular,businessId:this.businessId });
+            const turnosDB = await getMisTurnos({ celular: fullPhone, businessId:this.businessId });
 
             const DOW = ['dom', 'lun', 'mar', 'mié', 'jue', 'vie', 'sáb'];
             const MESES = ['enero', 'febrero', 'marzo', 'abril', 'mayo', 'junio', 'julio', 'agosto', 'setiembre', 'octubre', 'noviembre', 'diciembre'];
@@ -760,7 +858,8 @@ export default class AAPublicAgenda extends LightningElement {
 
         try {
             // 2. Llamada al backend (Apex)
-            const clienteExistente = await getOrCreateCustomer({ phoneNumber: this.persona.celular, businessId: this.businessId });
+            const fullPhone = this.getFormattedPhoneForApex(this.selectedCountryCode, this.persona.celular);
+            const clienteExistente = await getOrCreateCustomer({ phoneNumber: fullPhone, businessId: this.businessId });
             
             if (clienteExistente.Email__c) {
                 console.log('Cliente encontrado en SF: '+ clienteExistente.Id);
@@ -786,7 +885,21 @@ export default class AAPublicAgenda extends LightningElement {
 
         } catch (error) {
             console.error('Error al consultar Apex:'+ JSON.stringify(error));
-             alert(error.message);
+            
+            let errorMessage = 'Hubo un problema al procesar tus datos. Por favor, intenta nuevamente.';
+            if (error) {
+                if (error.body && error.body.message) {
+                    errorMessage = error.body.message;
+                } else if (error.body && error.body.fieldErrors && Object.keys(error.body.fieldErrors).length > 0) {
+                    const fieldName = Object.keys(error.body.fieldErrors)[0];
+                    errorMessage = error.body.fieldErrors[fieldName][0].message;
+                } else if (error.body && error.body.pageErrors && error.body.pageErrors.length > 0) {
+                    errorMessage = error.body.pageErrors[0].message;
+                } else if (error.message) {
+                    errorMessage = error.message;
+                }
+            }
+            alert(errorMessage);
             // TODO
             //this.reservaStep = 2; 
 

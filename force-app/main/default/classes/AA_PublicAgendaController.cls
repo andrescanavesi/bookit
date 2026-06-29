@@ -57,7 +57,7 @@ public without sharing class AA_PublicAgendaController {
     @AuraEnabled(cacheable=true)
     public static Map<String, String> getBusinessInfo(Id businessId) {
         AA_Logger logger = new AA_Logger(true);
-        logger.info('getBusinessInfo called');
+        //logger.info('getBusinessInfo called');
         List<AA_Business__c> businesses = [
             SELECT Id, Name, Address__c, Logo_URL__c, Phone_Number__c 
             FROM AA_Business__c 
@@ -94,7 +94,7 @@ public without sharing class AA_PublicAgendaController {
         AA_Logger logger = new AA_Logger(true);
         AA_Business_Branch__c branch = getBusinessBranch(businessId); 
         Id BRANCH_ID = branch.Id;
-        logger.info('getCategories, branch id '+branch.Id);
+        //logger.info('getCategories, branch id '+branch.Id);
         List<AA_Service_Category__c> categories = [
             SELECT Id, Name, Display_Name__c, Description_Short__c 
             FROM AA_Service_Category__c 
@@ -103,7 +103,7 @@ public without sharing class AA_PublicAgendaController {
             ORDER BY Name ASC 
             LIMIT 100
         ];
-        logger.info('categories: '+JSON.serializePretty(categories));
+        //logger.info('categories: '+JSON.serializePretty(categories));
         
         return categories;
     }
@@ -112,14 +112,14 @@ public without sharing class AA_PublicAgendaController {
     public static List<AA_Service__c> getServices(Id businessId) {
         AA_Logger logger = new AA_Logger(true);
         AA_Business_Branch__c branch = getBusinessBranch(businessId); 
-        logger.info('getServices, branch id '+branch.Id);
+        //logger.info('getServices, branch id '+branch.Id);
         List<AA_Service__c>  services =  [SELECT Id, Name, Display_Name__c, Duration_Minutes__c, Price__c, AA_Service_Category__c
                                           FROM AA_Service__c 
                                           WHERE Business_Branch__c = :branch.Id
                                           AND Is_Active__c = true
                                           LIMIT 100];
         
-        logger.info('services: '+JSON.serializePretty(services));
+        //logger.info('services: '+JSON.serializePretty(services));
         
         return services;
     }

@@ -31,6 +31,7 @@ public with sharing class AA_CustomerLookupController {
 
     @AuraEnabled
     public static AA_Customer__c createCustomer(String firstName, String lastName, String phone) {
+        AA_Logger logger = new AA_Logger(true);
         if (String.isBlank(firstName) || String.isBlank(lastName)) {
             throw new AuraHandledException('El nombre y el apellido son obligatorios.');
         }
@@ -47,7 +48,9 @@ public with sharing class AA_CustomerLookupController {
             ];
             
             if (!existingCustomers.isEmpty()) {
-                throw new AuraHandledException('Ya existe una clienta con este número de celular en tu salón.');
+                String message = 'Ya existe una persona con este número de celular '+phone+' en tu salón '+businessId;
+                logger.info(message);
+                throw new AuraHandledException(message);
             }
         }
         

@@ -207,6 +207,43 @@ h2 {
   margin-top: 8px;
 }
 
+/* Phone Input Container */
+.phone-input-container {
+  display: flex;
+  align-items: center;
+  border-bottom: 1px solid #e5dcce;
+  transition: border-color 0.2s ease;
+}
+
+.phone-input-container:focus-within {
+  border-bottom-color: var(--black);
+}
+
+.phone-country-select {
+  background: transparent;
+  border: none;
+  font-size: 16px;
+  color: var(--black);
+  outline: none;
+  padding: 12px 12px 12px 0;
+  cursor: pointer;
+  font-family: inherit;
+  appearance: none;
+  -webkit-appearance: none;
+  -moz-appearance: none;
+}
+
+.phone-number-input {
+  flex: 1;
+  border-bottom: none;
+  padding: 12px 0 12px 12px;
+  border-left: 1px solid var(--line);
+}
+
+.phone-number-input:focus {
+  border-bottom-color: transparent;
+}
+
 /* Botón Continuar */
 .btn {
   display: block;
