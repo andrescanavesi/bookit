@@ -23,6 +23,7 @@ public without sharing class AA_AppointmentService {
             SELECT Employee__c, Employee__r.Name, Employee__r.First_Name__c, Employee__r.Last_Name__c 
             FROM AA_Employee_Service__c 
             WHERE Service__c = :serviceId
+            AND Employee__r.Available_In_Public_Agenda__c = true
         ];
         
         if (empServices.isEmpty()) {
@@ -151,7 +152,7 @@ public without sharing class AA_AppointmentService {
         Integer durationMinutes = (Integer)service.Duration_Minutes__c;
         
         // 2. Find Employees
-        List<AA_Employee_Service__c> empServices = [SELECT Employee__c, Employee__r.Name, Employee__r.First_Name__c, Employee__r.Last_Name__c FROM AA_Employee_Service__c WHERE Service__c = :serviceId];
+        List<AA_Employee_Service__c> empServices = [SELECT Employee__c, Employee__r.Name, Employee__r.First_Name__c, Employee__r.Last_Name__c FROM AA_Employee_Service__c WHERE Service__c = :serviceId AND Employee__r.Available_In_Public_Agenda__c = true];
         if (empServices.isEmpty()) return finalAvailableSlots;
         
         Set<Id> employeeIds = new Set<Id>();
