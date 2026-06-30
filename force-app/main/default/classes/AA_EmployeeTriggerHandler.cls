@@ -5,6 +5,12 @@ public with sharing class AA_EmployeeTriggerHandler {
         List<AA_Employee__c> recordsToProcess = new List<AA_Employee__c>();
         Set<Id> branchIds = new Set<Id>();
         
+        // Variables para validación de User__c único
+        Set<Id> userIdsToCheck = new Set<Id>();
+        
+        // Variables para validación de desactivación
+        Set<Id> deactivatedEmpIds = new Set<Id>();
+        
         for (AA_Employee__c record : newRecords) {
             Boolean needsUpdate = false;
             
@@ -25,7 +31,84 @@ public with sharing class AA_EmployeeTriggerHandler {
                 recordsToProcess.add(record);
                 branchIds.add(record.Business_Branch__c);
             }
+            
+            // Recolectar empleados que están siendo desactivados
+            if (isUpdate) {
+                AA_Employee__c oldRecord = oldMap.get(record.Id);
+                if (record.Is_Active__c == false && oldRecord.Is_Active__c == true) {
+                    deactivatedEmpIds.add(record.Id);
+                }
+            }
+            
+            // Recolectar User__c para validación de unicidad
+            if (record.User__c != null) {
+                if (isInsert) {
+                    userIdsToCheck.add(record.User__c);
+                } else if (isUpdate) {
+                    AA_Employee__c oldRecord = oldMap.get(record.Id);
+                    if (record.User__c != oldRecord.User__c) {
+                        userIdsToCheck.add(record.User__c);
+                    }
+                }
+            }
         }
+        
+        // ==========================================
+        // Validación: User__c debe ser único
+        // ==========================================
+        if (!userIdsToCheck.isEmpty()) {
+            // 1. Buscar en la base de datos si ya existen otros empleados usando esos Usuarios
+            Set<Id> alreadyAssignedUsers = new Set<Id>();
+            for (AA_Employee__c existingEmp : [SELECT Id, User__c FROM AA_Employee__c WHERE User__c IN :userIdsToCheck]) {
+                // Si es un update, ignoramos el propio registro que estamos actualizando
+                if (!isUpdate || !oldMap.containsKey(existingEmp.Id)) {
+                    alreadyAssignedUsers.add(existingEmp.User__c);
+                }
+            }
+            
+            // 2. Controlar duplicados dentro del mismo lote (batch) que se está insertando/actualizando
+            Set<Id> usersSeenInBatch = new Set<Id>();
+            
+            // 3. Aplicar el error a los registros inválidos
+            for (AA_Employee__c record : newRecords) {
+                if (record.User__c != null && userIdsToCheck.contains(record.User__c)) {
+                    // Si ya está en BD o ya lo vimos en otro registro de este lote:
+                    if (alreadyAssignedUsers.contains(record.User__c) || usersSeenInBatch.contains(record.User__c)) {
+                        record.addError('Este Usuario de Salesforce ya está asignado a otro Empleado. No puede haber dos empleados vinculados al mismo Usuario.');
+                    } else {
+                        // Lo registramos como visto para las próximas iteraciones del lote
+                        usersSeenInBatch.add(record.User__c);
+                    }
+                }
+            }
+        }
+        // ==========================================
+        
+        // ==========================================
+        // Validación: Desactivación de Empleado
+        // ==========================================
+        if (!deactivatedEmpIds.isEmpty()) {
+            Set<Id> empsWithActiveAppts = new Set<Id>();
+            // Buscamos si tienen citas activas (Pending, Confirmed, Rescheduled)
+            for (AggregateResult ar : [
+                SELECT Employee__c 
+                FROM AA_Appointment__c 
+                WHERE Employee__c IN :deactivatedEmpIds 
+                AND Status__c IN ('Pending', 'Confirmed', 'Rescheduled')
+                GROUP BY Employee__c
+            ]) {
+                empsWithActiveAppts.add((Id)ar.get('Employee__c'));
+            }
+            
+            if (!empsWithActiveAppts.isEmpty()) {
+                for (AA_Employee__c record : newRecords) {
+                    if (empsWithActiveAppts.contains(record.Id)) {
+                        record.addError('No se puede desactivar el empleado porque tiene turnos asociados con estado Pending, Confirmed o Rescheduled. Cancele o reasigne los turnos antes de desactivar.');
+                    }
+                }
+            }
+        }
+        // ==========================================
         
         if (!recordsToProcess.isEmpty()) {
             Map<Id, AA_Business_Branch__c> branchMap = new Map<Id, AA_Business_Branch__c>([
