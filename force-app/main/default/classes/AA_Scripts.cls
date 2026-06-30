@@ -12,12 +12,14 @@ public class AA_Scripts {
         System.debug('Iniciando borrado de logs viejos...');
         
         // Buscamos logs creados ayer o antes
-        List<Log__c> logsToDelete = [
+        /*List<Log__c> logsToDelete = [
             SELECT Id FROM Log__c 
             WHERE CreatedDate < TODAY 
             LIMIT 10000
-        ];
+        ];*/
         
+        List<Log__c> logsToDelete = [SELECT Id FROM Log__c LIMIT 10000];
+
         if (!logsToDelete.isEmpty()) {
             Integer totalBorrados = logsToDelete.size();
             delete logsToDelete;
@@ -379,5 +381,61 @@ public class AA_Scripts {
         delete [SELECT Id FROM AA_Customer__c];
     }
 
+    /**
+     * Envía correos de prueba para verificar la entrega con formato texto y HTML.
+     * Ejecutar en Developer Console (Anonymous Window):
+     * AA_Scripts.sendTestEmail('tu_email@ejemplo.com');
+     */
+    public static void sendTestEmail(String emailDestino) {
+        AA_Logger logger = new AA_Logger(true); 
+        // 1. Buscar si hay un Usuario interno con ese correo para esquivar límites de orgs Developer
+        Id targetUserId = null;
+        List<User> users = [SELECT Id FROM User WHERE Email = :emailDestino AND IsActive = true LIMIT 1];
+        if (!users.isEmpty()) {
+            targetUserId = users[0].Id;
+            logger.info('user found to send the test email: ' + targetUserId);
+        }else{
+            logger.info('user not found to send the test email: ');
+        }
+        
+        // 2. Email de prueba en texto plano
+        AA_EmailRequest plainReq = new AA_EmailRequest();
+        plainReq.subject = '[Book It]Test Bookit - Texto Plano';
+        plainReq.plainTextBody = 'Hola!\n\nEste es un correo de prueba enviado en formato de texto crudo.\n\nSaludos,\nEl equipo de Bookit';
+        
+        // 3. Email de prueba en HTML
+        AA_EmailRequest htmlReq = new AA_EmailRequest();
+        htmlReq.subject = '[Book It] Test Bookit - Formato HTML';
+        
+        if (targetUserId != null) {
+            plainReq.targetObjectId = targetUserId;
+            plainReq.saveAsActivity = false;
+            
+            htmlReq.targetObjectId = targetUserId;
+            htmlReq.saveAsActivity = false;
+        } else {
+            plainReq.toAddresses = new List<String>{emailDestino};
+            htmlReq.toAddresses = new List<String>{emailDestino};
+        }
+        
+        String html = '<div style="font-family: Arial, sans-serif; color: #333; max-width: 600px; margin: 0 auto; border: 1px solid #ddd; border-radius: 8px; overflow: hidden;">';
+        html += '<div style="background-color: #0f0e0d; color: #faf6f0; padding: 20px; text-align: center;">';
+        html += '<h2 style="margin: 0; font-size: 24px;">Prueba HTML</h2>';
+        html += '</div>';
+        html += '<div style="padding: 20px; background-color: #faf6f0;">';
+        html += '<p style="font-size: 16px; line-height: 1.5;">Hola,</p>';
+        html += '<p style="font-size: 16px; line-height: 1.5;">Este correo está formateado con etiquetas <strong>HTML</strong> y algo de estilo <span style="color: green;">CSS en línea</span>.</p>';
+        html += '</div>';
+        html += '<div style="background-color: #e5dcce; text-align: center; padding: 12px; font-size: 12px; color: #8a7b6e;">';
+        html += 'Test enviado desde AA_Scripts';
+        html += '</div>';
+        html += '</div>';
+        
+        htmlReq.htmlBody = html;
+        
+        // Enviar ambos correos usando el servicio de eventos
+        AA_EmailService.publishEmails(new List<AA_EmailRequest>{plainReq, htmlReq});
+        logger.info('Se emitieron los eventos para enviar 2 correos de prueba a ' + emailDestino);
+    }
 
 }

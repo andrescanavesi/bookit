@@ -105,11 +105,19 @@ export default class AAPublicAgenda extends LightningElement {
                     if (isDisabled) {
                         cssClass += ' card--disabled';
                     }
+                    
+                    let durText = '';
+                    if (s.Duracion_Base_Min__c) {
+                        durText = s.Duracion_Base_Min__c >= 60 
+                            ? `${Math.floor(s.Duracion_Base_Min__c / 60)} h${s.Duracion_Base_Min__c % 60 > 0 ? ` ${s.Duracion_Base_Min__c % 60} min` : ''}` 
+                            : `${s.Duracion_Base_Min__c} min`;
+                    }
 
                     return {
                         ...s,
                         isDisabled: isDisabled,
-                        cssClass: cssClass
+                        cssClass: cssClass,
+                        duracionFormateada: durText
                     };
                 });
             return {
@@ -169,10 +177,17 @@ export default class AAPublicAgenda extends LightningElement {
             const serviciosDelGrupo = this.services
                 .filter(s => s.Grupo_Servicio__c === cat.id)
                 .map(s => {
+                    let durText = '';
+                    if (s.Duracion_Base_Min__c) {
+                        durText = s.Duracion_Base_Min__c >= 60 
+                            ? `${Math.floor(s.Duracion_Base_Min__c / 60)} h${s.Duracion_Base_Min__c % 60 > 0 ? ` ${s.Duracion_Base_Min__c % 60} min` : ''}` 
+                            : `${s.Duracion_Base_Min__c} min`;
+                    }
                     return {
                         ...s,
                         precioFormateado: s.Precio__c.toLocaleString('es-UY'),
-                        tieneDescripcion: s.Descripcion_Extendida__c && s.Descripcion_Extendida__c.trim() !== ''
+                        tieneDescripcion: s.Descripcion_Extendida__c && s.Descripcion_Extendida__c.trim() !== '',
+                        duracionFormateada: durText
                     };
                 });
             
@@ -679,8 +694,8 @@ export default class AAPublicAgenda extends LightningElement {
         try {
             const turnosDB = await getMisTurnos({ celular: fullPhone, businessId:this.businessId });
 
-            const DOW = ['dom', 'lun', 'mar', 'mié', 'jue', 'vie', 'sáb'];
-            const MESES = ['enero', 'febrero', 'marzo', 'abril', 'mayo', 'junio', 'julio', 'agosto', 'setiembre', 'octubre', 'noviembre', 'diciembre'];
+            const DOW = ['Domingo', 'Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes', 'Sábado'];
+            const MESES = ['Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio', 'Julio', 'Agosto', 'Setiembre', 'Octubre', 'Noviembre', 'Diciembre'];
 
             // Mapeamos los datos de Salesforce para la vista
             this.misTurnosEncontrados = turnosDB.map(t => {
@@ -693,13 +708,26 @@ export default class AAPublicAgenda extends LightningElement {
                 } else if (t.Internal_Comments__c && t.Internal_Comments__c.includes('Confirmado por el cliente')) {
                     isConfirmado = true;
                 }
+                
+                let horaFormateada = dt.toLocaleTimeString('es-UY', { hour: '2-digit', minute: '2-digit', hour12: true });
+                horaFormateada = horaFormateada.replace(/\.?\s?[ap]\.?\s?m\.?/i, match => {
+                    return match.toLowerCase().includes('p') ? ' PM' : ' AM';
+                }).trim();
+
+                let svcName = t.Service__r ? (t.Service__r.Display_Name__c ? t.Service__r.Display_Name__c : t.Service__r.Name) : 'Servicio';
+                if (t.Duration_Minutes__c) {
+                    let durText = t.Duration_Minutes__c >= 60
+                        ? `${Math.floor(t.Duration_Minutes__c / 60)} H${t.Duration_Minutes__c % 60 > 0 ? ` ${t.Duration_Minutes__c % 60} MIN` : ''}`
+                        : `${t.Duration_Minutes__c} MIN`;
+                    svcName += `, ${durText}`;
+                }
 
                 return {
                     Id: t.Id,
                     fechaStr: `${DOW[dt.getDay()]} ${dt.getDate()} de ${MESES[dt.getMonth()]}`,
-                    // Formato HH:mm
-                    horaStr: dt.toLocaleTimeString('es-UY', { hour: '2-digit', minute: '2-digit' }),
-                    servicio: t.Service__r ? (t.Service__r.Display_Name__c ? t.Service__r.Display_Name__c : t.Service__r.Name) : 'Servicio',
+                    // Formato HH:mm AM/PM
+                    horaStr: horaFormateada,
+                    servicio: svcName,
                     profesional: t.Employee__r ? ((t.Employee__r.First_Name__c ? t.Employee__r.First_Name__c + ' ' : '') + t.Employee__r.Last_Name__c) : 'El equipo',
                     status: t.Status__c,
                     startDateTimeObj: dt,
@@ -783,6 +811,7 @@ export default class AAPublicAgenda extends LightningElement {
         this.oldAppointmentId = appointmentId;
         this.reserva.customerId = turno.customerId;
         this.reserva.servicioSel = turno.serviceId;
+        this.selectedServiceIds = [turno.serviceId]; // Agregado para getComboSlots
         this.reserva.profesionalSel = turno.employeeId;
         this.persona.id = turno.customerId;
         
@@ -1064,9 +1093,9 @@ export default class AAPublicAgenda extends LightningElement {
                         val: combo.timeFormatted, 
                         cssClass: 'slot-btn',
                         isClusterDisabled: !clusterValid,
-                        clusterStyle: clusterValid ? 'background-color: #4CAF50; color: white; border-color: #4CAF50;' : 'opacity: 0.3; pointer-events: none;',
+                        clusterStyle: clusterValid ? '' : 'opacity: 0.3; pointer-events: none;',
                         isMinGapDisabled: !minGapValid,
-                        minGapStyle: minGapValid ? 'background-color: #4CAF50; color: white; border-color: #4CAF50;' : 'opacity: 0.3; pointer-events: none;',
+                        minGapStyle: minGapValid ? '' : 'opacity: 0.3; pointer-events: none;',
                         slotData: combo // Guardamos el objeto AA_ComboSlot completo
                     });
                 }

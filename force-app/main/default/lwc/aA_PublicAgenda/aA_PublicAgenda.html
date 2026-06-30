@@ -135,9 +135,14 @@
                                 <template for:each={cat.services} for:item="srv">
                                     <button key={srv.Id} class={srv.cssClass} data-id={srv.Id} onclick={handleToggleService}>
                                         <div class="card__content">
-                                            <div style="display: flex; justify-content: space-between; align-items: center; width: 100%;">
-                                                <div class="card__title card__title--sm" style="flex: 1;">{srv.Nombre_Visible__c}</div>
-                                                <div style="font-weight: 500;">${srv.Precio__c}</div>
+                                            <div style="display: flex; justify-content: space-between; align-items: flex-start; width: 100%;">
+                                                <div style="flex: 1;">
+                                                    <div class="card__title card__title--sm">{srv.Nombre_Visible__c}</div>
+                                                    <template if:true={srv.duracionFormateada}>
+                                                        <div style="font-size: 13px; color: #666; margin-top: 2px;">{srv.duracionFormateada}</div>
+                                                    </template>
+                                                </div>
+                                                <div style="font-weight: 500; margin-left: 12px;">${srv.Precio__c}</div>
                                             </div>
                                             <template if:true={srv.Descripcion_Extendida__c}>
                                                 <div class="card__desc" style="font-size: 13px; margin-top: 4px; color: #666;">{srv.Descripcion_Extendida__c}</div>
@@ -213,14 +218,17 @@
                             <button class="step-back" onclick={volverPasoDesde6}>&larr; Volver</button>
                             <span class="step-counter">PASO 3 DE 5</span>
                         </div>
-                        <h2 class="h2" style="margin-bottom: 12px;">
-                            <template if:true={servicioCabeceraInfo}>
-                                Elegí día y hora para {servicioCabeceraInfo.nombre}, {servicioCabeceraInfo.duracion}
-                            </template>
-                            <template if:false={servicioCabeceraInfo}>
-                                Elegí día y hora
-                            </template>
+                        <h2 class="h2" style="margin-bottom: 4px;">
+                            Elegí día y hora
                         </h2>
+                        <template if:true={servicioCabeceraInfo}>
+                            <div style="font-size: 16px; color: #4A4A4A; margin-bottom: 16px;">
+                                {servicioCabeceraInfo.nombre}, {servicioCabeceraInfo.duracion}
+                            </div>
+                        </template>
+                        <template if:false={servicioCabeceraInfo}>
+                            <div style="margin-bottom: 16px;"></div>
+                        </template>
                     </div>
 
                     <!-- Selector de Días (Horizontal Scroll) -->
@@ -240,20 +248,25 @@
 
                     <!-- Grilla de Horas -->
                     <template if:true={hasHorasDisponibles}>
+                        <!-- 
                         <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 8px; margin-bottom: 12px; font-size: 12px; font-weight: bold; text-align: center; color: var(--black);">
                             <div>Actual (Todos)</div>
                             <div>Opción 1 (Cluster)</div>
                             <div>Opción 2 (Gap 60m)</div>
                         </div>
+                        -->
                         <div style="display: flex; flex-direction: column; gap: 12px;">
                             <template for:each={horasDisponiblesList} for:item="hora">
-                                <div key={hora.val} style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 8px;">
+                                <div key={hora.val} style="display: grid; grid-template-columns: 1fr; gap: 8px;">
+                                    <!--
                                     <button class={hora.cssClass} data-hora={hora.val} onclick={handleSelectHora}>
                                         {hora.val}
                                     </button>
                                     <button class={hora.cssClass} style={hora.clusterStyle} data-hora={hora.val} onclick={handleSelectHora} disabled={hora.isClusterDisabled}>
                                         {hora.val}
                                     </button>
+                                    -->
+                                    <!-- Opción 2 (Gap 60m) -->
                                     <button class={hora.cssClass} style={hora.minGapStyle} data-hora={hora.val} onclick={handleSelectHora} disabled={hora.isMinGapDisabled}>
                                         {hora.val}
                                     </button>
@@ -489,6 +502,9 @@
                                 <div key={srv.Id} class="precio-row">
                                     <div class="precio-row__info">
                                         <div class="precio-row__name">{srv.Nombre_Visible__c}</div>
+                                        <template if:true={srv.duracionFormateada}>
+                                            <div class="precio-row__desc" style="margin-top: 2px;">{srv.duracionFormateada}</div>
+                                        </template>
                                         <template if:true={srv.tieneDescripcion}>
                                             <div class="precio-row__desc">{srv.Descripcion_Extendida__c}</div>
                                         </template>

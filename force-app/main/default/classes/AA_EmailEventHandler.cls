@@ -4,13 +4,22 @@ public without sharing class AA_EmailEventHandler {
     // para habilitar/deshabilitar por entorno (sandbox vs prod).
     private static final Set<String> ALLOWED_EMAILS = new Set<String>{
         'andres.canavesi@gmail.com', // <-- Agrega aquí tus correos de prueba
-        'test@bookit.com'
+        'test@bookit.com',
+        'beautybysilvina@gmail.com',
+        'maglabc@gmail.com'
     };
     
     public static void handle(List<AA_Send_Email_Event__e> events) {
         // Inicializamos el logger en false para acumular errores y publicar al final (Bulkified)
         AA_Logger logger = new AA_Logger(false);
         List<Messaging.SingleEmailMessage> emailsToSend = new List<Messaging.SingleEmailMessage>();
+        
+        // Obtener el ID del OrgWideEmailAddress (si existe alguno configurado)
+        Id defaultOwaId = null;
+        List<OrgWideEmailAddress> owaList = [SELECT Id FROM OrgWideEmailAddress LIMIT 1];
+        if (!owaList.isEmpty()) {
+            defaultOwaId = owaList[0].Id;
+        }
         
         for (AA_Send_Email_Event__e evt : events) {
             try {
@@ -58,6 +67,8 @@ public without sharing class AA_EmailEventHandler {
                 }
                 if (String.isNotBlank(request.orgWideEmailAddressId)) {
                     mail.setOrgWideEmailAddressId(request.orgWideEmailAddressId);
+                } else if (defaultOwaId != null) {
+                    mail.setOrgWideEmailAddressId(defaultOwaId);
                 }
                 if (request.saveAsActivity != null) {
                     mail.setSaveAsActivity(request.saveAsActivity);

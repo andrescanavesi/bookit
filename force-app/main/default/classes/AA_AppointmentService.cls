@@ -338,23 +338,23 @@ public without sharing class AA_AppointmentService {
             List<AA_AvailableSlot> empSlots = empSlotsMap.get(empId);
             String empName = empSlots[0].employeeName;
             
-            List<String> logLines = new List<String>();
+            /*List<String> logLines = new List<String>();
             logLines.add('\\n======================================================================');
             logLines.add(' SIMULATION: ' + empName + ' | Date: ' + targetDate);
             logLines.add('======================================================================');
             logLines.add(' HORA        | ACTUAL         | ESTRATEGIA 1 (Cluster) | ESTRATEGIA 2 (Gap 60m)');
             logLines.add('----------------------------------------------------------------------');
-            
+            */
             for (AA_AvailableSlot slot : empSlots) {
                 String tStr = slot.slotTimeString; // Using the GMT-3 formatted string
                 String clusterCol = clusterSetMap.get(empId).contains(slot.slotTime) ? tStr.rightPad(22) : 'X'.rightPad(22);
                 String gapCol = gapSetMap.get(empId).contains(slot.slotTime) ? tStr : 'X';
                 
-                logLines.add(' ' + tStr.rightPad(11) + ' | ' + tStr.rightPad(14) + ' | ' + clusterCol + ' | ' + gapCol);
+                //logLines.add(' ' + tStr.rightPad(11) + ' | ' + tStr.rightPad(14) + ' | ' + clusterCol + ' | ' + gapCol);
             }
-            logLines.add('======================================================================\\n');
+            //logLines.add('======================================================================\\n');
             
-            logger.info(String.join(logLines, '\\n'));
+            //logger.info(String.join(logLines, '\\n'));
         }
     }
     
