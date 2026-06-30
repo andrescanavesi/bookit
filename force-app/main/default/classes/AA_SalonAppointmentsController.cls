@@ -206,7 +206,7 @@ public without sharing class AA_SalonAppointmentsController {
                        Internal_Comments__c, Is_Reminder_Sent__c, Is_Customer_Confirmed__c, Reminder_Sent_Date__c
                 FROM AA_Appointment__c 
                 WHERE DAY_ONLY(Start_Date_Time__c) = :selectedDate 
-                AND Status__c != 'Cancelled'
+                AND Status__c NOT IN ('Cancelled', 'No Show')
                 AND Service__r.Business_Branch__r.Business__c = :businessId
             ];
 

@@ -24,7 +24,7 @@ public without sharing class AA_AppointmentTriggerHandler {
         
         List<AA_Appointment__c> appointmentsToProcess = [
             SELECT Id, Name, Start_Date_Time__c, End_Date_Time__c, Duration_Minutes__c, 
-                   Employee__r.Name, Service__r.Name, Customer__r.Name, Status__c, 
+                   Employee__r.Name, Employee__r.First_Name__c, Employee__r.Last_Name__c, Service__r.Name, Service__r.Display_Name__c, Customer__r.Name, Customer__r.First_Name__c, Customer__r.Last_Name__c, Status__c, 
                    Branch_Name__c, Amount__c, Business_Name__c, Business_Id__c,
                    Service__r.Business_Branch__r.Business__r.Email__c
             FROM AA_Appointment__c
@@ -77,14 +77,47 @@ public without sharing class AA_AppointmentTriggerHandler {
                 html += '<p style="font-size: 16px; line-height: 1.5;">Hola,</p>';
                 html += '<p style="font-size: 16px; line-height: 1.5;">Se han registrado cambios en la agenda del salón <strong>' + (appt.Business_Name__c != null ? appt.Business_Name__c : '') + '</strong>.</p>';
                 
+                String customerName = '';
+                if (appt.Customer__r != null) {
+                    if (String.isNotBlank(appt.Customer__r.First_Name__c)) {
+                        customerName = appt.Customer__r.First_Name__c;
+                        if (String.isNotBlank(appt.Customer__r.Last_Name__c)) {
+                            customerName += ' ' + appt.Customer__r.Last_Name__c;
+                        }
+                    } else {
+                        customerName = appt.Customer__r.Name;
+                    }
+                }
+                
+                String employeeName = '';
+                if (appt.Employee__r != null) {
+                    if (String.isNotBlank(appt.Employee__r.First_Name__c)) {
+                        employeeName = appt.Employee__r.First_Name__c;
+                        if (String.isNotBlank(appt.Employee__r.Last_Name__c)) {
+                            employeeName += ' ' + appt.Employee__r.Last_Name__c;
+                        }
+                    } else {
+                        employeeName = appt.Employee__r.Name;
+                    }
+                }
+                
+                String serviceName = '';
+                if (appt.Service__r != null) {
+                    if (String.isNotBlank(appt.Service__r.Display_Name__c)) {
+                        serviceName = appt.Service__r.Display_Name__c;
+                    } else {
+                        serviceName = appt.Service__r.Name;
+                    }
+                }
+                
                 html += '<table style="width: 100%; border-collapse: collapse; margin-top: 20px; background-color: #fff; border-radius: 8px; overflow: hidden; box-shadow: 0 1px 3px rgba(0,0,0,0.1);">';
-                html += '<tr style="border-bottom: 1px solid #eee;"><td style="padding: 12px; font-weight: bold; width: 40%; color: #8a7b6e;">Cliente:</td><td style="padding: 12px;">' + (appt.Customer__r != null ? appt.Customer__r.Name : '') + '</td></tr>';
-                html += '<tr style="border-bottom: 1px solid #eee;"><td style="padding: 12px; font-weight: bold; color: #8a7b6e;">Servicio:</td><td style="padding: 12px;">' + (appt.Service__r != null ? appt.Service__r.Name : '') + '</td></tr>';
-                html += '<tr style="border-bottom: 1px solid #eee;"><td style="padding: 12px; font-weight: bold; color: #8a7b6e;">Profesional:</td><td style="padding: 12px;">' + (appt.Employee__r != null ? appt.Employee__r.Name : '') + '</td></tr>';
+                html += '<tr style="border-bottom: 1px solid #eee;"><td style="padding: 12px; font-weight: bold; width: 40%; color: #8a7b6e;">Cliente:</td><td style="padding: 12px;">' + customerName + '</td></tr>';
+                html += '<tr style="border-bottom: 1px solid #eee;"><td style="padding: 12px; font-weight: bold; color: #8a7b6e;">Servicio:</td><td style="padding: 12px;">' + serviceName + '</td></tr>';
+                html += '<tr style="border-bottom: 1px solid #eee;"><td style="padding: 12px; font-weight: bold; color: #8a7b6e;">Profesional:</td><td style="padding: 12px;">' + employeeName + '</td></tr>';
                 html += '<tr style="border-bottom: 1px solid #eee;"><td style="padding: 12px; font-weight: bold; color: #8a7b6e;">Fecha:</td><td style="padding: 12px;">' + (appt.Start_Date_Time__c != null ? appt.Start_Date_Time__c.format() : '') + '</td></tr>';
                 html += '<tr style="border-bottom: 1px solid #eee;"><td style="padding: 12px; font-weight: bold; color: #8a7b6e;">Duración:</td><td style="padding: 12px;">' + (appt.Duration_Minutes__c != null ? String.valueOf(appt.Duration_Minutes__c) + ' min' : '') + '</td></tr>';
                 html += '<tr style="border-bottom: 1px solid #eee;"><td style="padding: 12px; font-weight: bold; color: #8a7b6e;">Monto:</td><td style="padding: 12px;">$' + (appt.Amount__c != null ? String.valueOf(appt.Amount__c) : '0') + '</td></tr>';
-                html += '<tr style="border-bottom: 1px solid #eee;"><td style="padding: 12px; font-weight: bold; color: #8a7b6e;">Estado:</td><td style="padding: 12px;"><span style="background-color: #e8ddd0; padding: 4px 8px; border-radius: 4px; font-size: 14px; font-weight: bold;">' + (appt.Status__c != null ? appt.Status__c : '') + '</span></td></tr>';
+                html += '<tr style="border-bottom: 1px solid #eee;"><td style="padding: 12px; font-weight: bold; color: #8a7b6e;">Estado:</td><td style="padding: 12px;"><span style="background-color: #e8ddd0; padding: 4px 8px; border-radius: 4px; font-size: 14px; font-weight: bold;">' + AA_Utils.translateStatus(appt.Status__c) + '</span></td></tr>';
                 html += '<tr><td style="padding: 12px; font-weight: bold; color: #8a7b6e;">ID Turno:</td><td style="padding: 12px; font-size: 13px; color: #666;">' + (appt.Name != null ? appt.Name : '') + '</td></tr>';
                 html += '</table>';
                 
