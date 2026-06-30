@@ -39,16 +39,17 @@ public with sharing class AA_CustomerLookupController {
         Id businessId = getBusinessId();
         
         // Validación de duplicados por celular en el mismo salón
-        if (String.isNotBlank(phone)) {
+        String cleanPhone = AA_CustomerTriggerHandler.normalizePhone(phone);
+        if (String.isNotBlank(cleanPhone)) {
             List<AA_Customer__c> existingCustomers = [
                 SELECT Id FROM AA_Customer__c 
-                WHERE Phone_Number__c = :phone 
+                WHERE Phone_Number__c = :cleanPhone 
                   AND Business__c = :businessId 
                 LIMIT 1
             ];
             
             if (!existingCustomers.isEmpty()) {
-                String message = 'Ya existe una persona con este número de celular '+phone+' en tu salón '+businessId;
+                String message = 'Ya existe una persona con este número de celular '+cleanPhone+' en tu salón '+businessId;
                 logger.info(message);
                 throw new AuraHandledException(message);
             }
@@ -58,7 +59,7 @@ public with sharing class AA_CustomerLookupController {
             First_Name__c = firstName,
             Last_Name__c = lastName,
             Name = firstName + ' ' + lastName, // Asumiendo que Name es un autonumber o string, pero si es texto lo poblamos
-            Phone_Number__c = phone,
+            Phone_Number__c = cleanPhone,
             Business__c = businessId
         );
         

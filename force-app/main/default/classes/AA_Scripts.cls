@@ -370,4 +370,14 @@ public class AA_Scripts {
         }
     }
 
+    /**
+     * 
+	 * AA_Scripts.deleteAllCustomers();
+     */
+    public static void deleteAllCustomers() {
+        System.debug('Iniciando borrado  todos los customers...');
+        delete [SELECT Id FROM AA_Customer__c];
+    }
+
+
 }

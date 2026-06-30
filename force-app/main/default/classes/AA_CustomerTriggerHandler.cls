@@ -1,22 +1,27 @@
 public with sharing class AA_CustomerTriggerHandler {
     
+    public static String normalizePhone(String phone) {
+        if (String.isBlank(phone)) return phone;
+        String clean = phone.replaceAll('\\D', ''); // Quita todo lo que no sea dígito
+        
+        if (clean.startsWith('00')) {
+            clean = clean.substring(2);
+        }
+        
+        if (clean.startsWith('09') && clean.length() == 9) {
+            clean = '598' + clean.substring(1);
+        }
+        
+        return clean;
+    }
+    
     public static void handleBeforeInsertUpdate(List<AA_Customer__c> newRecords, Map<Id, AA_Customer__c> oldMap, Boolean isInsert, Boolean isUpdate) {
         
         // --- NORMALIZACIÓN DE TELÉFONO (WhatsApp format) ---
         // Normalizamos el teléfono antes de revisar duplicados para asegurar integridad
         for (AA_Customer__c record : newRecords) {
             if (isInsert && String.isNotBlank(record.Phone_Number__c)) {
-                String clean = record.Phone_Number__c.replaceAll('\\D', ''); // Quita todo lo que no sea dígito
-                
-                if (clean.startsWith('00')) {
-                    clean = clean.substring(2);
-                }
-                
-                if (clean.startsWith('09') && clean.length() == 9) {
-                    clean = '598' + clean.substring(1);
-                }
-                
-                record.Phone_Number__c = clean;
+                record.Phone_Number__c = normalizePhone(record.Phone_Number__c);
             }
         }
         
@@ -96,9 +101,9 @@ public with sharing class AA_CustomerTriggerHandler {
                         String key = record.Business__c + '-' + record.Phone_Number__c;
                         
                         if (existingKeys.containsKey(key) && existingKeys.get(key) != record.Id) {
-                            record.Phone_Number__c.addError('Ya existe una clienta con este número de celular en tu salón.');
+                            record.Phone_Number__c.addError('Ya existe una persona con este número de celular en tu salón.');
                         } else if (inMemoryKeys.contains(key)) {
-                            record.Phone_Number__c.addError('Ya existe una clienta con este número de celular en tu salón.');
+                            record.Phone_Number__c.addError('Ya existe una persona con este número de celular en tu salón.');
                         } else {
                             inMemoryKeys.add(key);
                         }

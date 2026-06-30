@@ -657,12 +657,13 @@ export default class AAPublicAgenda extends LightningElement {
     getFormattedPhoneForApex(countryCode, localNumber) {
         if (!localNumber) return '';
         // Limpiar cualquier espacio o caracter no numérico
-        const cleanLocalNumber = localNumber.replace(/\D/g, '');
+        let cleanLocalNumber = localNumber.replace(/\D/g, '');
         
-        // Compatibilidad con datos viejos de Uruguay: enviamos 099... en vez de +59899...
-        if (countryCode === '+598') {
-            return '0' + cleanLocalNumber;
+        // Si el usuario por alguna razón logró ingresar un 0 inicial para Uruguay, lo quitamos
+        if (countryCode === '+598' && cleanLocalNumber.startsWith('0')) {
+            cleanLocalNumber = cleanLocalNumber.substring(1);
         }
+
         return countryCode + cleanLocalNumber;
     }
 

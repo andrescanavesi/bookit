@@ -3,23 +3,24 @@ public without sharing class AA_PublicAgendaController {
     @AuraEnabled(cacheable=false)
     public static AA_Customer__c getOrCreateCustomer(String phoneNumber, Id businessId){
         AA_Logger logger = new AA_Logger(true);
-        logger.info('getOrCreateCustomer, phoneNumber '+phoneNumber+' businessId: '+businessId);
+        String cleanPhone = AA_CustomerTriggerHandler.normalizePhone(phoneNumber);
+        logger.info('getOrCreateCustomer, phoneNumber '+phoneNumber+' cleanPhone '+cleanPhone+' businessId: '+businessId);
         List<AA_Customer__c> customers = [SELECT Id, Name, Email__c, First_Name__c, Last_Name__c, Phone_Number__c, Business__r.Business_Phone_Id__c
                                           FROM AA_Customer__c 
-                                          WHERE Phone_Number__c = :phoneNumber 
+                                          WHERE Phone_Number__c = :cleanPhone 
                                           AND Business__c = :businessId
                                           LIMIT 1];
         if(!customers.isEmpty()){
-            logger.info('getOrCreateCustomer, customer found by phone number '+phoneNumber+' businessId: '+businessId);
+            logger.info('getOrCreateCustomer, customer found by phone number '+cleanPhone+' businessId: '+businessId);
             return customers.get(0);
         }else{
-            logger.info('getOrCreateCustomer, a new customer will be created with the phone number '+phoneNumber+' businessId: '+businessId);
+            logger.info('getOrCreateCustomer, a new customer will be created with the phone number '+cleanPhone+' businessId: '+businessId);
             AA_Customer__c customer = new AA_Customer__c();
-            customer.Name  = phoneNumber;
-            customer.Phone_Number__c = phoneNumber;
+            customer.Name  = cleanPhone;
+            customer.Phone_Number__c = cleanPhone;
             customer.Business__c = businessId;
             insert customer;
-            logger.info('customer created, customerId '+customer.Id+ ' phoneNumber: '+phoneNumber+' businessId: '+businessId);
+            logger.info('customer created, customerId '+customer.Id+ ' phoneNumber: '+cleanPhone+' businessId: '+businessId);
             return customer;
         }
     }
@@ -193,14 +194,13 @@ public without sharing class AA_PublicAgendaController {
 
     @AuraEnabled(cacheable=false)
     public static List<AA_Appointment__c> getMisTurnos(String celular, Id businessId) {
-        // Limpiamos el número por si el usuario ingresó espacios o guiones
-        String cleanPhone = celular != null ? celular.replaceAll('[^0-9]', '') : '';
+        String cleanPhone = AA_CustomerTriggerHandler.normalizePhone(celular);
         AA_Business_Branch__c branch = getBusinessBranch(businessId); 
         return [
            SELECT Id, Name, Employee__r.Name, Employee__r.First_Name__c, Employee__r.Last_Name__c, Start_Date_Time__c, End_Date_Time__c, Duration_Minutes__c, Service__r.Name, Service__r.Display_Name__c, 
            Status__c, Customer__r.Name, Amount__c, Customer_Confirmation_Date__c, Internal_Comments__c
            FROM AA_Appointment__c 
-           WHERE Customer__r.Phone_Number__c = :celular 
+           WHERE Customer__r.Phone_Number__c = :cleanPhone 
            AND Start_Date_Time__c >= TODAY  
            AND Service__r.Business_Branch__c = :branch.Id
            AND Status__c = 'Pending'
