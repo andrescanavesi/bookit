@@ -169,6 +169,8 @@ export default class AASalonMatrixAdmin extends LightningElement {
                     isDone: appt.Status__c === 'Done',
                     isReminderSent: appt.Is_Reminder_Sent__c || !!appt.Reminder_Sent_Date__c,
                     internalComments: appt.Internal_Comments__c || '',
+                    customerComments: appt.Customer__r?.Comments_From_Customer__c || '',
+                    hasAllergies: appt.Customer__r?.Has_Allergies__c || false,
                     isPast: dt < new Date()
                 };
             });
@@ -440,7 +442,9 @@ export default class AASalonMatrixAdmin extends LightningElement {
                 waLink: this.generateWhatsAppLink(appt.phone, appt.customer, appt.service, appt.startTime),
                 isDone: appt.isDone,
                 isPending: appt.isPending,
-                isPast: appt.isPast
+                isPast: appt.isPast,
+                hasAllergies: appt.hasAllergies,
+                customerComments: appt.customerComments
             };
 
             // Calcular opciones de reasignación

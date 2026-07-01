@@ -63,7 +63,12 @@
                                                             <span class="appt-price">{cell.data.priceText}</span>
                                                         </div>
                                                         <div class="appt-main-info">
-                                                            <span class="appt-customer">{cell.data.customer}</span>
+                                                            <span class="appt-customer">
+                                                                {cell.data.customer}
+                                                                <template if:true={cell.data.hasAllergies}>
+                                                                    <lightning-icon icon-name="utility:warning" size="x-small" style="margin-left: 4px;" variant="error" title="Tiene alergias/condiciones"></lightning-icon>
+                                                                </template>
+                                                            </span>
                                                             <span class="appt-service">{cell.data.service}</span>
                                                         </div>
                                                         <div class="appt-footer">
@@ -220,7 +225,25 @@
                             <p><strong>Horario:</strong> {selectedAppt.timeRange} hs</p>
                         </div>
 
-                        <div class="form-group modal-comments-section">
+                        <template if:true={selectedAppt.hasAllergies}>
+                            <div style="background-color: #fee2e2; border-left: 4px solid #ef4444; padding: 12px; margin-top: 16px; margin-bottom: 16px; border-radius: 4px; display: flex; align-items: center;">
+                                <lightning-icon icon-name="utility:warning" size="small" variant="error" style="margin-right: 12px;"></lightning-icon>
+                                <span style="color: #991b1b; font-size: 14px;"><strong>Atención:</strong> El cliente indicó tener alergias a productos o condiciones especiales en la piel.</span>
+                            </div>
+                        </template>
+
+                        <template if:true={selectedAppt.customerComments}>
+                            <div class="form-group modal-comments-section" style="margin-top: 16px;">
+                                <label style="color: #666; font-size: 12px; font-weight: 600; letter-spacing: 0.5px; text-transform: uppercase;">Comentarios del Cliente</label>
+                                <lightning-textarea name="customerComments"
+                                        variant="label-hidden"
+                                        class="custom-lightning-textarea"
+                                        value={selectedAppt.customerComments}
+                                        disabled="true"></lightning-textarea>
+                            </div>
+                        </template>
+
+                        <div class="form-group modal-comments-section" style="margin-top: 16px;">
                             <label>Comentarios Internos / Notas del Servicio</label>
                             <lightning-textarea name="internalComments"
                                     variant="label-hidden"

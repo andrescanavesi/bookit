@@ -35,7 +35,7 @@ export default class AAPublicAgenda extends LightningElement {
     oldAppointmentId = null;
 
 
-    @track persona = { id: '', firstName: '', lastName: '', celular: '', email: '', indicaciones: '' };
+    @track persona = { id: '', firstName: '', lastName: '', celular: '', email: '', indicaciones: '', hasAllergies: false };
    
    @track reserva = { 
         grupoSel: null, 
@@ -480,7 +480,8 @@ export default class AAPublicAgenda extends LightningElement {
                 Duracion_Base_Min__c: s.Duration_Minutes__c,
                 Precio__c: s.Price__c,
                 Grupo_Servicio__c: s.AA_Service_Category__c, // Ahora es el ID de la categoría
-                Descripcion_Extendida__c: s.Description__c || ''
+                Descripcion_Extendida__c: s.Description__c || '',
+                Requires_Manual_Coordination__c: s.Requires_Manual_Coordination__c
             }));
 
         } catch (error) {
@@ -489,6 +490,10 @@ export default class AAPublicAgenda extends LightningElement {
     }
 
     handleInputChange(event) { this.persona[event.target.dataset.id] = event.target.value; }
+
+    handleCheckboxChange(event) {
+        this.persona[event.target.dataset.id] = event.target.checked;
+    }
     
     formatPhoneNumber(val, countryCode) {
         if (!val) return '';
@@ -529,7 +534,7 @@ export default class AAPublicAgenda extends LightningElement {
         this.persona.celular = this.formatPhoneNumber(this.persona.celular, this.selectedCountryCode);
     }
 
-    handleIndicacionesToggle(event) { this.tieneIndicaciones = (event.target.dataset.valor === 'si'); if (!this.tieneIndicaciones) this.persona.indicaciones = ''; }
+
     
     handleToggleService(event) {
         const srvId = event.currentTarget.dataset.id;
@@ -561,6 +566,21 @@ export default class AAPublicAgenda extends LightningElement {
             } else {
                 this.selectedServiceIds = [...this.selectedServiceIds, srvId];
             }
+        }
+    }
+
+    handleWhatsAppRedirect(event) {
+        event.stopPropagation();
+        const srvId = event.currentTarget.dataset.id;
+        const srv = this.services.find(s => s.Id === srvId);
+        if (srv) {
+            const serviceName = srv.Nombre_Visible__c;
+            const businessPhone = this.businessInfo.whatsappUrl ? this.businessInfo.whatsappUrl.match(/\d+/) : null;
+            const phone = businessPhone ? businessPhone[0] : '';
+            
+            const text = `Hola, me gustaría consultar por el servicio de ${serviceName}`;
+            const url = `https://wa.me/${phone}?text=${encodeURIComponent(text)}`;
+            window.open(url, '_blank');
         }
     }
 
@@ -960,7 +980,8 @@ export default class AAPublicAgenda extends LightningElement {
                 firstName: this.persona.firstName, 
                 lastName: this.persona.lastName,
                 email: this.persona.email,
-                comments: this.persona.indicaciones
+                comments: this.persona.indicaciones,
+                hasAllergies: this.persona.hasAllergies
             };
             console.info('data to update:');
             console.info(JSON.stringify(data));

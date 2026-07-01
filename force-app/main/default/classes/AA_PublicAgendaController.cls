@@ -26,9 +26,9 @@ public without sharing class AA_PublicAgendaController {
     }
     
     @AuraEnabled(cacheable=false)
-    public static AA_Customer__c updateCustomer(Id customerId, String firstName, String lastName, String email, String comments){
+    public static AA_Customer__c updateCustomer(Id customerId, String firstName, String lastName, String email, String comments, Boolean hasAllergies){
         AA_Logger logger = new AA_Logger(true);
-        logger.info('updateCustomer, customerId '+customerId+ ' firstName: '+firstName+' lastName: '+lastName+' email: '+email+' comments: '+comments);
+        logger.info('updateCustomer, customerId '+customerId+ ' firstName: '+firstName+' lastName: '+lastName+' email: '+email+' comments: '+comments+' hasAllergies: '+hasAllergies);
         try{
 
             AA_Customer__c customer = new AA_Customer__c(
@@ -37,11 +37,12 @@ public without sharing class AA_PublicAgendaController {
                 First_Name__c = firstName,
                 Last_Name__c = lastName,
                 Email__c = email,
-                Comments_From_Customer__c = comments
+                Comments_From_Customer__c = comments,
+                Has_Allergies__c = hasAllergies
             );
 
             update customer;
-            logger.info('customer updated, customerId '+customerId+ ' firstName: '+firstName+' lastName: '+lastName+' email: '+email+' comments: '+comments);
+            logger.info('customer updated, customerId '+customerId+ ' firstName: '+firstName+' lastName: '+lastName+' email: '+email+' comments: '+comments+' hasAllergies: '+hasAllergies);
             return customer;
         }catch(Exception e){
             String message = 'error updating customer: '+e.getMessage()+' '+e.getStackTraceString();
@@ -114,7 +115,7 @@ public without sharing class AA_PublicAgendaController {
         AA_Logger logger = new AA_Logger(true);
         AA_Business_Branch__c branch = getBusinessBranch(businessId); 
         //logger.info('getServices, branch id '+branch.Id);
-        List<AA_Service__c>  services =  [SELECT Id, Name, Display_Name__c, Duration_Minutes__c, Price__c, AA_Service_Category__c
+        List<AA_Service__c>  services =  [SELECT Id, Name, Display_Name__c, Duration_Minutes__c, Price__c, AA_Service_Category__c, Requires_Manual_Coordination__c
                                           FROM AA_Service__c 
                                           WHERE Business_Branch__c = :branch.Id
                                           AND Is_Active__c = true

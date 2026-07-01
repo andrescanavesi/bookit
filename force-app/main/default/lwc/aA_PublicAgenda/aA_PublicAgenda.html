@@ -99,19 +99,16 @@
                     </div>
 
                     <div class="field">
-                        <label class="field__label">¿HAY ALGO IMPORTANTE QUE TENGAMOS QUE SABER?</label>
-                        <div class="pill-row">
-                            <button class={pillClaseNo} data-valor="no" onclick={handleIndicacionesToggle}>No, todo bien</button>
-                            <button class={pillClaseSi} data-valor="si" onclick={handleIndicacionesToggle}>Sí, contar algo</button>
-                        </div>
+                        <label class="field__checkbox-label" style="display: flex; align-items: center; cursor: pointer;">
+                            <input type="checkbox" class="field__checkbox" data-id="hasAllergies" checked={persona.hasAllergies} onchange={handleCheckboxChange} style="margin-right: 8px;">
+                            Tengo alguna alergia a productos o condiciones en la piel
+                        </label>
                     </div>
 
-                    <template if:true={tieneIndicaciones}>
-                        <div class="field">
-                            <textarea class="field__textarea" data-id="indicaciones" rows="3" placeholder="Diabetes, allergies, embarazo, condiciones de la piel..." value={persona.indicaciones} onchange={handleInputChange}></textarea>
-                            <span class="field__hint">Esta información sólo la ve el equipo del salón.</span>
-                        </div>
-                    </template>
+                    <div class="field">
+                        <textarea class="field__textarea" data-id="indicaciones" rows="3" placeholder="Comentarios..." value={persona.indicaciones} onchange={handleInputChange}></textarea>
+                        <span class="field__hint">Esta información sólo la ve el equipo del salón.</span>
+                    </div>
 
                     <div class="spacer-md"></div>
                     <button class="btn" onclick={avanzarPaso3}>Continuar</button>
@@ -133,22 +130,44 @@
                             <div key={cat.id} class="category-group" style="margin-bottom: 32px;">
                                 <h3 style="font-size: 14px; letter-spacing: 1px; text-transform: uppercase; margin-bottom: 12px; border-bottom: 1px solid #ccc; padding-bottom: 4px;">{cat.label}</h3>
                                 <template for:each={cat.services} for:item="srv">
-                                    <button key={srv.Id} class={srv.cssClass} data-id={srv.Id} onclick={handleToggleService}>
-                                        <div class="card__content">
-                                            <div style="display: flex; justify-content: space-between; align-items: flex-start; width: 100%;">
-                                                <div style="flex: 1;">
-                                                    <div class="card__title card__title--sm">{srv.Nombre_Visible__c}</div>
-                                                    <template if:true={srv.duracionFormateada}>
-                                                        <div style="font-size: 13px; color: #666; margin-top: 2px;">{srv.duracionFormateada}</div>
-                                                    </template>
+                                    <template if:true={srv.Requires_Manual_Coordination__c}>
+                                        <button key={srv.Id} class="card between-rows" data-id={srv.Id} onclick={handleWhatsAppRedirect}>
+                                            <div class="card__content">
+                                                <div style="display: flex; justify-content: space-between; align-items: flex-start; width: 100%;">
+                                                    <div style="flex: 1;">
+                                                        <div class="card__title card__title--sm">{srv.Nombre_Visible__c}</div>
+                                                        <template if:true={srv.duracionFormateada}>
+                                                            <div style="font-size: 13px; color: #666; margin-top: 2px;">{srv.duracionFormateada} <span style="color: #25D366; font-weight: 500; margin-left: 4px;">• Por WhatsApp</span></div>
+                                                        </template>
+                                                    </div>
+                                                    <div style="margin-left: 12px; display: flex; align-items: center; justify-content: center; width: 36px; height: 36px; border-radius: 50%; background-color: #25D366; color: white;">
+                                                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"></path></svg>
+                                                    </div>
                                                 </div>
-                                                <div style="font-weight: 500; margin-left: 12px;">${srv.Precio__c}</div>
+                                                <template if:true={srv.Descripcion_Extendida__c}>
+                                                    <div class="card__desc" style="font-size: 13px; margin-top: 4px; color: #666;">{srv.Descripcion_Extendida__c}</div>
+                                                </template>
                                             </div>
-                                            <template if:true={srv.Descripcion_Extendida__c}>
-                                                <div class="card__desc" style="font-size: 13px; margin-top: 4px; color: #666;">{srv.Descripcion_Extendida__c}</div>
-                                            </template>
-                                        </div>
-                                    </button>
+                                        </button>
+                                    </template>
+                                    <template if:false={srv.Requires_Manual_Coordination__c}>
+                                        <button key={srv.Id} class={srv.cssClass} data-id={srv.Id} onclick={handleToggleService}>
+                                            <div class="card__content">
+                                                <div style="display: flex; justify-content: space-between; align-items: flex-start; width: 100%;">
+                                                    <div style="flex: 1;">
+                                                        <div class="card__title card__title--sm">{srv.Nombre_Visible__c}</div>
+                                                        <template if:true={srv.duracionFormateada}>
+                                                            <div style="font-size: 13px; color: #666; margin-top: 2px;">{srv.duracionFormateada}</div>
+                                                        </template>
+                                                    </div>
+                                                    <div style="font-weight: 500; margin-left: 12px;">${srv.Precio__c}</div>
+                                                </div>
+                                                <template if:true={srv.Descripcion_Extendida__c}>
+                                                    <div class="card__desc" style="font-size: 13px; margin-top: 4px; color: #666;">{srv.Descripcion_Extendida__c}</div>
+                                                </template>
+                                            </div>
+                                        </button>
+                                    </template>
                                 </template>
                             </div>
                         </template>

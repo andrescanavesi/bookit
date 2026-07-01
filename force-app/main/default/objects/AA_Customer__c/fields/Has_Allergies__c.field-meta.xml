@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomField xmlns="http://soap.sforce.com/2006/04/metadata">
+    <fullName>Has_Allergies__c</fullName>
+    <defaultValue>false</defaultValue>
+    <description>The specific allergy will be described in the comments</description>
+    <inlineHelpText>The specific allergy will be described in the comments</inlineHelpText>
+    <label>Has Allergies</label>
+    <trackHistory>false</trackHistory>
+    <trackTrending>false</trackTrending>
+    <type>Checkbox</type>
+</CustomField>
