@@ -166,15 +166,18 @@ public without sharing class AA_SalonAppointmentsController {
         }
     }
 
-    // ACTUALIZADO: El método ahora procesa y guarda las observaciones internas del salón
+    // ACTUALIZADO: El método ahora procesa y guarda las observaciones internas del salón y el pago
     @AuraEnabled
-    public static void completeAppointment(Id appointmentId, String internalComments) {
+    public static void completeAppointment(Id appointmentId, String internalComments, String paymentMethod, Decimal paymentAmount) {
         try {
             AA_Appointment__c appt = new AA_Appointment__c(
                 Id = appointmentId,
                 Status__c = 'Done',
                 Internal_Comments__c = internalComments,
-                Done_Date__c = System.now() 
+                Done_Date__c = System.now(),
+                Payment_Method__c = paymentMethod,
+                Payment_Amount__c = paymentAmount,
+                Payment_Date__c = System.today()
             );
             update appt;
         } catch (Exception e) {

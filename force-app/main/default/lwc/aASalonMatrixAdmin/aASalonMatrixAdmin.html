@@ -263,6 +263,32 @@
                                         disabled={selectedAppt.isDone}></lightning-textarea>
                             </div>
                         </div>
+                        
+                        <template if:false={selectedAppt.isDone}>
+                            <div style="display: flex; gap: 16px; margin-top: 16px; align-items: flex-end; background-color: #f8fafc; padding: 16px; border-radius: 8px; border: 1px dashed #cbd5e1;">
+                                <div class="form-group" style="flex: 1;">
+                                    <label style="color: #475569;">Método de Pago</label>
+                                    <lightning-combobox
+                                        name="paymentMethod"
+                                        variant="label-hidden"
+                                        value={tempPaymentMethod}
+                                        options={paymentMethodOptions}
+                                        onchange={handlePaymentMethodChange}>
+                                    </lightning-combobox>
+                                </div>
+                                <div class="form-group" style="flex: 1;">
+                                    <label style="color: #475569;">Monto Pagado</label>
+                                    <lightning-input 
+                                        type="number" 
+                                        variant="label-hidden"
+                                        value={tempPaymentAmount} 
+                                        formatter="currency" 
+                                        step="0.01"
+                                        onchange={handlePaymentAmountChange}>
+                                    </lightning-input>
+                                </div>
+                            </div>
+                        </template>
                     </div>
 
                    <div class="modal-footer modal-footer--split">

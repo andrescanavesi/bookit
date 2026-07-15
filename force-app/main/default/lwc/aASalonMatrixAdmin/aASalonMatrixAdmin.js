@@ -172,6 +172,7 @@ export default class AASalonMatrixAdmin extends LightningElement {
                     customerComments: appt.Customer__r?.Comments_From_Customer__c || '',
                     hasAllergies: appt.Customer__r?.Has_Allergies__c || false,
                     isNewCustomer: appt.Customer__r?.Is_New_Customer__c || false,
+                    rawPrice: rawPrice,
                     isPast: dt < new Date()
                 };
             });
@@ -474,6 +475,8 @@ export default class AASalonMatrixAdmin extends LightningElement {
             }
 
             this.tempInternalComments = appt.internalComments || '';
+            this.tempPaymentMethod = 'Efectivo';
+            this.tempPaymentAmount = appt.rawPrice || 0;
             this.isDetailModalOpen = true;
         }
     }
@@ -502,9 +505,30 @@ export default class AASalonMatrixAdmin extends LightningElement {
         this.tempInternalComments = event.target.value;
     }
 
+    get paymentMethodOptions() {
+        return [
+            { label: 'Efectivo', value: 'Efectivo' },
+            { label: 'Transferencia', value: 'Transferencia' },
+            { label: 'Mercado Pago', value: 'Mercado Pago' }
+        ];
+    }
+
+    handlePaymentMethodChange(event) {
+        this.tempPaymentMethod = event.detail.value;
+    }
+
+    handlePaymentAmountChange(event) {
+        this.tempPaymentAmount = event.target.value;
+    }
+
     handleDoneAction() {
         this.isCompleting = true;
-        completeAppointment({ appointmentId: this.selectedAppt.id, internalComments: this.tempInternalComments })
+        completeAppointment({ 
+            appointmentId: this.selectedAppt.id, 
+            internalComments: this.tempInternalComments,
+            paymentMethod: this.tempPaymentMethod,
+            paymentAmount: this.tempPaymentAmount
+        })
             .then(() => this.closeAndRefresh())
             .catch(err => { console.error(err); this.isCompleting = false; });
     }
