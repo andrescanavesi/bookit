@@ -65,6 +65,9 @@
                                                         <div class="appt-main-info">
                                                             <span class="appt-customer">
                                                                 {cell.data.customer}
+                                                                <template if:true={cell.data.isNewCustomer}>
+                                                                    <lightning-icon icon-name="utility:new" size="x-small" style="margin-left: 4px;" variant="success" title="Cliente Nuevo"></lightning-icon>
+                                                                </template>
                                                                 <template if:true={cell.data.hasAllergies}>
                                                                     <lightning-icon icon-name="utility:warning" size="x-small" style="margin-left: 4px;" variant="error" title="Tiene alergias/condiciones"></lightning-icon>
                                                                 </template>
@@ -203,7 +206,12 @@
                     <div class="modal-body">
                         <div class="detail-card-header">
                             <span class="detail-status-badge">{selectedAppt.status}</span>
-                            <h3>{selectedAppt.customer}</h3>
+                            <h3 style="display: flex; align-items: center; gap: 8px;">
+                                {selectedAppt.customer}
+                                <template if:true={selectedAppt.isNewCustomer}>
+                                    <span style="font-size: 11px; background: #dcfce7; color: #166534; padding: 2px 6px; border-radius: 4px; font-weight: 600; text-transform: uppercase;">Nuevo</span>
+                                </template>
+                            </h3>
                             <p>{selectedAppt.service} · {selectedAppt.priceText}</p>
                         </div>
                         <div class="detail-info-grid">
@@ -226,32 +234,34 @@
                         </div>
 
                         <template if:true={selectedAppt.hasAllergies}>
-                            <div style="background-color: #fee2e2; border-left: 4px solid #ef4444; padding: 12px; margin-top: 16px; margin-bottom: 16px; border-radius: 4px; display: flex; align-items: center;">
+                            <div style="background-color: #fee2e2; border-left: 4px solid #ef4444; padding: 12px; margin-top: 16px; border-radius: 4px; display: flex; align-items: center;">
                                 <lightning-icon icon-name="utility:warning" size="small" variant="error" style="margin-right: 12px;"></lightning-icon>
                                 <span style="color: #991b1b; font-size: 14px;"><strong>Atención:</strong> El cliente indicó tener alergias a productos o condiciones especiales en la piel.</span>
                             </div>
                         </template>
 
-                        <template if:true={selectedAppt.customerComments}>
-                            <div class="form-group modal-comments-section" style="margin-top: 16px;">
-                                <label style="color: #666; font-size: 12px; font-weight: 600; letter-spacing: 0.5px; text-transform: uppercase;">Comentarios del Cliente</label>
-                                <lightning-textarea name="customerComments"
+                        <div style="display: flex; gap: 16px; margin-top: 16px;">
+                            <template if:true={selectedAppt.customerComments}>
+                                <div class="form-group modal-comments-section" style="flex: 1;">
+                                    <label style="color: #666; font-size: 12px; font-weight: 600; letter-spacing: 0.5px; text-transform: uppercase;">Comentarios del Cliente</label>
+                                    <lightning-textarea name="customerComments"
+                                            variant="label-hidden"
+                                            class="custom-lightning-textarea"
+                                            value={selectedAppt.customerComments}
+                                            disabled="true"></lightning-textarea>
+                                </div>
+                            </template>
+
+                            <div class="form-group modal-comments-section" style="flex: 1;">
+                                <label>Comentarios Internos / Notas del Servicio</label>
+                                <lightning-textarea name="internalComments"
                                         variant="label-hidden"
                                         class="custom-lightning-textarea"
-                                        value={selectedAppt.customerComments}
-                                        disabled="true"></lightning-textarea>
+                                        placeholder="Ej. Diseño Nail Art minimalista, prefiere tonos nude, cutículas sensibles..."
+                                        value={tempInternalComments}
+                                        onchange={handleCommentChange}
+                                        disabled={selectedAppt.isDone}></lightning-textarea>
                             </div>
-                        </template>
-
-                        <div class="form-group modal-comments-section" style="margin-top: 16px;">
-                            <label>Comentarios Internos / Notas del Servicio</label>
-                            <lightning-textarea name="internalComments"
-                                    variant="label-hidden"
-                                    class="custom-lightning-textarea"
-                                    placeholder="Ej. Diseño Nail Art minimalista, prefiere tonos nude, cutículas sensibles..."
-                                    value={tempInternalComments}
-                                    onchange={handleCommentChange}
-                                    disabled={selectedAppt.isDone}></lightning-textarea>
                         </div>
                     </div>
 

@@ -25,11 +25,56 @@ public class AA_Scripts {
             delete logsToDelete;
             System.debug('Se eliminaron con éxito ' + totalBorrados + ' logs viejos.');
         } else {
-            System.debug('No se encontraron logs viejos para eliminar.');
+            System.debug('No se encontraron logs viejos para borrar.');
         }
     }
 
-
+    /**
+     * Agrega todos los servicios disponibles de la misma sucursal a un empleado, 
+     * omitiendo aquellos que el empleado ya tiene asignados.
+     * AA_Scripts.addMissingServicesToEmployee('a01gL00000abcde');
+     */
+    public static void addMissingServicesToEmployee(Id employeeId) {
+        System.debug('Agregando servicios faltantes al empleado: ' + employeeId);
+        
+        // 1. Obtener el empleado y su sucursal
+        List<AA_Employee__c> employees = [SELECT Id, Business_Branch__c FROM AA_Employee__c WHERE Id = :employeeId LIMIT 1];
+        if (employees.isEmpty()) {
+            System.debug('No se encontró el empleado.');
+            return;
+        }
+        Id branchId = employees[0].Business_Branch__c;
+        
+        // 2. Obtener los servicios asignados actualmente
+        List<AA_Employee_Service__c> existingServices = [SELECT Service__c FROM AA_Employee_Service__c WHERE Employee__c = :employeeId];
+        Set<Id> assignedServiceIds = new Set<Id>();
+        for (AA_Employee_Service__c es : existingServices) {
+            assignedServiceIds.add(es.Service__c);
+        }
+        
+        // 3. Obtener todos los servicios de la sucursal
+        List<AA_Service__c> allBranchServices = [SELECT Id, Name FROM AA_Service__c WHERE Business_Branch__c = :branchId AND Is_Active__c = true];
+        
+        // 4. Crear los registros faltantes
+        List<AA_Employee_Service__c> servicesToInsert = new List<AA_Employee_Service__c>();
+        for (AA_Service__c srv : allBranchServices) {
+            if (!assignedServiceIds.contains(srv.Id)) {
+                servicesToInsert.add(new AA_Employee_Service__c(
+                    Employee__c = employeeId,
+                    Service__c = srv.Id
+                ));
+                System.debug('Agregando servicio: ' + srv.Name);
+            }
+        }
+        
+        // 5. Insertar
+        if (!servicesToInsert.isEmpty()) {
+            insert servicesToInsert;
+            System.debug('Se agregaron ' + servicesToInsert.size() + ' servicios al empleado.');
+        } else {
+            System.debug('El empleado ya tiene asignados todos los servicios de la sucursal.');
+        }
+    }
 	/**
      * 
 	 * AA_Scripts.deleteAllAppointments();

@@ -171,6 +171,7 @@ export default class AASalonMatrixAdmin extends LightningElement {
                     internalComments: appt.Internal_Comments__c || '',
                     customerComments: appt.Customer__r?.Comments_From_Customer__c || '',
                     hasAllergies: appt.Customer__r?.Has_Allergies__c || false,
+                    isNewCustomer: appt.Customer__r?.Is_New_Customer__c || false,
                     isPast: dt < new Date()
                 };
             });
@@ -444,6 +445,7 @@ export default class AASalonMatrixAdmin extends LightningElement {
                 isPending: appt.isPending,
                 isPast: appt.isPast,
                 hasAllergies: appt.hasAllergies,
+                isNewCustomer: appt.isNewCustomer,
                 customerComments: appt.customerComments
             };
 

@@ -445,6 +445,10 @@
     display: flex; flex-direction: column; overflow: hidden;
 }
 
+.modal-container--detail {
+    max-width: 680px;
+}
+
 .modal-header {
     padding: 16px 24px; border-bottom: 1px solid #E5DFD5;
     display: flex; justify-content: space-between; align-items: center;
