@@ -80,6 +80,12 @@
                             <value>NAME</value>
                         </valueListItems>
                         <valueListItems>
+                            <value>AA_Employee__c.First_Name__c</value>
+                        </valueListItems>
+                        <valueListItems>
+                            <value>AA_Employee__c.Last_Name__c</value>
+                        </valueListItems>
+                        <valueListItems>
                             <value>AA_Employee__c.Available_In_Public_Agenda__c</value>
                         </valueListItems>
                         <valueListItems>

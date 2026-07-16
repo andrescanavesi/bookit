@@ -10,6 +10,10 @@
         <enabled>false</enabled>
     </classAccesses>
     <classAccesses>
+        <apexClass>AA_AppointmentTriggerHandler</apexClass>
+        <enabled>false</enabled>
+    </classAccesses>
+    <classAccesses>
         <apexClass>AA_AvailableSlot</apexClass>
         <enabled>false</enabled>
     </classAccesses>
@@ -27,6 +31,18 @@
     </classAccesses>
     <classAccesses>
         <apexClass>AA_CustomerTriggerHandler</apexClass>
+        <enabled>false</enabled>
+    </classAccesses>
+    <classAccesses>
+        <apexClass>AA_EmailEventHandler</apexClass>
+        <enabled>false</enabled>
+    </classAccesses>
+    <classAccesses>
+        <apexClass>AA_EmailRequest</apexClass>
+        <enabled>false</enabled>
+    </classAccesses>
+    <classAccesses>
+        <apexClass>AA_EmailService</apexClass>
         <enabled>false</enabled>
     </classAccesses>
     <classAccesses>
@@ -424,6 +440,11 @@
         <readable>true</readable>
     </fieldPermissions>
     <fieldPermissions>
+        <editable>false</editable>
+        <field>AA_Customer__c.Count_Appointments_Done__c</field>
+        <readable>true</readable>
+    </fieldPermissions>
+    <fieldPermissions>
         <editable>true</editable>
         <field>AA_Customer__c.Email__c</field>
         <readable>true</readable>
@@ -435,7 +456,17 @@
     </fieldPermissions>
     <fieldPermissions>
         <editable>true</editable>
+        <field>AA_Customer__c.Has_Allergies__c</field>
+        <readable>true</readable>
+    </fieldPermissions>
+    <fieldPermissions>
+        <editable>true</editable>
         <field>AA_Customer__c.Internal_Comments__c</field>
+        <readable>true</readable>
+    </fieldPermissions>
+    <fieldPermissions>
+        <editable>false</editable>
+        <field>AA_Customer__c.Is_New_Customer__c</field>
         <readable>true</readable>
     </fieldPermissions>
     <fieldPermissions>
@@ -462,6 +493,11 @@
         <editable>false</editable>
         <field>AA_Employee_Working_Hour__c.Start_Default_Break_Hour__c</field>
         <readable>false</readable>
+    </fieldPermissions>
+    <fieldPermissions>
+        <editable>true</editable>
+        <field>AA_Employee__c.Available_In_Public_Agenda__c</field>
+        <readable>true</readable>
     </fieldPermissions>
     <fieldPermissions>
         <editable>false</editable>
@@ -521,6 +557,11 @@
     <fieldPermissions>
         <editable>true</editable>
         <field>AA_Service__c.Is_Active__c</field>
+        <readable>true</readable>
+    </fieldPermissions>
+    <fieldPermissions>
+        <editable>true</editable>
+        <field>AA_Service__c.Requires_Manual_Coordination__c</field>
         <readable>true</readable>
     </fieldPermissions>
     <fieldPermissions>

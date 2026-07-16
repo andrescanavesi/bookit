@@ -18,3 +18,9 @@ The `sfdx-project.json` file contains useful configuration information for your 
 - [Salesforce CLI Setup Guide](https://developer.salesforce.com/docs/atlas.en-us.sfdx_setup.meta/sfdx_setup/sfdx_setup_intro.htm)
 - [Salesforce DX Developer Guide](https://developer.salesforce.com/docs/atlas.en-us.sfdx_dev.meta/sfdx_dev/sfdx_dev_intro.htm)
 - [Salesforce CLI Command Reference](https://developer.salesforce.com/docs/atlas.en-us.sfdx_cli_reference.meta/sfdx_cli_reference/cli_reference.htm)
+
+```
+sf config set defaultusername=andres.canavesi.1948a083958b@agentforce.com
+sf config set defaultusername=andres.canavesi_21k3lnccm1m3gm7@gmail.com
+sf project retrieve start --metadata GlobalValueSet
+```

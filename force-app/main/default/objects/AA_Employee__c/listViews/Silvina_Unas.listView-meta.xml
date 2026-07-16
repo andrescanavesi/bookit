@@ -6,8 +6,9 @@
     <columns>Last_Name__c</columns>
     <columns>User__c</columns>
     <columns>Is_Admin__c</columns>
-    <columns>LAST_UPDATE</columns>
     <columns>Is_Active__c</columns>
+    <columns>Available_In_Public_Agenda__c</columns>
+    <columns>LAST_UPDATE</columns>
     <filterScope>Everything</filterScope>
     <filters>
         <field>NAME</field>

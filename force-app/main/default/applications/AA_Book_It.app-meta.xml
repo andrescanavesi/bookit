@@ -12,10 +12,8 @@
     <isOmniPinnedViewEnabled>false</isOmniPinnedViewEnabled>
     <label>AA Book It</label>
     <navType>Standard</navType>
-    <tabs>AA_Public_Agenda_Test</tabs>
-    <tabs>AA_Salon_Reminders</tabs>
     <tabs>AA_WeeklyMatrixAdmin</tabs>
-    <tabs>AA_Agenda_Zentidos</tabs>
+    <tabs>AA_Salon_Reminders</tabs>
     <tabs>AA_Agenda_Silvina</tabs>
     <tabs>AA_SalonCustomersTable</tabs>
     <tabs>AA_SalonEmployeesTable</tabs>
