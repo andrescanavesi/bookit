@@ -331,4 +331,28 @@
         <tab>Log__c</tab>
         <visibility>Visible</visibility>
     </tabSettings>
+    <tabSettings>
+        <tab>AA_Agenda_Silvina</tab>
+        <visibility>Visible</visibility>
+    </tabSettings>
+    <tabSettings>
+        <tab>AA_SalonCustomersTable</tab>
+        <visibility>Visible</visibility>
+    </tabSettings>
+    <tabSettings>
+        <tab>AA_SalonEmployeesTable</tab>
+        <visibility>Visible</visibility>
+    </tabSettings>
+    <tabSettings>
+        <tab>AA_Salon_Matrix</tab>
+        <visibility>Visible</visibility>
+    </tabSettings>
+    <tabSettings>
+        <tab>AA_Salon_Reminders</tab>
+        <visibility>Visible</visibility>
+    </tabSettings>
+    <tabSettings>
+        <tab>AA_WeeklyMatrixAdmin</tab>
+        <visibility>Visible</visibility>
+    </tabSettings>
 </PermissionSet>
