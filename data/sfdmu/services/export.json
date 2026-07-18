@@ -1,0 +1,19 @@
+{
+  "objects": [
+    {
+      "query": "SELECT Id, Name FROM AA_Business_Branch__c",
+      "operation": "Readonly",
+      "externalId": "Name"
+    },
+    {
+      "query": "SELECT Id FROM AA_Service_Category__c",
+      "operation": "Upsert",
+      "externalId": "Name"
+    },
+    {
+      "query": "SELECT Id FROM AA_Service__c",
+      "operation": "Upsert",
+      "externalId": "Name"
+    }
+  ]
+}

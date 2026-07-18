@@ -1,0 +1,31 @@
+{
+  "objects": [
+    {
+      "query": "SELECT Id, Name FROM AA_Business_Branch__c",
+      "operation": "Readonly",
+      "externalId": "Name"
+    },
+    {
+      "query": "SELECT Id, Name FROM AA_Service__c",
+      "operation": "Readonly",
+      "externalId": "Name"
+    },
+    {
+      "query": "SELECT Id FROM AA_Employee__c",
+      "operation": "Upsert",
+      "externalId": "Name"
+    },
+    {
+      "query": "SELECT Id FROM AA_Employee_Working_Hour__c",
+      "operation": "Insert"
+    },
+    {
+      "query": "SELECT Id FROM AA_Employee_Absence__c",
+      "operation": "Insert"
+    },
+    {
+      "query": "SELECT Id FROM AA_Employee_Service__c",
+      "operation": "Insert"
+    }
+  ]
+}

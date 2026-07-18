@@ -27,8 +27,23 @@ sf project retrieve start --metadata GlobalValueSet
 
 # SFDMU (Migración de Datos)
 
-Para migrar la configuración inicial desde Dev a Prod, usá el siguiente comando (utilizando los alias de las orgs):
+Para migrar la configuración inicial desde Dev a Prod, podés correr los siguientes comandos dependiendo de lo que quieras migrar.
+Recordá usar los alias de tus orgs (`bookitDevOrg` como origen y `bookitProd` como destino).
+
+**Para migrar TODO (Business, Branches, Services, Employees, etc):**
 
 ```bash
-sf sfdmu run --sourceusername bookitDevOrg --targetusername bookitProd --path ./data/sfdmu/business
+sf sfdmu run --sourceusername bookitDevOrg --targetusername bookitProd --path ./data/sfdmu/all --canmodify sostienemas.my.salesforce.com
+```
+
+**Para migrar SOLO Servicios y Categorías:**
+
+```bash
+sf sfdmu run --sourceusername bookitDevOrg --targetusername bookitProd --path ./data/sfdmu/services --canmodify sostienemas.my.salesforce.com
+```
+
+**Para migrar SOLO Empleados (incluyendo horarios y ausencias):**
+
+```bash
+sf sfdmu run --sourceusername bookitDevOrg --targetusername bookitProd --path ./data/sfdmu/employees --canmodify sostienemas.my.salesforce.com
 ```
