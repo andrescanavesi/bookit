@@ -1,17 +1,17 @@
 {
   "objects": [
     {
-      "query": "SELECT Id, Name FROM AA_Business_Branch__c",
+      "query": "SELECT Id, Name, Address__c, Business__c, Display_Name__c FROM AA_Business_Branch__c",
       "operation": "Readonly",
       "externalId": "Name"
     },
     {
-      "query": "SELECT Id FROM AA_Service_Category__c",
+      "query": "SELECT Id, Name, Business_Branch__c, Description_Short__c, Display_Name__c, Is_Active__c FROM AA_Service_Category__c",
       "operation": "Upsert",
       "externalId": "Name"
     },
     {
-      "query": "SELECT Id FROM AA_Service__c",
+      "query": "SELECT Id, Name, AA_Service_Category__c, Business_Branch__c, Count_Appointments_Done__c, Description__c, Display_Name__c, Duration_Minutes__c, Is_Active__c, Price__c, Requires_Manual_Coordination__c FROM AA_Service__c",
       "operation": "Upsert",
       "externalId": "Name"
     }

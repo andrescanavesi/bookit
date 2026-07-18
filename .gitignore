@@ -187,7 +187,7 @@ force-app/main/default/experiences/Salon_Back_Office1/config/loginAppPage.json
 force-app/main/default/experiences/Salon_Back_Office1/config/languages.json
 force-app/main/default/experiences/Salon_Back_Office1/brandingSets/customerAccountPortal.json
 force-app/main/default/experiences/Salon_Back_Office1.site-meta.xml
-/data/sfdmu/business/target
+
 .vscode/settings.json
 force-app/main/default/flexipages/.DS_Store
 force-app/main/default/layouts/AA_My_Custom_Object__c-AA My Custom Object Layout.layout-meta.xml
@@ -360,3 +360,9 @@ force-app/main/default/layouts/WorkStepTemplate-Work Step Template Layout.layout
 force-app/main/default/layouts/WorkType-Work Type Layout.layout-meta.xml
 force-app/main/default/layouts/WorkTypeGroup-Work Type Group Layout.layout-meta.xml
 force-app/main/default/layouts/WorkTypeGroupMember-Work Type Group Member Layout.layout-meta.xml
+
+data/sfdmu/all/reports
+data/sfdmu/all/target
+data/sfdmu/employees/target
+data/sfdmu/services/target
+
