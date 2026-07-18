@@ -37,6 +37,7 @@
 		<members>User</members>
 		<members>AA_Send_Email_Event__e</members>
 		<members>AA_Log_Event__e</members>
+		<members>AA_Config__mdt</members>
 		<name>CustomObject</name>
 	</types>
 	<types>
