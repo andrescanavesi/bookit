@@ -24,3 +24,11 @@ sf config set defaultusername=andres.canavesi.1948a083958b@agentforce.com
 sf config set defaultusername=andres.canavesi_21k3lnccm1m3gm7@gmail.com
 sf project retrieve start --metadata GlobalValueSet
 ```
+
+# SFDMU (Migración de Datos)
+
+Para migrar la configuración inicial desde Dev a Prod, usá el siguiente comando (utilizando los alias de las orgs):
+
+```bash
+sf sfdmu run --sourceusername bookitDevOrg --targetusername bookitProd --path ./data/sfdmu/business
+```

@@ -4,6 +4,56 @@
       "query": "SELECT Id, Name, Email__c, Phone__c, Logo_Url__c, Instagram_Url__c, Facebook_Url__c, Website__c, Description__c FROM AA_Business__c",
       "operation": "Upsert",
       "externalId": "Name"
+    },
+    {
+      "query": "SELECT Id FROM AA_Business_Branch__c",
+      "operation": "Upsert",
+      "externalId": "Name"
+    },
+    {
+      "query": "SELECT Id FROM AA_Service_Category__c",
+      "operation": "Upsert",
+      "externalId": "Name"
+    },
+    {
+      "query": "SELECT Id FROM AA_Service__c",
+      "operation": "Upsert",
+      "externalId": "Name"
+    },
+    {
+      "query": "SELECT Id FROM AA_Employee__c",
+      "operation": "Upsert",
+      "externalId": "Name"
+    },
+    {
+      "query": "SELECT Id FROM AA_Branch_Holiday__c",
+      "operation": "Upsert",
+      "externalId": "Name"
+    },
+    {
+      "query": "SELECT Id FROM AA_Branch_Working_Hour__c",
+      "operation": "Insert"
+    },
+    {
+      "query": "SELECT Id FROM AA_Employee_Working_Hour__c",
+      "operation": "Insert"
+    },
+    {
+      "query": "SELECT Id FROM AA_Employee_Service__c",
+      "operation": "Insert"
+    },
+    {
+      "query": "SELECT Id FROM AA_Customer__c",
+      "operation": "Upsert",
+      "externalId": "Phone_Number__c"
+    },
+    {
+      "query": "SELECT Id FROM AA_Employee_Absence__c",
+      "operation": "Insert"
+    },
+    {
+      "query": "SELECT Id FROM AA_Appointment__c",
+      "operation": "Insert"
     }
   ]
 }
