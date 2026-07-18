@@ -36,6 +36,12 @@ Recordá usar los alias de tus orgs (`bookitDevOrg` como origen y `bookitProd` c
 sf sfdmu run --sourceusername bookitDevOrg --targetusername bookitProd --path ./data/sfdmu/all --canmodify sostienemas.my.salesforce.com
 ```
 
+**Para migrar SOLO Negocios y Sucursales (Business & Branches):**
+
+```bash
+sf sfdmu run --sourceusername bookitDevOrg --targetusername bookitProd --path ./data/sfdmu/business --canmodify sostienemas.my.salesforce.com
+```
+
 **Para migrar SOLO Servicios y Categorías:**
 
 ```bash

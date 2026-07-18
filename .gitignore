@@ -366,3 +366,5 @@ data/sfdmu/all/target
 data/sfdmu/employees/target
 data/sfdmu/services/target
 
+/data/sfdmu/business/reports
+/data/sfdmu/business/target
