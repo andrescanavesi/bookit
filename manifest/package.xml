@@ -74,7 +74,8 @@
         <name>FlexiPage</name>
     </types>
 	<types>
-		<members>*</members>
+		<members>AA_Book_It_Admin</members>
+		<members>AA_Admin_Salon</members>
 		<name>PermissionSet</name>
 	</types>
 	<types>
