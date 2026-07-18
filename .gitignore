@@ -188,3 +188,175 @@ force-app/main/default/experiences/Salon_Back_Office1/config/languages.json
 force-app/main/default/experiences/Salon_Back_Office1/brandingSets/customerAccountPortal.json
 force-app/main/default/experiences/Salon_Back_Office1.site-meta.xml
 /data/sfdmu/business/target
+.vscode/settings.json
+force-app/main/default/flexipages/.DS_Store
+force-app/main/default/layouts/AA_My_Custom_Object__c-AA My Custom Object Layout.layout-meta.xml
+force-app/main/default/layouts/AA_WhatsApp_Interaction__c-AA WhatsApp Interaction Layout.layout-meta.xml
+force-app/main/default/layouts/AA_WhatsApp_Session__c-AA WhatsApp Session Layout.layout-meta.xml
+force-app/main/default/layouts/Account-Account %28Marketing%29 Layout.layout-meta.xml
+force-app/main/default/layouts/Account-Account %28Sales%29 Layout.layout-meta.xml
+force-app/main/default/layouts/Account-Account %28Support%29 Layout.layout-meta.xml
+force-app/main/default/layouts/Account-Account Layout.layout-meta.xml
+force-app/main/default/layouts/AccountBrand-Account Brand Layout.layout-meta.xml
+force-app/main/default/layouts/AlternativePaymentMethod-Alternative Payment Method Layout.layout-meta.xml
+force-app/main/default/layouts/ApiAnomalyEventStore-API Anomaly Event Store Layout.layout-meta.xml
+force-app/main/default/layouts/AppointmentInvitation-Appointment Invitation Layout.layout-meta.xml
+force-app/main/default/layouts/Asset-Asset Layout.layout-meta.xml
+force-app/main/default/layouts/AssetAction-Asset Action Layout.layout-meta.xml
+force-app/main/default/layouts/AssetActionSource-Asset Action Source Layout.layout-meta.xml
+force-app/main/default/layouts/AssetRelationship-Asset Relationship Layout.layout-meta.xml
+force-app/main/default/layouts/AssetStatePeriod-Asset State Period Layout.layout-meta.xml
+force-app/main/default/layouts/AssignedResource-Assigned Resource Layout.layout-meta.xml
+force-app/main/default/layouts/AssociatedLocation-Associated Location Layout.layout-meta.xml
+force-app/main/default/layouts/AsyncOperationLog-Async Operation Log Layout.layout-meta.xml
+force-app/main/default/layouts/AuthorizationForm-Authorization Form Layout.layout-meta.xml
+force-app/main/default/layouts/AuthorizationFormConsent-Authorization Form Consent Layout.layout-meta.xml
+force-app/main/default/layouts/AuthorizationFormDataUse-Authorization Form Data Use Layout.layout-meta.xml
+force-app/main/default/layouts/AuthorizationFormText-Authorization Form Text Layout.layout-meta.xml
+force-app/main/default/layouts/BusinessBrand-Business Brand Layout.layout-meta.xml
+force-app/main/default/layouts/Campaign-Campaign Layout.layout-meta.xml
+force-app/main/default/layouts/CampaignMember-Campaign Member Page Layout.layout-meta.xml
+force-app/main/default/layouts/CardPaymentMethod-Card Payment Method Layout.layout-meta.xml
+force-app/main/default/layouts/CartCheckoutSession-Cart Checkout Session Layout.layout-meta.xml
+force-app/main/default/layouts/CartDeliveryGroup-Cart Delivery Group Layout.layout-meta.xml
+force-app/main/default/layouts/CartDeliveryGroupMethod-Cart Delivery Group Method Layout.layout-meta.xml
+force-app/main/default/layouts/CartItem-Cart Item Layout.layout-meta.xml
+force-app/main/default/layouts/CartTax-Cart Tax Layout.layout-meta.xml
+force-app/main/default/layouts/CartValidationOutput-Cart Validation Output Layout.layout-meta.xml
+force-app/main/default/layouts/Case-Case %28Marketing%29 Layout.layout-meta.xml
+force-app/main/default/layouts/Case-Case %28Sales%29 Layout.layout-meta.xml
+force-app/main/default/layouts/Case-Case %28Support%29 Layout.layout-meta.xml
+force-app/main/default/layouts/Case-Case Layout.layout-meta.xml
+force-app/main/default/layouts/CaseClose-Close Case Layout.layout-meta.xml
+force-app/main/default/layouts/CaseMilestone-Case Milestone Layout.layout-meta.xml
+force-app/main/default/layouts/CommunityMemberLayout-Community Member Layout.layout-meta.xml
+force-app/main/default/layouts/ConsumptionRate-Consumption Rate Layout.layout-meta.xml
+force-app/main/default/layouts/ConsumptionSchedule-Consumption Schedule Layout.layout-meta.xml
+force-app/main/default/layouts/Contact-Contact %28Marketing%29 Layout.layout-meta.xml
+force-app/main/default/layouts/Contact-Contact %28Sales%29 Layout.layout-meta.xml
+force-app/main/default/layouts/Contact-Contact %28Support%29 Layout.layout-meta.xml
+force-app/main/default/layouts/Contact-Contact Layout.layout-meta.xml
+force-app/main/default/layouts/ContactPointAddress-Contact Point Address Layout.layout-meta.xml
+force-app/main/default/layouts/ContactPointEmail-Contact Point Email Layout.layout-meta.xml
+force-app/main/default/layouts/ContactPointPhone-Contact Point Phone Layout.layout-meta.xml
+force-app/main/default/layouts/ContactPointTypeConsent-Contact Point Type Consent Layout.layout-meta.xml
+force-app/main/default/layouts/ContentVersion-Content Version Layout.layout-meta.xml
+force-app/main/default/layouts/Contract-Contract Layout.layout-meta.xml
+force-app/main/default/layouts/ContractLineItem-Contract Line Item Layout.layout-meta.xml
+force-app/main/default/layouts/CredentialStuffingEventStore-Credential Stuffing Event Store Layout.layout-meta.xml
+force-app/main/default/layouts/CreditMemo-Credit Memo Layout.layout-meta.xml
+force-app/main/default/layouts/CreditMemoInvApplication-Credit Memo Invoice Application Layout.layout-meta.xml
+force-app/main/default/layouts/CreditMemoLine-Credit Memo Line Layout.layout-meta.xml
+force-app/main/default/layouts/Customer-Customer Layout.layout-meta.xml
+force-app/main/default/layouts/DandBCompany-D%26B Company Layout.layout-meta.xml
+force-app/main/default/layouts/DataUseLegalBasis-Data Use Legal Basis Layout.layout-meta.xml
+force-app/main/default/layouts/DataUsePurpose-Data Use Purpose Layout.layout-meta.xml
+force-app/main/default/layouts/DelegatedAccount-External Managed Account Layout.layout-meta.xml
+force-app/main/default/layouts/DigitalWallet-Digital Wallet Layout.layout-meta.xml
+force-app/main/default/layouts/DuplicateRecordSet-Duplicate Record Set Layout.layout-meta.xml
+force-app/main/default/layouts/EmailMessage-Email Message Layout.layout-meta.xml
+force-app/main/default/layouts/EngagementChannelType-Engagement Channel Type Layout.layout-meta.xml
+force-app/main/default/layouts/Entitlement-Entitlement Layout.layout-meta.xml
+force-app/main/default/layouts/EntityMilestone-Object Milestone Layout.layout-meta.xml
+force-app/main/default/layouts/Event-Event Layout.layout-meta.xml
+force-app/main/default/layouts/FeedItem-Feed Item Layout.layout-meta.xml
+force-app/main/default/layouts/FinanceBalanceSnapshot-Finance Balance Snapshot Layout.layout-meta.xml
+force-app/main/default/layouts/FinanceTransaction-Finance Transaction Layout.layout-meta.xml
+force-app/main/default/layouts/FulfillmentOrder-Fulfillment Order Layout.layout-meta.xml
+force-app/main/default/layouts/FulfillmentOrderItemAdjustment-Fulfillment Order Item Adjustment Layout.layout-meta.xml
+force-app/main/default/layouts/FulfillmentOrderItemTax-Fulfillment Order Item Tax Layout.layout-meta.xml
+force-app/main/default/layouts/FulfillmentOrderLineItem-Fulfillment Order Product Layout.layout-meta.xml
+force-app/main/default/layouts/Global-Global Layout.layout-meta.xml
+force-app/main/default/layouts/GuestUserAnomalyEventStore-Guest User Anomaly Event Store Layout.layout-meta.xml
+force-app/main/default/layouts/Idea-Idea Layout.layout-meta.xml
+force-app/main/default/layouts/Individual-Individual Layout.layout-meta.xml
+force-app/main/default/layouts/Invoice-Invoice Layout.layout-meta.xml
+force-app/main/default/layouts/InvoiceLine-Invoice Line Layout.layout-meta.xml
+force-app/main/default/layouts/Lead-Lead %28Marketing%29 Layout.layout-meta.xml
+force-app/main/default/layouts/Lead-Lead %28Sales%29 Layout.layout-meta.xml
+force-app/main/default/layouts/Lead-Lead %28Support%29 Layout.layout-meta.xml
+force-app/main/default/layouts/Lead-Lead Layout.layout-meta.xml
+force-app/main/default/layouts/LegalEntity-Legal Entity Layout.layout-meta.xml
+force-app/main/default/layouts/Location-Location Layout.layout-meta.xml
+force-app/main/default/layouts/LocationGroup-Location Group Layout.layout-meta.xml
+force-app/main/default/layouts/LocationGroupAssignment-Location Group Assignment Layout.layout-meta.xml
+force-app/main/default/layouts/Log__c-LogLayout.layout-meta.xml
+force-app/main/default/layouts/LoginAnomalyEventStore-Login Anomaly Event Store Layout.layout-meta.xml
+force-app/main/default/layouts/Macro-Macro Layout.layout-meta.xml
+force-app/main/default/layouts/OperatingHours-Operating Hours Layout.layout-meta.xml
+force-app/main/default/layouts/Opportunity-Opportunity %28Marketing%29 Layout.layout-meta.xml
+force-app/main/default/layouts/Opportunity-Opportunity %28Sales%29 Layout.layout-meta.xml
+force-app/main/default/layouts/Opportunity-Opportunity %28Support%29 Layout.layout-meta.xml
+force-app/main/default/layouts/Opportunity-Opportunity Layout.layout-meta.xml
+force-app/main/default/layouts/OpportunityLineItem-Opportunity Product Layout.layout-meta.xml
+force-app/main/default/layouts/Order-Order Layout.layout-meta.xml
+force-app/main/default/layouts/OrderItem-Order Product Layout.layout-meta.xml
+force-app/main/default/layouts/Payment-Payment Layout.layout-meta.xml
+force-app/main/default/layouts/PaymentAuthAdjustment-Payment Authorization Adjustment Layout.layout-meta.xml
+force-app/main/default/layouts/PaymentAuthorization-Payment Authorization Layout.layout-meta.xml
+force-app/main/default/layouts/PaymentGateway-Payment Gateway Layout.layout-meta.xml
+force-app/main/default/layouts/PaymentGatewayLog-Payment Gateway Log Layout.layout-meta.xml
+force-app/main/default/layouts/PaymentGroup-Payment Group Layout.layout-meta.xml
+force-app/main/default/layouts/PaymentLineInvoice-Payment Line Invoice Layout.layout-meta.xml
+force-app/main/default/layouts/Pricebook2-Price Book Layout.layout-meta.xml
+force-app/main/default/layouts/PricebookEntry-Price Book Entry Layout.layout-meta.xml
+force-app/main/default/layouts/ProcessException-Process Exception Layout.layout-meta.xml
+force-app/main/default/layouts/Product2-Product Layout.layout-meta.xml
+force-app/main/default/layouts/ProductConsumptionSchedule-Product Consumption Schedule Layout.layout-meta.xml
+force-app/main/default/layouts/QuickText-Quick Text Layout.layout-meta.xml
+force-app/main/default/layouts/Refund-Refund Layout.layout-meta.xml
+force-app/main/default/layouts/RefundLinePayment-Refund Line Payment Layout.layout-meta.xml
+force-app/main/default/layouts/ReportAnomalyEventStore-Report Anomaly Event Store Layout.layout-meta.xml
+force-app/main/default/layouts/ResourceAbsence-Resource Absence Layout.layout-meta.xml
+force-app/main/default/layouts/ResourcePreference-Resource Preference Layout.layout-meta.xml
+force-app/main/default/layouts/ReturnOrder-Return Order Layout.layout-meta.xml
+force-app/main/default/layouts/ReturnOrderItemAdjustment-Return Order Item Adjustment Layout.layout-meta.xml
+force-app/main/default/layouts/ReturnOrderItemTax-Return Order Item Tax Layout.layout-meta.xml
+force-app/main/default/layouts/ReturnOrderLineItem-Return Order Line Item Layout.layout-meta.xml
+force-app/main/default/layouts/Scorecard-Scorecard Layout.layout-meta.xml
+force-app/main/default/layouts/ScorecardAssociation-Scorecard Association Layout.layout-meta.xml
+force-app/main/default/layouts/ScorecardMetric-Scorecard Metric Layout.layout-meta.xml
+force-app/main/default/layouts/Seller-Seller Layout.layout-meta.xml
+force-app/main/default/layouts/ServiceAppointment-Service Appointment Layout.layout-meta.xml
+force-app/main/default/layouts/ServiceAppointmentShift-Service Appointment Shift Layout.layout-meta.xml
+force-app/main/default/layouts/ServiceContract-Service Contract Layout.layout-meta.xml
+force-app/main/default/layouts/ServiceResource-Service Resource Layout.layout-meta.xml
+force-app/main/default/layouts/ServiceResourceSkill-Service Resource Skill Layout.layout-meta.xml
+force-app/main/default/layouts/ServiceTerritory-Service Territory Layout.layout-meta.xml
+force-app/main/default/layouts/ServiceTerritoryMember-Service Territory Member Layout.layout-meta.xml
+force-app/main/default/layouts/SessionHijackingEventStore-Session Hijacking Event Store Layout.layout-meta.xml
+force-app/main/default/layouts/Shift-Shift Layout.layout-meta.xml
+force-app/main/default/layouts/ShiftWorkTopic-Shift Work Topic Layout.layout-meta.xml
+force-app/main/default/layouts/ShippingConfigurationSet-Shipping Configuration Set Layout.layout-meta.xml
+force-app/main/default/layouts/ShippingRateArea-Shipping Rate Area Layout.layout-meta.xml
+force-app/main/default/layouts/ShippingRateGroup-Shipping Rate Group Layout.layout-meta.xml
+force-app/main/default/layouts/SkillRequirement-Skill Requirement Layout.layout-meta.xml
+force-app/main/default/layouts/SocialPersona-Social Persona Layout.layout-meta.xml
+force-app/main/default/layouts/Solution-Solution Layout.layout-meta.xml
+force-app/main/default/layouts/StandardShippingRate-Standard Shipping Rate Layout.layout-meta.xml
+force-app/main/default/layouts/Task-Task Layout.layout-meta.xml
+force-app/main/default/layouts/ThreatDetectionFeedback-Threat Detection Feedback Layout.layout-meta.xml
+force-app/main/default/layouts/TimeSlot-Time Slot Layout.layout-meta.xml
+force-app/main/default/layouts/UniversalAnomalyEventStore-Universal Anomaly Event Store Layout.layout-meta.xml
+force-app/main/default/layouts/User-User Layout.layout-meta.xml
+force-app/main/default/layouts/UserAlt-User Profile Layout.layout-meta.xml
+force-app/main/default/layouts/UserProvAccount-User Provisioning Account Layout.layout-meta.xml
+force-app/main/default/layouts/UserProvisioningLog-User Provisioning Log Layout.layout-meta.xml
+force-app/main/default/layouts/UserProvisioningRequest-User Provisioning Request Layout.layout-meta.xml
+force-app/main/default/layouts/Waitlist-%5F%5FMISSING LABEL%5F%5F PropertyFile - val Waitlist not found in section StandardLayouts.layout-meta.xml
+force-app/main/default/layouts/WebCart-Cart Layout.layout-meta.xml
+force-app/main/default/layouts/WebCartAdjustmentBasis-Cart Adjustment Basis Layout.layout-meta.xml
+force-app/main/default/layouts/WebCartAdjustmentGroup-Cart Adjustment Group Layout.layout-meta.xml
+force-app/main/default/layouts/WebStore-Store Layout.layout-meta.xml
+force-app/main/default/layouts/WebStoreConfig-Web Store Configuration Layout.layout-meta.xml
+force-app/main/default/layouts/WhatsApp_Interaction__c-WhatsApp Interaction Layout.layout-meta.xml
+force-app/main/default/layouts/WorkOrder-Work Order Layout.layout-meta.xml
+force-app/main/default/layouts/WorkOrderLineItem-Work Order Line Item Layout.layout-meta.xml
+force-app/main/default/layouts/WorkPlan-Work Plan Layout.layout-meta.xml
+force-app/main/default/layouts/WorkPlanTemplate-Work Plan Template Layout.layout-meta.xml
+force-app/main/default/layouts/WorkPlanTemplateEntry-Work Plan Template Entry Layout.layout-meta.xml
+force-app/main/default/layouts/WorkStep-Work Step Layout.layout-meta.xml
+force-app/main/default/layouts/WorkStepTemplate-Work Step Template Layout.layout-meta.xml
+force-app/main/default/layouts/WorkType-Work Type Layout.layout-meta.xml
+force-app/main/default/layouts/WorkTypeGroup-Work Type Group Layout.layout-meta.xml
+force-app/main/default/layouts/WorkTypeGroupMember-Work Type Group Member Layout.layout-meta.xml
