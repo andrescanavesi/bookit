@@ -304,12 +304,14 @@
 
                         <template if:false={selectedAppt.isDone}>
                             <div class="modal-footer-left">
-                                <button class="modal-btn modal-btn--danger" onclick={handleCancelAction} disabled={isCancelling}>
-                                    <template if:true={isCancelling}>Cancelando...</template>
-                                    <template if:false={isCancelling}>✕ Cancelar</template>
-                                </button>
+                                <template if:false={selectedAppt.isPast}>
+                                    <button class="modal-btn modal-btn--danger" onclick={handleCancelAction} disabled={isCancelling}>
+                                        <template if:true={isCancelling}>Cancelando...</template>
+                                        <template if:false={isCancelling}>✕ Cancelar</template>
+                                    </button>
+                                </template>
                                 <template if:true={selectedAppt.isPast}>
-                                    <button class="modal-btn modal-btn--noshow" onclick={handleNoShowAction} disabled={isNoShowing} style="margin-left: 8px;">
+                                    <button class="modal-btn modal-btn--noshow" onclick={handleNoShowAction} disabled={isNoShowing}>
                                         <template if:true={isNoShowing}>Cargando...</template>
                                         <template if:false={isNoShowing}>No Show</template>
                                     </button>
