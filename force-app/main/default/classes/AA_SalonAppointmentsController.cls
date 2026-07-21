@@ -17,10 +17,13 @@ public without sharing class AA_SalonAppointmentsController {
     }
 
     private static Id getBusinessId(){
+        Id currentUserId = UserInfo.getUserId();
         List<AA_Employee__c> employees = [SELECT Id, Name, Business_Id__c FROM AA_Employee__c 
-        WHERE User__c = :UserInfo.getUserId() ORDER BY Name ASC];
+        WHERE User__c = :currentUserId ORDER BY Name ASC];
 
         if (employees.isEmpty()) {
+            AA_Logger logger = new AA_Logger(true);
+            logger.error('No se encontro ningun empleado (AA_Employee__c) asociado al User ID: ' + currentUserId);
             throw new AuraHandledException('El empleado no está configurado como usuario');
         }
         
