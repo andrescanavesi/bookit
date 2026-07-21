@@ -38,7 +38,7 @@ public without sharing class AA_PublicAgendaController {
                 Last_Name__c = lastName,
                 Email__c = email,
                 Comments_From_Customer__c = comments,
-                Has_Allergies__c = hasAllergies
+                Has_Allergy_Esmalte_Semipermanente__c = hasAllergies
             );
 
             update customer;

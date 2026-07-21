@@ -216,8 +216,8 @@
                     <name>uiBehavior</name>
                     <value>none</value>
                 </fieldInstanceProperties>
-                <fieldItem>Record.Has_Allergies__c</fieldItem>
-                <identifier>RecordHas_Allergies_cField</identifier>
+                <fieldItem>Record.Has_Allergy_Esmalte_Semipermanente__c</fieldItem>
+                <identifier>RecordHas_Allergy_Esmalte_Semipermanente__cField</identifier>
             </fieldInstance>
         </itemInstances>
         <itemInstances>
@@ -256,18 +256,16 @@
                     <name>uiBehavior</name>
                     <value>none</value>
                 </fieldInstanceProperties>
-                <fieldItem>Record.Has_Allergies__c</fieldItem>
-                <identifier>RecordHas_Allergies__cField</identifier>
-            </fieldInstance>
-        </itemInstances>
-        <itemInstances>
-            <fieldInstance>
                 <fieldItem>Record.Count_Appointments_Done__c</fieldItem>
                 <identifier>RecordCount_Appointments_Done__cField</identifier>
             </fieldInstance>
         </itemInstances>
         <itemInstances>
             <fieldInstance>
+                <fieldInstanceProperties>
+                    <name>uiBehavior</name>
+                    <value>none</value>
+                </fieldInstanceProperties>
                 <fieldItem>Record.Is_New_Customer__c</fieldItem>
                 <identifier>RecordIs_New_Customer__cField</identifier>
             </fieldInstance>

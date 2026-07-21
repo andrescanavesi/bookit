@@ -170,7 +170,7 @@ export default class AASalonMatrixAdmin extends LightningElement {
                     isReminderSent: appt.Is_Reminder_Sent__c || !!appt.Reminder_Sent_Date__c,
                     internalComments: appt.Internal_Comments__c || '',
                     customerComments: appt.Customer__r?.Comments_From_Customer__c || '',
-                    hasAllergies: appt.Customer__r?.Has_Allergies__c || false,
+                    hasAllergies: appt.Customer__r?.Has_Allergy_Esmalte_Semipermanente__c || false,
                     isNewCustomer: appt.Customer__r?.Is_New_Customer__c || false,
                     rawPrice: rawPrice,
                     isPast: dt < new Date()
