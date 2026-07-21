@@ -229,7 +229,8 @@ export default class AASalonMatrixAdmin extends LightningElement {
 
             this.generateMatrix();
         } else if (error) {
-            console.error('Error al recuperar información:', error);
+            console.error('error loading matrix data:', error);
+            console.error(JSON.stringify(error, null, 2));
         }
     }
 
