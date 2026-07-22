@@ -200,4 +200,21 @@ private class AA_SalonAppointmentsControllerTest {
         AA_Appointment__c updatedAppt = [SELECT Payment_Date__c FROM AA_Appointment__c WHERE Id = :appt.Id];
         System.assertEquals(System.today(), updatedAppt.Payment_Date__c, 'Payment date should be today');
     }
+
+    @isTest
+    static void testUpdateAppointmentWithValidation() {
+        AA_Appointment__c appt = [SELECT Id, Employee__c, Start_Date_Time__c FROM AA_Appointment__c LIMIT 1];
+        
+        Test.startTest();
+        AA_SalonAppointmentsController.updateAppointmentWithValidation(
+            appt.Id, 
+            appt.Employee__c, 
+            appt.Start_Date_Time__c, 
+            'Nuevos Comentarios Test'
+        );
+        Test.stopTest();
+        
+        AA_Appointment__c updatedAppt = [SELECT Internal_Comments__c FROM AA_Appointment__c WHERE Id = :appt.Id];
+        System.assertEquals('Nuevos Comentarios Test', updatedAppt.Internal_Comments__c, 'Comments should be updated');
+    }
 }

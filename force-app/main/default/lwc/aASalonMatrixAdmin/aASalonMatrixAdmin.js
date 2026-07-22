@@ -12,6 +12,7 @@ import createAbsence from '@salesforce/apex/AA_SalonAppointmentsController.creat
 import deleteAbsence from '@salesforce/apex/AA_SalonAppointmentsController.deleteAbsence';
 import setNoShowAppointment from '@salesforce/apex/AA_SalonAppointmentsController.setNoShowAppointment';
 import moveAppointment from '@salesforce/apex/AA_SalonAppointmentsController.moveAppointment';
+import updateAppointmentWithValidation from '@salesforce/apex/AA_SalonAppointmentsController.updateAppointmentWithValidation';
 import { ShowToastEvent } from 'lightning/platformShowToastEvent';
 
 export default class AASalonMatrixAdmin extends LightningElement {
@@ -48,6 +49,11 @@ export default class AASalonMatrixAdmin extends LightningElement {
     // Modales y formularios y variables de control ---
     @track isCreateModalOpen = false;
     @track isDetailModalOpen = false;
+    
+    @track tempDate = '';
+    @track tempTime = '';
+    @track tempEmployeeId = '';
+    @track isUpdating = false;
     @track isAbsenceModalOpen = false;
     @track eligibleEmployeesOptions = [];
     @track selectedAppt = {}; 
@@ -158,6 +164,8 @@ export default class AASalonMatrixAdmin extends LightningElement {
                     name: appt.Name, 
                     employeeId: appt.Employee__c,
                     serviceId: appt.Service__c,
+                    dateValue: dt.toISOString().split('T')[0],
+                    timeValue: `${String(dt.getHours()).padStart(2, '0')}:${String(dt.getMinutes()).padStart(2, '0')}`,
                     startTime: startTimeStr,
                     duration: durationMins,
                     customer: `${firstName} ${lastName}`.trim() || 'Sin Nombre',
@@ -480,21 +488,67 @@ export default class AASalonMatrixAdmin extends LightningElement {
             this.tempInternalComments = appt.internalComments || '';
             this.tempPaymentMethod = 'Efectivo';
             this.tempPaymentAmount = appt.rawPrice || 0;
+            this.tempDate = appt.dateValue;
+            this.tempTime = appt.timeValue;
+            this.tempEmployeeId = appt.employeeId;
             this.isDetailModalOpen = true;
         }
     }
 
-    handleReassignChange(event) {
-        const newEmployeeId = event.detail.value;
-        if (newEmployeeId === this.selectedAppt.employeeId) return;
+    get timeOptions() {
+        const opts = [];
+        for (let h = 0; h < 24; h++) {
+            const hourStr = String(h).padStart(2, '0');
+            opts.push({ label: `${hourStr}:00`, value: `${hourStr}:00` });
+            opts.push({ label: `${hourStr}:30`, value: `${hourStr}:30` });
+        }
+        return opts;
+    }
 
-        this.isSaving = true;
-        reassignAppointment({ appointmentId: this.selectedAppt.id, newEmployeeId: newEmployeeId })
-            .then(() => this.closeAndRefresh())
-            .catch(error => {
-                console.error('Error reasignando cita:', error);
-                this.isSaving = false;
-            });
+    handleDateChange(event) {
+        this.tempDate = event.target.value;
+    }
+
+    handleTimeChange(event) {
+        this.tempTime = event.target.value;
+    }
+
+    handleReassignChange(event) {
+        this.tempEmployeeId = event.detail.value;
+    }
+
+    handleGuardarCambios() {
+        if (!this.tempDate || !this.tempTime || !this.tempEmployeeId) {
+            this.dispatchEvent(new ShowToastEvent({ title: 'Error', message: 'Debe completar Fecha, Hora y Profesional.', variant: 'error' }));
+            return;
+        }
+
+        this.isUpdating = true;
+        
+        // Formar el Datetime extrayendo los primeros 5 caracteres (HH:mm) del tiempo
+        const cleanTime = this.tempTime.substring(0, 5); 
+        // new Date('YYYY-MM-DDTHH:mm:00') toma la hora como local, lo cual es correcto
+        const localDateObj = new Date(`${this.tempDate}T${cleanTime}:00`);
+        const dateTimeString = localDateObj.toISOString();
+        
+        updateAppointmentWithValidation({ 
+            appointmentId: this.selectedAppt.id, 
+            newEmployeeId: this.tempEmployeeId, 
+            newStartDateTime: dateTimeString, 
+            internalComments: this.tempInternalComments 
+        })
+        .then(() => {
+            this.dispatchEvent(new ShowToastEvent({ title: 'Éxito', message: 'Turno actualizado correctamente.', variant: 'success' }));
+            this.closeAndRefresh();
+        })
+        .catch(error => {
+            console.error('Error actualizando cita:', error);
+            const errorMessage = error.body && error.body.message ? error.body.message : 'Error desconocido al actualizar';
+            this.dispatchEvent(new ShowToastEvent({ title: 'Error', message: errorMessage, variant: 'error' }));
+        })
+        .finally(() => {
+            this.isUpdating = false;
+        });
     }
 
     handleConfirmAction() {

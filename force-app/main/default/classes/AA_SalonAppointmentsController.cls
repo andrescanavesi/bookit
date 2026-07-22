@@ -379,6 +379,94 @@ public without sharing class AA_SalonAppointmentsController {
         }
     }
 
+    @AuraEnabled
+    public static void updateAppointmentWithValidation(Id appointmentId, Id newEmployeeId, Datetime newStartDateTime, String internalComments) {
+        AA_Logger logger = new AA_Logger(true);
+        try {
+            // 1. Get Appointment Info
+            AA_Appointment__c appt = [SELECT Id, Service__c, Duration_Minutes__c, Start_Date_Time__c, Employee__c
+                                      FROM AA_Appointment__c WHERE Id = :appointmentId LIMIT 1];
+            
+            // If nothing changed in time and employee, just update comments
+            if (appt.Employee__c == newEmployeeId && appt.Start_Date_Time__c == newStartDateTime) {
+                appt.Internal_Comments__c = internalComments;
+                update appt;
+                return;
+            }
+
+            // 2. Validate Employee provides Service
+            List<AA_Employee_Service__c> empService = [SELECT Id FROM AA_Employee_Service__c 
+                                                       WHERE Employee__c = :newEmployeeId 
+                                                       AND Service__c = :appt.Service__c LIMIT 1];
+            if (empService.isEmpty()) {
+                throw new AuraHandledException('El profesional seleccionado no realiza este servicio.');
+            }
+
+            // 3. Validate Working Hours
+            Date targetDate = newStartDateTime.date();
+            String dayOfWeek = newStartDateTime.format('EEEE', 'en_US');
+            List<AA_Employee_Working_Hour__c> whList = [SELECT Start_Hour__c, End_Hour__c, Start_Default_Break_Hour__c, End_Default_Break_Hour__c 
+                                                        FROM AA_Employee_Working_Hour__c 
+                                                        WHERE Employee__c = :newEmployeeId 
+                                                        AND Day_Of_Week__c = :dayOfWeek LIMIT 1];
+            if (whList.isEmpty()) {
+                throw new AuraHandledException('El profesional no trabaja ese día de la semana.');
+            }
+            AA_Employee_Working_Hour__c wh = whList[0];
+            
+            Datetime expectedEnd = newStartDateTime.addMinutes((Integer)appt.Duration_Minutes__c);
+            Time startTime = newStartDateTime.time();
+            Time endTime = expectedEnd.time();
+
+            if (startTime < wh.Start_Hour__c || endTime > wh.End_Hour__c) {
+                throw new AuraHandledException('El horario elegido está fuera de la jornada laboral del profesional.');
+            }
+
+            if (wh.Start_Default_Break_Hour__c != null && wh.End_Default_Break_Hour__c != null) {
+                if ((startTime >= wh.Start_Default_Break_Hour__c && startTime < wh.End_Default_Break_Hour__c) ||
+                    (endTime > wh.Start_Default_Break_Hour__c && endTime <= wh.End_Default_Break_Hour__c) ||
+                    (startTime <= wh.Start_Default_Break_Hour__c && endTime >= wh.End_Default_Break_Hour__c)) {
+                    throw new AuraHandledException('El horario elegido interfiere con el descanso del profesional.');
+                }
+            }
+
+            // 4. Validate Absences
+            List<AA_Employee_Absence__c> absences = [SELECT Id FROM AA_Employee_Absence__c 
+                                                     WHERE Employee__c = :newEmployeeId 
+                                                     AND Start_Date_Time__c < :expectedEnd 
+                                                     AND End_Date_Time__c > :newStartDateTime LIMIT 1];
+            if (!absences.isEmpty()) {
+                throw new AuraHandledException('El profesional tiene una ausencia programada en ese horario.');
+            }
+
+            // 5. Validate Overlapping Appointments
+            List<AA_Appointment__c> overlaps = [SELECT Id FROM AA_Appointment__c 
+                                                WHERE Employee__c = :newEmployeeId 
+                                                AND Id != :appointmentId 
+                                                AND Status__c NOT IN ('Cancelled', 'No Show') 
+                                                AND Start_Date_Time__c < :expectedEnd 
+                                                AND End_Date_Time__c > :newStartDateTime LIMIT 1];
+            if (!overlaps.isEmpty()) {
+                throw new AuraHandledException('El profesional ya tiene otra cita en ese horario.');
+            }
+
+            // All clear, update
+            appt.Employee__c = newEmployeeId;
+            appt.Start_Date_Time__c = newStartDateTime;
+            if (internalComments != null) {
+                appt.Internal_Comments__c = internalComments;
+            }
+            update appt;
+
+        } catch (AuraHandledException e) {
+            throw e;
+        } catch (Exception e) {
+            String message = 'Error al actualizar cita: ' + e.getMessage();
+            logger.error(message + ' ' + e.getStackTraceString());
+            throw new AuraHandledException(message);
+        }
+    }
+
     @AuraEnabled(cacheable=true)
     public static List<AA_Employee__c> getEmployees() {
         Id businessId = getBusinessId();

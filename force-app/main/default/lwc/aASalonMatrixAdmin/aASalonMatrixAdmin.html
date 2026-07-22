@@ -220,17 +220,39 @@
                                     <strong>Profesional:</strong>
                                     <lightning-combobox
                                         variant="label-hidden"
-                                        value={selectedAppt.employeeId}
+                                        value={tempEmployeeId}
                                         options={eligibleEmployeesOptions}
                                         onchange={handleReassignChange}
                                         class="slds-m-top_xxx-small">
                                     </lightning-combobox>
                                 </div>
+                                <div style="display: flex; gap: 8px;">
+                                    <div style="flex: 1;">
+                                        <strong>Fecha:</strong>
+                                        <lightning-input 
+                                            type="date" 
+                                            variant="label-hidden" 
+                                            value={tempDate} 
+                                            onchange={handleDateChange} 
+                                            class="slds-m-top_xxx-small">
+                                        </lightning-input>
+                                    </div>
+                                    <div style="flex: 1;">
+                                        <strong>Hora:</strong>
+                                        <lightning-combobox 
+                                            variant="label-hidden" 
+                                            value={tempTime} 
+                                            options={timeOptions}
+                                            onchange={handleTimeChange} 
+                                            class="slds-m-top_xxx-small">
+                                        </lightning-combobox>
+                                    </div>
+                                </div>
                             </template>
                             <template if:true={selectedAppt.isDone}>
                                 <p><strong>Profesional:</strong> {selectedAppt.employeeName}</p>
+                                <p><strong>Horario:</strong> {selectedAppt.timeRange} hs</p>
                             </template>
-                            <p><strong>Horario:</strong> {selectedAppt.timeRange} hs</p>
                         </div>
 
                         <template if:true={selectedAppt.hasAllergies}>
@@ -335,6 +357,11 @@
                                         <template if:false={isCompleting}>✓ Atendido</template>
                                     </button>
                                 </template>
+
+                                <button class="modal-btn modal-btn--secondary" onclick={handleGuardarCambios} disabled={isUpdating}>
+                                    <template if:true={isUpdating}>Guardando...</template>
+                                    <template if:false={isUpdating}>Guardar</template>
+                                </button>
                             </div>
                         </template>
                     </div>
