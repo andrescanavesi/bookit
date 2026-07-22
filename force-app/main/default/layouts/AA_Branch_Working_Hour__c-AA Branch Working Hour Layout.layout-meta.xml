@@ -8,19 +8,11 @@
         <layoutColumns>
             <layoutItems>
                 <behavior>Required</behavior>
-                <field>Admin_Close_Time__c</field>
-            </layoutItems>
-            <layoutItems>
-                <behavior>Required</behavior>
-                <field>Admin_Open_Time__c</field>
+                <field>Name</field>
             </layoutItems>
             <layoutItems>
                 <behavior>Required</behavior>
                 <field>Business_Branch__c</field>
-            </layoutItems>
-            <layoutItems>
-                <behavior>Required</behavior>
-                <field>Close_Time__c</field>
             </layoutItems>
             <layoutItems>
                 <behavior>Required</behavior>
@@ -32,7 +24,15 @@
             </layoutItems>
             <layoutItems>
                 <behavior>Required</behavior>
-                <field>Name</field>
+                <field>Close_Time__c</field>
+            </layoutItems>
+            <layoutItems>
+                <behavior>Required</behavior>
+                <field>Admin_Open_Time__c</field>
+            </layoutItems>
+            <layoutItems>
+                <behavior>Required</behavior>
+                <field>Admin_Close_Time__c</field>
             </layoutItems>
         </layoutColumns>
         <layoutColumns>
@@ -71,14 +71,6 @@
         <layoutColumns/>
         <style>CustomLinks</style>
     </layoutSections>
-    <miniLayout>
-        <fields>Admin_Close_Time__c</fields>
-        <fields>Admin_Open_Time__c</fields>
-        <fields>Business_Branch__c</fields>
-        <fields>Close_Time__c</fields>
-        <fields>Day_Of_Week__c</fields>
-        <fields>Open_Time__c</fields>
-    </miniLayout>
     <showEmailCheckbox>false</showEmailCheckbox>
     <showHighlightsPanel>false</showHighlightsPanel>
     <showInteractionLogPanel>false</showInteractionLogPanel>

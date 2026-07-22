@@ -102,7 +102,7 @@ public without sharing class AA_PublicAgendaController {
             FROM AA_Service_Category__c 
             WHERE Business_Branch__c = :branch.Id
             AND Is_Active__c = true
-            ORDER BY Name ASC 
+            ORDER BY Order_Index__c ASC NULLS LAST, Name ASC 
             LIMIT 100
         ];
         //logger.info('categories: '+JSON.serializePretty(categories));
@@ -115,10 +115,11 @@ public without sharing class AA_PublicAgendaController {
         AA_Logger logger = new AA_Logger(true);
         AA_Business_Branch__c branch = getBusinessBranch(businessId); 
         //logger.info('getServices, branch id '+branch.Id);
-        List<AA_Service__c>  services =  [SELECT Id, Name, Display_Name__c, Duration_Minutes__c, Price__c, AA_Service_Category__c, Requires_Manual_Coordination__c
+        List<AA_Service__c>  services =  [SELECT Id, Name, Display_Name__c, Duration_Minutes__c, Price__c, AA_Service_Category__c, Requires_Manual_Coordination__c, Description__c
                                           FROM AA_Service__c 
                                           WHERE Business_Branch__c = :branch.Id
                                           AND Is_Active__c = true
+                                          ORDER BY Order_Index__c ASC NULLS LAST, Name ASC
                                           LIMIT 100];
         
         //logger.info('services: '+JSON.serializePretty(services));

@@ -56,6 +56,16 @@
         <field>AA_Appointment__c.Reminder_Sent_Date__c</field>
         <readable>true</readable>
     </fieldPermissions>
+    <fieldPermissions>
+        <editable>true</editable>
+        <field>AA_Service_Category__c.Order_Index__c</field>
+        <readable>true</readable>
+    </fieldPermissions>
+    <fieldPermissions>
+        <editable>true</editable>
+        <field>AA_Service__c.Order_Index__c</field>
+        <readable>true</readable>
+    </fieldPermissions>
     <hasActivationRequired>false</hasActivationRequired>
     <label>AA Admin Salon</label>
     <objectPermissions>

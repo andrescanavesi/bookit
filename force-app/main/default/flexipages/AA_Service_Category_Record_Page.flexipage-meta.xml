@@ -197,6 +197,16 @@
                 <identifier>RecordIs_Active__cField</identifier>
             </fieldInstance>
         </itemInstances>
+        <itemInstances>
+            <fieldInstance>
+                <fieldInstanceProperties>
+                    <name>uiBehavior</name>
+                    <value>none</value>
+                </fieldInstanceProperties>
+                <fieldItem>Record.Order_Index__c</fieldItem>
+                <identifier>RecordOrder_Index__cField</identifier>
+            </fieldInstance>
+        </itemInstances>
         <name>Facet-22a33459-f1be-4cd9-8b1a-085247623025</name>
         <type>Facet</type>
     </flexiPageRegions>
