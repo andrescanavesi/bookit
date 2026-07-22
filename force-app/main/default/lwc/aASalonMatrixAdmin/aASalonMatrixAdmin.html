@@ -55,7 +55,7 @@
                                     <td key={cell.id} class="appt-cell" style={cell.tdStyle}>
                                         
                                         <template if:true={cell.isOccupied}>
-                                            <div class={cell.cssClass} style={cell.style} data-id={cell.data.id} onclick={handleApptClick}>
+                                            <div class={cell.cssClass} style={cell.style} data-id={cell.data.id} onclick={handleApptClick} draggable={cell.isStartBlock} ondragstart={handleDragStart}>
                                                 <template if:true={cell.isStartBlock}>
                                                     <div class="appt-content-wrapper">
                                                         <div class="appt-meta">
@@ -101,7 +101,7 @@
                                             </template>
                                             
                                             <template if:false={cell.isBlocked}>
-                                                <div class={cell.cssClass} data-time={cell.time} data-empid={cell.empId} onclick={handleEmptySlotClick}>
+                                                <div class={cell.cssClass} data-time={cell.time} data-empid={cell.empId} onclick={handleEmptySlotClick} ondragover={handleDragOver} ondrop={handleDrop}>
                                                     <template if:true={cell.outsideLabel}>
                                                         <span class="outside-label">{cell.outsideLabel}</span>
                                                     </template>

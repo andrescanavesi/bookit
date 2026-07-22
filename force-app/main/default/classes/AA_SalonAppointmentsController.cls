@@ -362,6 +362,23 @@ public without sharing class AA_SalonAppointmentsController {
         }
     }
 
+    @AuraEnabled
+    public static void moveAppointment(Id appointmentId, Id newEmployeeId, Datetime newStartDateTime) {
+        AA_Logger logger = new AA_Logger(true);
+        try {
+            AA_Appointment__c appt = new AA_Appointment__c(
+                Id = appointmentId,
+                Employee__c = newEmployeeId,
+                Start_Date_Time__c = newStartDateTime
+            );
+            update appt;
+        } catch (Exception e) {
+            String message = 'Error al mover cita: ' + e.getMessage();
+            logger.error(message + ' ' + e.getStackTraceString());
+            throw new AuraHandledException(message);
+        }
+    }
+
     @AuraEnabled(cacheable=true)
     public static List<AA_Employee__c> getEmployees() {
         Id businessId = getBusinessId();

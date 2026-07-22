@@ -11,6 +11,8 @@ import markReminderAsSent from '@salesforce/apex/AA_SalonAppointmentsController.
 import createAbsence from '@salesforce/apex/AA_SalonAppointmentsController.createAbsence';
 import deleteAbsence from '@salesforce/apex/AA_SalonAppointmentsController.deleteAbsence';
 import setNoShowAppointment from '@salesforce/apex/AA_SalonAppointmentsController.setNoShowAppointment';
+import moveAppointment from '@salesforce/apex/AA_SalonAppointmentsController.moveAppointment';
+import { ShowToastEvent } from 'lightning/platformShowToastEvent';
 
 export default class AASalonMatrixAdmin extends LightningElement {
     
@@ -712,6 +714,69 @@ export default class AASalonMatrixAdmin extends LightningElement {
                 .then(() => this.closeAndRefresh())
                 .catch(err => { console.error(err); this.isSaving = false; });
         }
+    }
+
+    // --- DRAG AND DROP ---
+    handleDragStart(event) {
+        if (!event.currentTarget.dataset.id) return;
+        event.dataTransfer.setData('apptId', event.currentTarget.dataset.id);
+    }
+
+    handleDragOver(event) {
+        event.preventDefault(); 
+    }
+
+    handleDrop(event) {
+        event.preventDefault();
+        const apptId = event.dataTransfer.getData('apptId');
+        if (!apptId) return;
+
+        const empId = event.currentTarget.dataset.empid;
+        const timeLabel = event.currentTarget.dataset.time;
+
+        const appt = this.activeAppointments.find(a => a.id === apptId);
+        if (!appt) return;
+
+        const offersService = this.rawEmployeeServices.some(es => 
+            es.Employee__c === empId && es.Service__c === appt.serviceId
+        );
+
+        if (!offersService) {
+            this.dispatchEvent(new ShowToastEvent({
+                title: 'No se puede mover',
+                message: 'El empleado seleccionado no realiza este servicio.',
+                variant: 'error'
+            }));
+            return;
+        }
+
+        const isAvailable = this.isEmployeeAvailable(empId, timeLabel, appt.duration, appt.id);
+        if (!isAvailable) {
+            this.dispatchEvent(new ShowToastEvent({
+                title: 'No se puede mover',
+                message: 'El empleado no tiene disponibilidad suficiente en ese horario.',
+                variant: 'error'
+            }));
+            return;
+        }
+
+        this.isSaving = true;
+
+        const [hours, minutes] = timeLabel.split(':').map(Number);
+        const newStartDateTime = new Date(this.selectedDate + 'T00:00:00');
+        newStartDateTime.setHours(hours, minutes, 0, 0);
+
+        moveAppointment({ appointmentId: appt.id, newEmployeeId: empId, newStartDateTime: newStartDateTime })
+            .then(() => this.closeAndRefresh())
+            .catch(error => {
+                console.error(error);
+                this.dispatchEvent(new ShowToastEvent({
+                    title: 'Error moviendo cita',
+                    message: error.body ? error.body.message : error.message,
+                    variant: 'error'
+                }));
+                this.isSaving = false;
+            });
     }
 
 }
