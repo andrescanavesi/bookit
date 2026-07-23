@@ -44,11 +44,11 @@ private class AA_EmployeeAppointmentsCtrlTest {
         AA_Employee__c emp = [SELECT Id FROM AA_Employee__c LIMIT 1];
         
         Test.startTest();
-        List<AA_Appointment__c> appts = AA_EmployeeAppointmentsCtrl.getPendingAppointments(emp.Id, Date.today());
+        List<AA_EmployeeAppointmentsCtrl.AppointmentDTO> appts = AA_EmployeeAppointmentsCtrl.getPendingAppointments(emp.Id, Date.today());
         Test.stopTest();
         
         System.assertEquals(1, appts.size(), 'Should return 1 pending appointment for today.');
-        System.assertEquals('Pending', appts[0].Status__c, 'Status should be Pending.');
+        System.assertEquals('Pending', appts[0].appt.Status__c, 'Status should be Pending.');
     }
     
     @IsTest

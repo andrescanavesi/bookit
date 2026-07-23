@@ -233,6 +233,16 @@
                 <identifier>RecordAvailable_In_Public_Agenda__cField</identifier>
             </fieldInstance>
         </itemInstances>
+        <itemInstances>
+            <fieldInstance>
+                <fieldInstanceProperties>
+                    <name>uiBehavior</name>
+                    <value>none</value>
+                </fieldInstanceProperties>
+                <fieldItem>Record.Order_Index__c</fieldItem>
+                <identifier>RecordOrder_Index__cField</identifier>
+            </fieldInstance>
+        </itemInstances>
         <name>Facet-21ccb584-6cd7-49a8-aebf-3e4f7e8c72f6</name>
         <type>Facet</type>
     </flexiPageRegions>

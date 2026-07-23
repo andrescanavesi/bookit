@@ -73,7 +73,10 @@ export default class AAEmployeeAppointments extends LightningElement {
 
         getPendingAppointments({ employeeId: this.selectedEmployeeId, selectedDate: dateString })
             .then(result => {
-                this.appointments = result.map(appt => {
+                this.appointments = result.map(dto => {
+                    const appt = dto.appt;
+                    const otherAppts = dto.otherAppointments;
+
                     let formattedTime = '';
                     if (appt.Start_Date_Time__c) {
                         const startDate = new Date(appt.Start_Date_Time__c);
@@ -83,10 +86,25 @@ export default class AAEmployeeAppointments extends LightningElement {
                     if (displayStatus === 'Pending') {
                         displayStatus = 'Pendiente';
                     }
+
+                    let formattedOtherAppts = [];
+                    if (otherAppts && otherAppts.length > 0) {
+                        formattedOtherAppts = otherAppts.map(other => {
+                            let otherTime = '';
+                            if (other.startTime) {
+                                const oDate = new Date(other.startTime);
+                                otherTime = oDate.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+                            }
+                            return `${other.serviceName} a las ${otherTime}`;
+                        });
+                    }
+
                     return {
                         ...appt,
                         formattedTime,
-                        displayStatus
+                        displayStatus,
+                        hasOtherAppointments: formattedOtherAppts.length > 0,
+                        otherAppointmentsText: formattedOtherAppts.join(', ')
                     };
                 });
             })

@@ -54,8 +54,14 @@
                                 {appt.Customer__r.First_Name__c} {appt.Customer__r.Last_Name__c}
                             </div>
                             <div class="service-name slds-text-color_weak slds-m-bottom_xx-small">
-                                {appt.Service__r.Name}
+                                {appt.Service__r.Display_Name__c}
                             </div>
+                            <template if:true={appt.hasOtherAppointments}>
+                                <div class="other-appointments slds-text-body_small slds-m-top_x-small slds-p-top_xx-small" style="color: #b97a00; border-top: 1px dashed #c9c9c9;">
+                                    <lightning-icon icon-name="utility:warning" size="xx-small" class="slds-m-right_xx-small" variant="warning"></lightning-icon>
+                                    <strong>También hoy:</strong> {appt.otherAppointmentsText}
+                                </div>
+                            </template>
                         </div>
                     </template>
                 </div>
@@ -93,10 +99,21 @@
                             </template>
                         </div>
 
+                        <template if:true={selectedAppointment.hasOtherAppointments}>
+                            <div class="slds-box slds-m-bottom_medium slds-p-around_small" style="background-color: #fff9e6; border: 1px solid #ffc233; color: #a36b00;">
+                                <div class="slds-grid slds-grid_vertical-align-center">
+                                    <lightning-icon icon-name="utility:warning" size="small" class="slds-m-right_small" variant="warning"></lightning-icon>
+                                    <div>
+                                        <strong>También hoy:</strong> {selectedAppointment.otherAppointmentsText}
+                                    </div>
+                                </div>
+                            </div>
+                        </template>
+
                         <!-- Cliente y Servicio -->
                         <div class="info-section slds-m-bottom_medium">
                             <p><strong>Cliente:</strong> {selectedAppointment.Customer__r.First_Name__c} {selectedAppointment.Customer__r.Last_Name__c}</p>
-                            <p><strong>Servicio:</strong> {selectedAppointment.Service__r.Name}</p>
+                            <p><strong>Servicio:</strong> {selectedAppointment.Service__r.Display_Name__c}</p>
                             <p><strong>Hora:</strong> {selectedAppointment.formattedTime}</p>
                             <p class="slds-m-top_x-small"><strong>Comentarios de Cliente:</strong> {selectedAppointment.Customer__r.Comments_From_Customer__c}</p>
                             <p class="slds-m-top_x-small"><strong>Comentarios de la Cita:</strong> {selectedAppointment.Customer_Comments__c}</p>

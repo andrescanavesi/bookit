@@ -202,7 +202,7 @@ public without sharing class AA_SalonAppointmentsController {
                 FROM AA_Employee__c 
                 WHERE Business_Branch__r.Business__c = :businessId
                 AND Is_Active__c = true
-                ORDER BY Name ASC
+                ORDER BY Order_Index__c ASC NULLS LAST, Name ASC
             ];
             
             wrapper.appointments = [
@@ -473,7 +473,7 @@ public without sharing class AA_SalonAppointmentsController {
         return [SELECT Id, Name, First_Name__c, Last_Name__c, Is_Admin__c, Business_Branch__r.Name 
                 FROM AA_Employee__c 
                 WHERE Business_Branch__r.Business__c = :businessId
-                ORDER BY First_Name__c ASC];
+                ORDER BY Order_Index__c ASC NULLS LAST, First_Name__c ASC];
     }
 
     @AuraEnabled(cacheable=true)
