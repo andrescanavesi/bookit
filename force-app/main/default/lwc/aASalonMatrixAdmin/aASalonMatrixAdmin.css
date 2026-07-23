@@ -500,6 +500,8 @@
 .modal-btn--primary:hover { background-color: #333333; }
 .modal-btn--secondary { background-color: transparent; color: var(--text-muted); border: 1px solid var(--border-color); }
 .modal-btn--secondary:hover { background-color: rgba(0,0,0,0.02); }
+.modal-btn--save { background-color: #0B5CAB; color: #FFFFFF; border: 1px solid #0B5CAB; }
+.modal-btn--save:hover { background-color: #08437E; }
 .modal-btn--danger { background-color: transparent; color: var(--brand-red); border: 1px solid var(--border-color); }
 .modal-btn--danger:hover { background-color: rgba(154,1,2,0.04); border-color: var(--brand-red); }
 .modal-btn--success { background-color: #2D6A4F; color: #FFFFFF; }
