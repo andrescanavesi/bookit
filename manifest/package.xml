@@ -81,6 +81,7 @@
 	<types>
 		<members>AA_Book_It_Admin</members>
 		<members>AA_Admin_Salon</members>
+		<members>AA_Wave_MFA</members>
 		<name>PermissionSet</name>
 	</types>
 	<types>
