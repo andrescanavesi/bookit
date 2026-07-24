@@ -209,7 +209,7 @@ public without sharing class AA_SalonAppointmentsController {
                 SELECT Id, Name, Start_Date_Time__c, Status__c, Employee__c,
                        Customer__r.First_Name__c, Customer__r.Last_Name__c, Customer__r.Phone_Number__c, Customer__r.Has_Allergy_Esmalte_Semipermanente__c, Customer__r.Comments_From_Customer__c, Customer__r.Is_New_Customer__c,
                        Service__r.Name, Service__r.Display_Name__c, Service__r.Duration_Minutes__c, Service__r.Price__c,
-                       Internal_Comments__c, Customer_Comments__c, Is_Reminder_Sent__c, Is_Customer_Confirmed__c, Reminder_Sent_Date__c
+                       Internal_Comments__c, Customer_Comments__c, Is_Reminder_Sent__c, Is_Customer_Confirmed__c, Reminder_Sent_Date__c, Payment_Amount__c, Payment_Method__c
                 FROM AA_Appointment__c 
                 WHERE DAY_ONLY(Start_Date_Time__c) = :selectedDate 
                 AND Status__c NOT IN ('Cancelled', 'No Show')
@@ -380,16 +380,18 @@ public without sharing class AA_SalonAppointmentsController {
     }
 
     @AuraEnabled
-    public static void updateAppointmentWithValidation(Id appointmentId, Id newEmployeeId, Datetime newStartDateTime, String internalComments) {
+    public static void updateAppointmentWithValidation(Id appointmentId, Id newEmployeeId, Datetime newStartDateTime, String internalComments, String paymentMethod, Decimal paymentAmount) {
         AA_Logger logger = new AA_Logger(true);
         try {
             // 1. Get Appointment Info
             AA_Appointment__c appt = [SELECT Id, Service__c, Duration_Minutes__c, Start_Date_Time__c, Employee__c
                                       FROM AA_Appointment__c WHERE Id = :appointmentId LIMIT 1];
             
-            // If nothing changed in time and employee, just update comments
+            // If nothing changed in time and employee, just update comments and payment
             if (appt.Employee__c == newEmployeeId && appt.Start_Date_Time__c == newStartDateTime) {
                 appt.Internal_Comments__c = internalComments;
+                appt.Payment_Method__c = paymentMethod;
+                appt.Payment_Amount__c = paymentAmount;
                 update appt;
                 return;
             }
@@ -456,6 +458,8 @@ public without sharing class AA_SalonAppointmentsController {
             if (internalComments != null) {
                 appt.Internal_Comments__c = internalComments;
             }
+            appt.Payment_Method__c = paymentMethod;
+            appt.Payment_Amount__c = paymentAmount;
             update appt;
 
         } catch (AuraHandledException e) {

@@ -5,6 +5,10 @@
         <visible>true</visible>
     </applicationVisibilities>
     <classAccesses>
+        <apexClass>AA_EmployeeAppointmentsCtrl</apexClass>
+        <enabled>true</enabled>
+    </classAccesses>
+    <classAccesses>
         <apexClass>AA_AppointmentService</apexClass>
         <enabled>true</enabled>
     </classAccesses>

@@ -210,11 +210,15 @@ private class AA_SalonAppointmentsControllerTest {
             appt.Id, 
             appt.Employee__c, 
             appt.Start_Date_Time__c, 
-            'Nuevos Comentarios Test'
+            'Nuevos Comentarios Test',
+            'Efectivo',
+            1500.00
         );
         Test.stopTest();
         
-        AA_Appointment__c updatedAppt = [SELECT Internal_Comments__c FROM AA_Appointment__c WHERE Id = :appt.Id];
+        AA_Appointment__c updatedAppt = [SELECT Internal_Comments__c, Payment_Method__c, Payment_Amount__c FROM AA_Appointment__c WHERE Id = :appt.Id];
         System.assertEquals('Nuevos Comentarios Test', updatedAppt.Internal_Comments__c, 'Comments should be updated');
+        System.assertEquals('Efectivo', updatedAppt.Payment_Method__c, 'Payment Method should be updated');
+        System.assertEquals(1500.00, updatedAppt.Payment_Amount__c, 'Payment Amount should be updated');
     }
 }

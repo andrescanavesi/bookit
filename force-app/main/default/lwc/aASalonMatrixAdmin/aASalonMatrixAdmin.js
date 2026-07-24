@@ -179,6 +179,8 @@ export default class AASalonMatrixAdmin extends LightningElement {
                     isDone: appt.Status__c === 'Done',
                     isReminderSent: appt.Is_Reminder_Sent__c || !!appt.Reminder_Sent_Date__c,
                     internalComments: appt.Internal_Comments__c || '',
+                    paymentAmount: appt.Payment_Amount__c,
+                    paymentMethod: appt.Payment_Method__c,
                     customerComments: appt.Customer__r?.Comments_From_Customer__c || '',
                     hasAllergies: appt.Customer__r?.Has_Allergy_Esmalte_Semipermanente__c || false,
                     isNewCustomer: appt.Customer__r?.Is_New_Customer__c || false,
@@ -486,8 +488,8 @@ export default class AASalonMatrixAdmin extends LightningElement {
             }
 
             this.tempInternalComments = appt.internalComments || '';
-            this.tempPaymentMethod = 'Efectivo';
-            this.tempPaymentAmount = appt.rawPrice || 0;
+            this.tempPaymentMethod = appt.paymentMethod || 'Efectivo';
+            this.tempPaymentAmount = appt.paymentAmount !== undefined && appt.paymentAmount !== null ? appt.paymentAmount : (appt.rawPrice || 0);
             this.tempDate = appt.dateValue;
             this.tempTime = appt.timeValue;
             this.tempEmployeeId = appt.employeeId;
@@ -540,7 +542,9 @@ export default class AASalonMatrixAdmin extends LightningElement {
             appointmentId: this.selectedAppt.id, 
             newEmployeeId: this.tempEmployeeId, 
             newStartDateTime: dateTimeString, 
-            internalComments: this.tempInternalComments 
+            internalComments: this.tempInternalComments,
+            paymentMethod: this.tempPaymentMethod,
+            paymentAmount: this.tempPaymentAmount
         })
         .then(() => {
             this.dispatchEvent(new ShowToastEvent({ title: 'Éxito', message: 'Turno actualizado correctamente.', variant: 'success' }));
