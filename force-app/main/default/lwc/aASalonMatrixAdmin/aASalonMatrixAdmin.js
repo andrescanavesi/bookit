@@ -497,10 +497,15 @@ export default class AASalonMatrixAdmin extends LightningElement {
 
     get timeOptions() {
         const opts = [];
-        for (let h = 0; h < 24; h++) {
+        const startMins = this.branchStartMins || (9 * 60);
+        const endMins = this.branchEndMins || (20 * 60);
+
+        for (let m = startMins; m <= endMins; m += 30) {
+            const h = Math.floor(m / 60);
+            const mins = m % 60;
             const hourStr = String(h).padStart(2, '0');
-            opts.push({ label: `${hourStr}:00`, value: `${hourStr}:00` });
-            opts.push({ label: `${hourStr}:30`, value: `${hourStr}:30` });
+            const minStr = String(mins).padStart(2, '0');
+            opts.push({ label: `${hourStr}:${minStr}`, value: `${hourStr}:${minStr}` });
         }
         return opts;
     }
