@@ -1,5 +1,6 @@
 public class AA_Scripts {
 
+    @TestVisible
     private static Id BUSINESS_ID =  'a02gL00000Ix6AHQAZ'; // Zentidos
 
 	
@@ -407,6 +408,7 @@ public class AA_Scripts {
             emp.First_Name__c = fName;
             emp.Last_Name__c = lName;
             emp.Business_Branch__c = branchId;
+            emp.Color__c = '#FF0000'; // Agregado para pasar validación
 
             employeesToInsert.add(emp);
         }

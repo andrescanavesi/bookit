@@ -11,6 +11,9 @@ import markReminderAsSent from '@salesforce/apex/AA_SalonAppointmentsController.
 import createAbsence from '@salesforce/apex/AA_SalonAppointmentsController.createAbsence';
 import deleteAbsence from '@salesforce/apex/AA_SalonAppointmentsController.deleteAbsence';
 import setNoShowAppointment from '@salesforce/apex/AA_SalonAppointmentsController.setNoShowAppointment';
+import moveAppointment from '@salesforce/apex/AA_SalonAppointmentsController.moveAppointment';
+import updateAppointmentWithValidation from '@salesforce/apex/AA_SalonAppointmentsController.updateAppointmentWithValidation';
+import { ShowToastEvent } from 'lightning/platformShowToastEvent';
 
 export default class AASalonMatrixAdmin extends LightningElement {
     
@@ -46,6 +49,11 @@ export default class AASalonMatrixAdmin extends LightningElement {
     // Modales y formularios y variables de control ---
     @track isCreateModalOpen = false;
     @track isDetailModalOpen = false;
+    
+    @track tempDate = '';
+    @track tempTime = '';
+    @track tempEmployeeId = '';
+    @track isUpdating = false;
     @track isAbsenceModalOpen = false;
     @track eligibleEmployeesOptions = [];
     @track selectedAppt = {}; 
@@ -156,6 +164,8 @@ export default class AASalonMatrixAdmin extends LightningElement {
                     name: appt.Name, 
                     employeeId: appt.Employee__c,
                     serviceId: appt.Service__c,
+                    dateValue: dt.toISOString().split('T')[0],
+                    timeValue: `${String(dt.getHours()).padStart(2, '0')}:${String(dt.getMinutes()).padStart(2, '0')}`,
                     startTime: startTimeStr,
                     duration: durationMins,
                     customer: `${firstName} ${lastName}`.trim() || 'Sin Nombre',
@@ -170,7 +180,7 @@ export default class AASalonMatrixAdmin extends LightningElement {
                     isReminderSent: appt.Is_Reminder_Sent__c || !!appt.Reminder_Sent_Date__c,
                     internalComments: appt.Internal_Comments__c || '',
                     customerComments: appt.Customer__r?.Comments_From_Customer__c || '',
-                    hasAllergies: appt.Customer__r?.Has_Allergies__c || false,
+                    hasAllergies: appt.Customer__r?.Has_Allergy_Esmalte_Semipermanente__c || false,
                     isNewCustomer: appt.Customer__r?.Is_New_Customer__c || false,
                     rawPrice: rawPrice,
                     isPast: dt < new Date()
@@ -229,7 +239,8 @@ export default class AASalonMatrixAdmin extends LightningElement {
 
             this.generateMatrix();
         } else if (error) {
-            console.error('Error al recuperar información:', error);
+            console.error('error loading matrix data:', error);
+            console.error(JSON.stringify(error, null, 2));
         }
     }
 
@@ -477,21 +488,72 @@ export default class AASalonMatrixAdmin extends LightningElement {
             this.tempInternalComments = appt.internalComments || '';
             this.tempPaymentMethod = 'Efectivo';
             this.tempPaymentAmount = appt.rawPrice || 0;
+            this.tempDate = appt.dateValue;
+            this.tempTime = appt.timeValue;
+            this.tempEmployeeId = appt.employeeId;
             this.isDetailModalOpen = true;
         }
     }
 
-    handleReassignChange(event) {
-        const newEmployeeId = event.detail.value;
-        if (newEmployeeId === this.selectedAppt.employeeId) return;
+    get timeOptions() {
+        const opts = [];
+        const startMins = this.branchStartMins || (9 * 60);
+        const endMins = this.branchEndMins || (20 * 60);
 
-        this.isSaving = true;
-        reassignAppointment({ appointmentId: this.selectedAppt.id, newEmployeeId: newEmployeeId })
-            .then(() => this.closeAndRefresh())
-            .catch(error => {
-                console.error('Error reasignando cita:', error);
-                this.isSaving = false;
-            });
+        for (let m = startMins; m <= endMins; m += 30) {
+            const h = Math.floor(m / 60);
+            const mins = m % 60;
+            const hourStr = String(h).padStart(2, '0');
+            const minStr = String(mins).padStart(2, '0');
+            opts.push({ label: `${hourStr}:${minStr}`, value: `${hourStr}:${minStr}` });
+        }
+        return opts;
+    }
+
+    handleDateChange(event) {
+        this.tempDate = event.target.value;
+    }
+
+    handleTimeChange(event) {
+        this.tempTime = event.target.value;
+    }
+
+    handleReassignChange(event) {
+        this.tempEmployeeId = event.detail.value;
+    }
+
+    handleGuardarCambios() {
+        if (!this.tempDate || !this.tempTime || !this.tempEmployeeId) {
+            this.dispatchEvent(new ShowToastEvent({ title: 'Error', message: 'Debe completar Fecha, Hora y Profesional.', variant: 'error' }));
+            return;
+        }
+
+        this.isUpdating = true;
+        
+        // Formar el Datetime extrayendo los primeros 5 caracteres (HH:mm) del tiempo
+        const cleanTime = this.tempTime.substring(0, 5); 
+        // new Date('YYYY-MM-DDTHH:mm:00') toma la hora como local, lo cual es correcto
+        const localDateObj = new Date(`${this.tempDate}T${cleanTime}:00`);
+        const dateTimeString = localDateObj.toISOString();
+        
+        updateAppointmentWithValidation({ 
+            appointmentId: this.selectedAppt.id, 
+            newEmployeeId: this.tempEmployeeId, 
+            newStartDateTime: dateTimeString, 
+            internalComments: this.tempInternalComments 
+        })
+        .then(() => {
+            this.dispatchEvent(new ShowToastEvent({ title: 'Éxito', message: 'Turno actualizado correctamente.', variant: 'success' }));
+            this.closeAndRefresh();
+        })
+        .catch(error => {
+            console.error('Error actualizando cita:', error);
+            const errorMessage = error.body && error.body.message ? error.body.message : 'Error desconocido al actualizar';
+            this.dispatchEvent(new ShowToastEvent({ title: 'Error', message: errorMessage, variant: 'error' }));
+        })
+        .finally(() => {
+            this.isUpdating = false;
+        });
     }
 
     handleConfirmAction() {
@@ -711,6 +773,69 @@ export default class AASalonMatrixAdmin extends LightningElement {
                 .then(() => this.closeAndRefresh())
                 .catch(err => { console.error(err); this.isSaving = false; });
         }
+    }
+
+    // --- DRAG AND DROP ---
+    handleDragStart(event) {
+        if (!event.currentTarget.dataset.id) return;
+        event.dataTransfer.setData('apptId', event.currentTarget.dataset.id);
+    }
+
+    handleDragOver(event) {
+        event.preventDefault(); 
+    }
+
+    handleDrop(event) {
+        event.preventDefault();
+        const apptId = event.dataTransfer.getData('apptId');
+        if (!apptId) return;
+
+        const empId = event.currentTarget.dataset.empid;
+        const timeLabel = event.currentTarget.dataset.time;
+
+        const appt = this.activeAppointments.find(a => a.id === apptId);
+        if (!appt) return;
+
+        const offersService = this.rawEmployeeServices.some(es => 
+            es.Employee__c === empId && es.Service__c === appt.serviceId
+        );
+
+        if (!offersService) {
+            this.dispatchEvent(new ShowToastEvent({
+                title: 'No se puede mover',
+                message: 'El empleado seleccionado no realiza este servicio.',
+                variant: 'error'
+            }));
+            return;
+        }
+
+        const isAvailable = this.isEmployeeAvailable(empId, timeLabel, appt.duration, appt.id);
+        if (!isAvailable) {
+            this.dispatchEvent(new ShowToastEvent({
+                title: 'No se puede mover',
+                message: 'El empleado no tiene disponibilidad suficiente en ese horario.',
+                variant: 'error'
+            }));
+            return;
+        }
+
+        this.isSaving = true;
+
+        const [hours, minutes] = timeLabel.split(':').map(Number);
+        const newStartDateTime = new Date(this.selectedDate + 'T00:00:00');
+        newStartDateTime.setHours(hours, minutes, 0, 0);
+
+        moveAppointment({ appointmentId: appt.id, newEmployeeId: empId, newStartDateTime: newStartDateTime })
+            .then(() => this.closeAndRefresh())
+            .catch(error => {
+                console.error(error);
+                this.dispatchEvent(new ShowToastEvent({
+                    title: 'Error moviendo cita',
+                    message: error.body ? error.body.message : error.message,
+                    variant: 'error'
+                }));
+                this.isSaving = false;
+            });
     }
 
 }

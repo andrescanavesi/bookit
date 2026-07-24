@@ -55,7 +55,7 @@
                                     <td key={cell.id} class="appt-cell" style={cell.tdStyle}>
                                         
                                         <template if:true={cell.isOccupied}>
-                                            <div class={cell.cssClass} style={cell.style} data-id={cell.data.id} onclick={handleApptClick}>
+                                            <div class={cell.cssClass} style={cell.style} data-id={cell.data.id} onclick={handleApptClick} draggable={cell.isStartBlock} ondragstart={handleDragStart}>
                                                 <template if:true={cell.isStartBlock}>
                                                     <div class="appt-content-wrapper">
                                                         <div class="appt-meta">
@@ -101,7 +101,7 @@
                                             </template>
                                             
                                             <template if:false={cell.isBlocked}>
-                                                <div class={cell.cssClass} data-time={cell.time} data-empid={cell.empId} onclick={handleEmptySlotClick}>
+                                                <div class={cell.cssClass} data-time={cell.time} data-empid={cell.empId} onclick={handleEmptySlotClick} ondragover={handleDragOver} ondrop={handleDrop}>
                                                     <template if:true={cell.outsideLabel}>
                                                         <span class="outside-label">{cell.outsideLabel}</span>
                                                     </template>
@@ -220,17 +220,39 @@
                                     <strong>Profesional:</strong>
                                     <lightning-combobox
                                         variant="label-hidden"
-                                        value={selectedAppt.employeeId}
+                                        value={tempEmployeeId}
                                         options={eligibleEmployeesOptions}
                                         onchange={handleReassignChange}
                                         class="slds-m-top_xxx-small">
                                     </lightning-combobox>
                                 </div>
+                                <div style="display: flex; gap: 8px;">
+                                    <div style="flex: 1;">
+                                        <strong>Fecha:</strong>
+                                        <lightning-input 
+                                            type="date" 
+                                            variant="label-hidden" 
+                                            value={tempDate} 
+                                            onchange={handleDateChange} 
+                                            class="slds-m-top_xxx-small">
+                                        </lightning-input>
+                                    </div>
+                                    <div style="flex: 1;">
+                                        <strong>Hora:</strong>
+                                        <lightning-combobox 
+                                            variant="label-hidden" 
+                                            value={tempTime} 
+                                            options={timeOptions}
+                                            onchange={handleTimeChange} 
+                                            class="slds-m-top_xxx-small">
+                                        </lightning-combobox>
+                                    </div>
+                                </div>
                             </template>
                             <template if:true={selectedAppt.isDone}>
                                 <p><strong>Profesional:</strong> {selectedAppt.employeeName}</p>
+                                <p><strong>Horario:</strong> {selectedAppt.timeRange} hs</p>
                             </template>
-                            <p><strong>Horario:</strong> {selectedAppt.timeRange} hs</p>
                         </div>
 
                         <template if:true={selectedAppt.hasAllergies}>
@@ -304,12 +326,14 @@
 
                         <template if:false={selectedAppt.isDone}>
                             <div class="modal-footer-left">
-                                <button class="modal-btn modal-btn--danger" onclick={handleCancelAction} disabled={isCancelling}>
-                                    <template if:true={isCancelling}>Cancelando...</template>
-                                    <template if:false={isCancelling}>✕ Cancelar</template>
-                                </button>
+                                <template if:false={selectedAppt.isPast}>
+                                    <button class="modal-btn modal-btn--danger" onclick={handleCancelAction} disabled={isCancelling}>
+                                        <template if:true={isCancelling}>Cancelando...</template>
+                                        <template if:false={isCancelling}>✕ Cancelar</template>
+                                    </button>
+                                </template>
                                 <template if:true={selectedAppt.isPast}>
-                                    <button class="modal-btn modal-btn--noshow" onclick={handleNoShowAction} disabled={isNoShowing} style="margin-left: 8px;">
+                                    <button class="modal-btn modal-btn--noshow" onclick={handleNoShowAction} disabled={isNoShowing}>
                                         <template if:true={isNoShowing}>Cargando...</template>
                                         <template if:false={isNoShowing}>No Show</template>
                                     </button>
@@ -333,6 +357,11 @@
                                         <template if:false={isCompleting}>✓ Atendido</template>
                                     </button>
                                 </template>
+
+                                <button class="modal-btn modal-btn--save" onclick={handleGuardarCambios} disabled={isUpdating}>
+                                    <template if:true={isUpdating}>Guardando...</template>
+                                    <template if:false={isUpdating}>Guardar</template>
+                                </button>
                             </div>
                         </template>
                     </div>

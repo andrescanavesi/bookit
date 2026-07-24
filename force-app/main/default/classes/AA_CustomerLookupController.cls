@@ -1,4 +1,4 @@
-public with sharing class AA_CustomerLookupController {
+public without sharing class AA_CustomerLookupController {
     
     private static Id getBusinessId() {
         List<AA_Employee__c> employees = [SELECT Id, Business_Id__c FROM AA_Employee__c WHERE User__c = :UserInfo.getUserId() LIMIT 1];
@@ -32,38 +32,45 @@ public with sharing class AA_CustomerLookupController {
     @AuraEnabled
     public static AA_Customer__c createCustomer(String firstName, String lastName, String phone) {
         AA_Logger logger = new AA_Logger(true);
-        if (String.isBlank(firstName) || String.isBlank(lastName)) {
-            throw new AuraHandledException('El nombre y el apellido son obligatorios.');
-        }
-        
-        Id businessId = getBusinessId();
-        
-        // Validación de duplicados por celular en el mismo salón
-        String cleanPhone = AA_CustomerTriggerHandler.normalizePhone(phone);
-        if (String.isNotBlank(cleanPhone)) {
-            List<AA_Customer__c> existingCustomers = [
-                SELECT Id FROM AA_Customer__c 
-                WHERE Phone_Number__c = :cleanPhone 
-                  AND Business__c = :businessId 
-                LIMIT 1
-            ];
-            
-            if (!existingCustomers.isEmpty()) {
-                String message = 'Ya existe una persona con este número de celular '+cleanPhone+' en tu salón '+businessId;
-                logger.info(message);
-                throw new AuraHandledException(message);
+        try {
+            if (String.isBlank(firstName) || String.isBlank(lastName)) {
+                throw new AuraHandledException('El nombre y el apellido son obligatorios.');
             }
+            
+            Id businessId = getBusinessId();
+            
+            // Validación de duplicados por celular en el mismo salón
+            String cleanPhone = AA_CustomerTriggerHandler.normalizePhone(phone);
+            if (String.isNotBlank(cleanPhone)) {
+                List<AA_Customer__c> existingCustomers = [
+                    SELECT Id FROM AA_Customer__c 
+                    WHERE Phone_Number__c = :cleanPhone 
+                      AND Business__c = :businessId 
+                    LIMIT 1
+                ];
+                
+                if (!existingCustomers.isEmpty()) {
+                    String message = 'Ya existe una persona con este número de celular '+cleanPhone+' en tu salón '+businessId;
+                    logger.info(message);
+                    throw new AuraHandledException(message);
+                }
+            }
+            
+            AA_Customer__c newCustomer = new AA_Customer__c(
+                First_Name__c = firstName,
+                Last_Name__c = lastName,
+                Name = firstName + ' ' + lastName, // Asumiendo que Name es un autonumber o string, pero si es texto lo poblamos
+                Phone_Number__c = cleanPhone,
+                Business__c = businessId
+            );
+            
+            insert newCustomer;
+            return newCustomer;
+        } catch (AuraHandledException e) {
+            throw e;
+        } catch (Exception e) {
+            logger.error('Error creating customer: ' + e.getMessage() + '\n' + e.getStackTraceString());
+            throw new AuraHandledException('Ocurrió un error inesperado al intentar crear el cliente.');
         }
-        
-        AA_Customer__c newCustomer = new AA_Customer__c(
-            First_Name__c = firstName,
-            Last_Name__c = lastName,
-            Name = firstName + ' ' + lastName, // Asumiendo que Name es un autonumber o string, pero si es texto lo poblamos
-            Phone_Number__c = cleanPhone,
-            Business__c = businessId
-        );
-        
-        insert newCustomer;
-        return newCustomer;
     }
 }

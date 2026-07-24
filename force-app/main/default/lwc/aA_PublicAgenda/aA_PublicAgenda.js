@@ -275,10 +275,14 @@ export default class AAPublicAgenda extends LightningElement {
         if (!this.reserva.servicioSel || !this.reserva.fechaSel || !this.reserva.slotData) return {};
         
         let totalCalculado = 0;
+        let descripcionesArr = [];
         this.selectedServiceIds.forEach(id => {
             const service = this.services.find(s => s.Id === id);
             if (service && service.Precio__c) {
                 totalCalculado += service.Precio__c;
+            }
+            if (service && service.Descripcion_Extendida__c) {
+                descripcionesArr.push(service.Descripcion_Extendida__c);
             }
         });
         
@@ -307,6 +311,7 @@ export default class AAPublicAgenda extends LightningElement {
         const servicioLabel = serviciosArr.length > 1 ? 'SERVICIOS' : 'SERVICIO';
         const profNombre = profsArr.join(' y ');
         const profLabel = profsArr.length > 1 ? 'PROFESIONALES' : 'PROFESIONAL';
+        const descripcionServicio = descripcionesArr.join(' | ');
 
         return { 
             cliente: `${this.persona.firstName} ${this.persona.lastName}`.trim(),
@@ -317,7 +322,8 @@ export default class AAPublicAgenda extends LightningElement {
             fecha: `${firstSlot.dayOfTheWeek} ${firstSlot.dayNumber} de ${firstSlot.monthName}`, // Ej: Miércoles 5 de Mayo
             hora: combo.timeFormatted, 
             duracion: totalMinutos > 0 ? `${totalMinutos} min` : 'Varios min', 
-            total: totalCalculado 
+            total: totalCalculado,
+            descripcionServicio: descripcionServicio
         };
     }
 
@@ -356,7 +362,11 @@ export default class AAPublicAgenda extends LightningElement {
         const branchName = this.businessInfo && this.businessInfo.branchName ? this.businessInfo.branchName : 'nuestro local';
         const title = encodeURIComponent(`Reserva de ${this.resumenDatos.servicio} en ${branchName}`);
         const dates = `${formatGCalDate(start)}/${formatGCalDate(end)}`;
-        const details = encodeURIComponent(`Te esperamos para tu servicio de ${this.resumenDatos.servicio}.`);
+        let detailsText = `Te esperamos para tu servicio de ${this.resumenDatos.servicio}.`;
+        if (this.resumenDatos.descripcionServicio) {
+            detailsText += `\n\nDetalles del servicio:\n${this.resumenDatos.descripcionServicio}`;
+        }
+        const details = encodeURIComponent(detailsText);
         const location = encodeURIComponent(this.businessInfo && this.businessInfo.address ? this.businessInfo.address : '');
 
         return `https://calendar.google.com/calendar/render?action=TEMPLATE&text=${title}&dates=${dates}&details=${details}&location=${location}`;
@@ -385,7 +395,10 @@ export default class AAPublicAgenda extends LightningElement {
 
         const branchName = this.businessInfo && this.businessInfo.branchName ? this.businessInfo.branchName : 'nuestro local';
         const title = `Reserva de ${this.resumenDatos.servicio} en ${branchName}`;
-        const description = `Te esperamos para tu servicio de ${this.resumenDatos.servicio}.`;
+        let description = `Te esperamos para tu servicio de ${this.resumenDatos.servicio}.`;
+        if (this.resumenDatos.descripcionServicio) {
+            description += `\\n\\nDetalles del servicio:\\n${this.resumenDatos.descripcionServicio}`;
+        }
         const location = this.businessInfo && this.businessInfo.address ? this.businessInfo.address : '';
 
         const icsContent = [

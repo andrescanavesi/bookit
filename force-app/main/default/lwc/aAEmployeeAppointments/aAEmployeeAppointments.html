@@ -1,0 +1,173 @@
+<template>
+    <div class="container slds-p-around_x-small">
+        <!-- Encabezado con selector de Empleado y Fecha -->
+        <div class="header-section slds-box slds-theme_default slds-m-bottom_small">
+            <template if:true={employeeOptions.length}>
+                <lightning-combobox
+                    name="employee"
+                    label="Empleado"
+                    value={selectedEmployeeId}
+                    options={employeeOptions}
+                    onchange={handleEmployeeChange}
+                    class="slds-m-bottom_small">
+                </lightning-combobox>
+            </template>
+            
+            <div class="date-navigator slds-grid slds-grid_align-center slds-grid_vertical-align-center">
+                <lightning-button-icon icon-name="utility:chevronleft" variant="border-filled" onclick={handlePrevDay}></lightning-button-icon>
+                <div class="slds-text-heading_small slds-m-horizontal_medium date-label">
+                    {formattedDate}
+                </div>
+                <lightning-button-icon icon-name="utility:chevronright" variant="border-filled" onclick={handleNextDay}></lightning-button-icon>
+            </div>
+            
+            <div class="slds-grid slds-grid_align-center slds-m-top_x-small">
+                <lightning-button label="Hoy" variant="base" onclick={handleToday}></lightning-button>
+            </div>
+        </div>
+
+        <!-- Spinner -->
+        <template if:true={isLoading}>
+            <div class="spinner-container">
+                <lightning-spinner alternative-text="Loading" size="medium"></lightning-spinner>
+            </div>
+        </template>
+
+        <!-- Lista de Citas -->
+        <template if:false={isLoading}>
+            <template if:true={hasAppointments}>
+                <div class="appointments-list">
+                    <template for:each={appointments} for:item="appt">
+                        <div key={appt.Id} class="appointment-card slds-box slds-m-bottom_small" onclick={handleCardClick} data-id={appt.Id}>
+                            <div class="slds-grid slds-grid_vertical-align-center slds-m-bottom_x-small">
+                                <div class="slds-col slds-size_1-of-3">
+                                    <div class="time-badge">
+                                        <lightning-icon icon-name="utility:clock" size="xx-small" class="slds-m-right_xx-small"></lightning-icon>
+                                        {appt.formattedTime}
+                                    </div>
+                                </div>
+                                <div class="slds-col slds-size_2-of-3 slds-text-align_right">
+                                    <span class="status-badge slds-badge">{appt.displayStatus}</span>
+                                </div>
+                            </div>
+                            <div class="customer-name slds-text-heading_small slds-m-bottom_xx-small">
+                                {appt.Customer__r.First_Name__c} {appt.Customer__r.Last_Name__c}
+                            </div>
+                            <div class="service-name slds-text-color_weak slds-m-bottom_xx-small">
+                                {appt.Service__r.Display_Name__c}
+                            </div>
+                            <template if:true={appt.hasOtherAppointments}>
+                                <div class="other-appointments slds-text-body_small slds-m-top_x-small slds-p-top_xx-small" style="color: #b97a00; border-top: 1px dashed #c9c9c9;">
+                                    <lightning-icon icon-name="utility:warning" size="xx-small" class="slds-m-right_xx-small" variant="warning"></lightning-icon>
+                                    <strong>También hoy:</strong> {appt.otherAppointmentsText}
+                                </div>
+                            </template>
+                        </div>
+                    </template>
+                </div>
+            </template>
+            <template if:false={hasAppointments}>
+                <div class="empty-state slds-text-align_center slds-p-around_medium slds-text-color_weak">
+                    <lightning-icon icon-name="utility:event" size="large" class="slds-m-bottom_small"></lightning-icon>
+                    <p>No tienes citas pendientes para este día.</p>
+                </div>
+            </template>
+        </template>
+    </div>
+
+    <!-- Modal de Detalles -->
+    <template if:true={isModalOpen}>
+        <section role="dialog" tabindex="-1" class="slds-modal slds-fade-in-open">
+            <div class="slds-modal__container modal-mobile">
+                <header class="slds-modal__header">
+                    <button class="slds-button slds-button_icon slds-modal__close slds-button_icon-inverse" title="Close" onclick={closeModal}>
+                        <lightning-icon icon-name="utility:close" alternative-text="close" variant="inverse" size="small"></lightning-icon>
+                        <span class="slds-assistive-text">Cerrar</span>
+                    </button>
+                    <h2 class="slds-text-heading_medium slds-hyphenate">Detalles de la Cita</h2>
+                </header>
+                
+                <div class="slds-modal__content slds-p-around_medium">
+                    <template if:true={selectedAppointment}>
+                        <!-- Badges Informativos -->
+                        <div class="badges-container slds-m-bottom_medium">
+                            <template if:true={selectedAppointment.Customer__r.Is_New_Customer__c}>
+                                <span class="slds-badge slds-theme_success">Nuevo Cliente</span>
+                            </template>
+                            <template if:true={selectedAppointment.Customer__r.Has_Allergy_Esmalte_Semipermanente__c}>
+                                <span class="slds-badge slds-theme_error">Alergia Esmalte</span>
+                            </template>
+                        </div>
+
+                        <template if:true={selectedAppointment.hasOtherAppointments}>
+                            <div class="slds-box slds-m-bottom_medium slds-p-around_small" style="background-color: #fff9e6; border: 1px solid #ffc233; color: #a36b00;">
+                                <div class="slds-grid slds-grid_vertical-align-center">
+                                    <lightning-icon icon-name="utility:warning" size="small" class="slds-m-right_small" variant="warning"></lightning-icon>
+                                    <div>
+                                        <strong>También hoy:</strong> {selectedAppointment.otherAppointmentsText}
+                                    </div>
+                                </div>
+                            </div>
+                        </template>
+
+                        <!-- Cliente y Servicio -->
+                        <div class="info-section slds-m-bottom_medium">
+                            <p><strong>Cliente:</strong> {selectedAppointment.Customer__r.First_Name__c} {selectedAppointment.Customer__r.Last_Name__c}</p>
+                            <p><strong>Servicio:</strong> {selectedAppointment.Service__r.Display_Name__c}</p>
+                            <p><strong>Hora:</strong> {selectedAppointment.formattedTime}</p>
+                            <p class="slds-m-top_x-small"><strong>Comentarios de Cliente:</strong> {selectedAppointment.Customer__r.Comments_From_Customer__c}</p>
+                            <p class="slds-m-top_x-small"><strong>Comentarios de la Cita:</strong> {selectedAppointment.Customer_Comments__c}</p>
+                        </div>
+
+                        <!-- Campos Editables -->
+                        <div class="form-section">
+                            <lightning-textarea 
+                                label="Comentarios Internos Cliente" 
+                                value={editedData.customerIntComments}
+                                onchange={handleInputChange}
+                                data-field="customerIntComments">
+                            </lightning-textarea>
+                            <div class="slds-text-color_weak slds-text-body_small slds-m-bottom_small">Estos comentarios solo los ve nuestro equipo.</div>
+
+                            <lightning-textarea 
+                                label="Notas Internas de la Cita" 
+                                value={editedData.apptIntComments}
+                                onchange={handleInputChange}
+                                data-field="apptIntComments">
+                            </lightning-textarea>
+                            <div class="slds-text-color_weak slds-text-body_small slds-m-bottom_medium">Estos comentarios solo los ve nuestro equipo.</div>
+
+                            <lightning-combobox
+                                label="Método de Pago"
+                                placeholder="Seleccionar..."
+                                value={editedData.paymentMethod}
+                                options={paymentMethodOptions}
+                                onchange={handleInputChange}
+                                data-field="paymentMethod">
+                            </lightning-combobox>
+
+                            <lightning-input 
+                                type="number" 
+                                label="Monto Abonado" 
+                                value={editedData.paymentAmount}
+                                onchange={handleInputChange}
+                                data-field="paymentAmount"
+                                formatter="currency"
+                                step="0.01">
+                            </lightning-input>
+                        </div>
+                    </template>
+                </div>
+                
+                <footer class="slds-modal__footer slds-grid slds-grid_align-spread mobile-footer">
+                    <lightning-button label="Cerrar" onclick={closeModal}></lightning-button>
+                    <div>
+                        <lightning-button label="Guardar" variant="neutral" onclick={handleSave} class="slds-m-right_xx-small"></lightning-button>
+                        <lightning-button label="Marcar como Atendida" variant="brand" onclick={handleMarkAsDone}></lightning-button>
+                    </div>
+                </footer>
+            </div>
+        </section>
+        <div class="slds-backdrop slds-backdrop_open"></div>
+    </template>
+</template>

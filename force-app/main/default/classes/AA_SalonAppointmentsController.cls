@@ -17,10 +17,13 @@ public without sharing class AA_SalonAppointmentsController {
     }
 
     private static Id getBusinessId(){
+        Id currentUserId = UserInfo.getUserId();
         List<AA_Employee__c> employees = [SELECT Id, Name, Business_Id__c FROM AA_Employee__c 
-        WHERE User__c = :UserInfo.getUserId() ORDER BY Name ASC];
+        WHERE User__c = :currentUserId ORDER BY Name ASC];
 
         if (employees.isEmpty()) {
+            AA_Logger logger = new AA_Logger(true);
+            logger.error('No se encontro ningun empleado (AA_Employee__c) asociado al User ID: ' + currentUserId);
             throw new AuraHandledException('El empleado no está configurado como usuario');
         }
         
@@ -199,12 +202,12 @@ public without sharing class AA_SalonAppointmentsController {
                 FROM AA_Employee__c 
                 WHERE Business_Branch__r.Business__c = :businessId
                 AND Is_Active__c = true
-                ORDER BY Name ASC
+                ORDER BY Order_Index__c ASC NULLS LAST, Name ASC
             ];
             
             wrapper.appointments = [
                 SELECT Id, Name, Start_Date_Time__c, Status__c, Employee__c,
-                       Customer__r.First_Name__c, Customer__r.Last_Name__c, Customer__r.Phone_Number__c, Customer__r.Has_Allergies__c, Customer__r.Comments_From_Customer__c, Customer__r.Is_New_Customer__c,
+                       Customer__r.First_Name__c, Customer__r.Last_Name__c, Customer__r.Phone_Number__c, Customer__r.Has_Allergy_Esmalte_Semipermanente__c, Customer__r.Comments_From_Customer__c, Customer__r.Is_New_Customer__c,
                        Service__r.Name, Service__r.Display_Name__c, Service__r.Duration_Minutes__c, Service__r.Price__c,
                        Internal_Comments__c, Customer_Comments__c, Is_Reminder_Sent__c, Is_Customer_Confirmed__c, Reminder_Sent_Date__c
                 FROM AA_Appointment__c 
@@ -359,13 +362,118 @@ public without sharing class AA_SalonAppointmentsController {
         }
     }
 
+    @AuraEnabled
+    public static void moveAppointment(Id appointmentId, Id newEmployeeId, Datetime newStartDateTime) {
+        AA_Logger logger = new AA_Logger(true);
+        try {
+            AA_Appointment__c appt = new AA_Appointment__c(
+                Id = appointmentId,
+                Employee__c = newEmployeeId,
+                Start_Date_Time__c = newStartDateTime
+            );
+            update appt;
+        } catch (Exception e) {
+            String message = 'Error al mover cita: ' + e.getMessage();
+            logger.error(message + ' ' + e.getStackTraceString());
+            throw new AuraHandledException(message);
+        }
+    }
+
+    @AuraEnabled
+    public static void updateAppointmentWithValidation(Id appointmentId, Id newEmployeeId, Datetime newStartDateTime, String internalComments) {
+        AA_Logger logger = new AA_Logger(true);
+        try {
+            // 1. Get Appointment Info
+            AA_Appointment__c appt = [SELECT Id, Service__c, Duration_Minutes__c, Start_Date_Time__c, Employee__c
+                                      FROM AA_Appointment__c WHERE Id = :appointmentId LIMIT 1];
+            
+            // If nothing changed in time and employee, just update comments
+            if (appt.Employee__c == newEmployeeId && appt.Start_Date_Time__c == newStartDateTime) {
+                appt.Internal_Comments__c = internalComments;
+                update appt;
+                return;
+            }
+
+            // 2. Validate Employee provides Service
+            List<AA_Employee_Service__c> empService = [SELECT Id FROM AA_Employee_Service__c 
+                                                       WHERE Employee__c = :newEmployeeId 
+                                                       AND Service__c = :appt.Service__c LIMIT 1];
+            if (empService.isEmpty()) {
+                throw new AuraHandledException('El profesional seleccionado no realiza este servicio.');
+            }
+
+            // 3. Validate Working Hours
+            Date targetDate = newStartDateTime.date();
+            String dayOfWeek = newStartDateTime.format('EEEE', 'en_US');
+            List<AA_Employee_Working_Hour__c> whList = [SELECT Start_Hour__c, End_Hour__c, Start_Default_Break_Hour__c, End_Default_Break_Hour__c 
+                                                        FROM AA_Employee_Working_Hour__c 
+                                                        WHERE Employee__c = :newEmployeeId 
+                                                        AND Day_Of_Week__c = :dayOfWeek LIMIT 1];
+            if (whList.isEmpty()) {
+                throw new AuraHandledException('El profesional no trabaja ese día de la semana.');
+            }
+            AA_Employee_Working_Hour__c wh = whList[0];
+            
+            Datetime expectedEnd = newStartDateTime.addMinutes((Integer)appt.Duration_Minutes__c);
+            Time startTime = newStartDateTime.time();
+            Time endTime = expectedEnd.time();
+
+            if (startTime < wh.Start_Hour__c || endTime > wh.End_Hour__c) {
+                throw new AuraHandledException('El horario elegido está fuera de la jornada laboral del profesional.');
+            }
+
+            if (wh.Start_Default_Break_Hour__c != null && wh.End_Default_Break_Hour__c != null) {
+                if ((startTime >= wh.Start_Default_Break_Hour__c && startTime < wh.End_Default_Break_Hour__c) ||
+                    (endTime > wh.Start_Default_Break_Hour__c && endTime <= wh.End_Default_Break_Hour__c) ||
+                    (startTime <= wh.Start_Default_Break_Hour__c && endTime >= wh.End_Default_Break_Hour__c)) {
+                    throw new AuraHandledException('El horario elegido interfiere con el descanso del profesional.');
+                }
+            }
+
+            // 4. Validate Absences
+            List<AA_Employee_Absence__c> absences = [SELECT Id FROM AA_Employee_Absence__c 
+                                                     WHERE Employee__c = :newEmployeeId 
+                                                     AND Start_Date_Time__c < :expectedEnd 
+                                                     AND End_Date_Time__c > :newStartDateTime LIMIT 1];
+            if (!absences.isEmpty()) {
+                throw new AuraHandledException('El profesional tiene una ausencia programada en ese horario.');
+            }
+
+            // 5. Validate Overlapping Appointments
+            List<AA_Appointment__c> overlaps = [SELECT Id FROM AA_Appointment__c 
+                                                WHERE Employee__c = :newEmployeeId 
+                                                AND Id != :appointmentId 
+                                                AND Status__c NOT IN ('Cancelled', 'No Show') 
+                                                AND Start_Date_Time__c < :expectedEnd 
+                                                AND End_Date_Time__c > :newStartDateTime LIMIT 1];
+            if (!overlaps.isEmpty()) {
+                throw new AuraHandledException('El profesional ya tiene otra cita en ese horario.');
+            }
+
+            // All clear, update
+            appt.Employee__c = newEmployeeId;
+            appt.Start_Date_Time__c = newStartDateTime;
+            if (internalComments != null) {
+                appt.Internal_Comments__c = internalComments;
+            }
+            update appt;
+
+        } catch (AuraHandledException e) {
+            throw e;
+        } catch (Exception e) {
+            String message = 'Error al actualizar cita: ' + e.getMessage();
+            logger.error(message + ' ' + e.getStackTraceString());
+            throw new AuraHandledException(message);
+        }
+    }
+
     @AuraEnabled(cacheable=true)
     public static List<AA_Employee__c> getEmployees() {
         Id businessId = getBusinessId();
         return [SELECT Id, Name, First_Name__c, Last_Name__c, Is_Admin__c, Business_Branch__r.Name 
                 FROM AA_Employee__c 
                 WHERE Business_Branch__r.Business__c = :businessId
-                ORDER BY First_Name__c ASC];
+                ORDER BY Order_Index__c ASC NULLS LAST, First_Name__c ASC];
     }
 
     @AuraEnabled(cacheable=true)

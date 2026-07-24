@@ -48,6 +48,10 @@
                 <behavior>Edit</behavior>
                 <field>Available_In_Public_Agenda__c</field>
             </layoutItems>
+            <layoutItems>
+                <behavior>Edit</behavior>
+                <field>Order_Index__c</field>
+            </layoutItems>
         </layoutColumns>
         <layoutColumns/>
         <style>TwoColumnsTopToBottom</style>

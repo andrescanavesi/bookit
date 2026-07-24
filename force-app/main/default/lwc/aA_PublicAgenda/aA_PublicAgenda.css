@@ -885,14 +885,19 @@ h2 {
 
 /* Botón blanco de WhatsApp */
 .wa-redirect__cta {
+  -webkit-appearance: none;
+  appearance: none;
   display: inline-block;
   padding: 16px 24px;
-  background: #ffffff;
-  color: #8b1a1a;
-  text-decoration: none;
+  background-color: #ffffff !important;
+  color: #8b1a1a !important;
+  text-decoration: none !important;
   font-weight: 600;
   font-size: 16px;
   font-family: "DM Sans", sans-serif;
+  border-radius: 8px; /* Adding a small radius to make it look more like a button */
+  border: none;
+  text-align: center;
   transition: opacity 0.2s ease;
 }
 
